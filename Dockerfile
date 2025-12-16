@@ -13,9 +13,9 @@ RUN wget https://download.racket-lang.org/releases/8.15/installers/racket-8.15-x
 RUN echo yes | sh racket-8.15-x86_64-linux-cs.sh
 RUN raco setup --doc-index --force-user-docs
 
-RUN raco pkg install --auto https://github.com/cpsc411/cpsc411-pub.git?path=cpsc411-lib#2024w2
+RUN raco pkg install --auto https://github.com/cpsc411/cpsc411-pub.git?path=cpsc411-lib#2025w2
 
-ADD "https://api.github.com/repos/cpsc411/cpsc411-pub/commits/2024w2?per_page=1" latest_commit
+ADD "https://api.github.com/repos/cpsc411/cpsc411-pub/commits/2025w2?per_page=1" latest_commit
 RUN raco pkg update --auto cpsc411-lib
 
 WORKDIR /app/workspace
