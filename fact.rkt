@@ -53,9 +53,10 @@ EOS
   (system/exit-code! (compile str) number?))
 
 (module+ test
-  (check-regexp-match
-    #rx"2\\.(13|14|15)"
-    (with-output-to-string (thunk (system "nasm --version"))))
+  (check-match
+    (with-output-to-string (thunk (system "nasm --version")))
+    (regexp #px"NASM version 2\\.(\\d+)" (list _ minor-version))
+    (<= 13 (and (displayln minor-version) (string->number minor-version))))
 
   (check-regexp-match
     #rx"\\.exe"
