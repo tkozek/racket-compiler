@@ -1,5 +1,6 @@
 services:
   cpsc411:
+    platform: linux/amd64
     build: .
     image: cpsc411
     container_name: cpsc411    
