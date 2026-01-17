@@ -13,13 +13,66 @@
 (define-syntax-rule (TODO . stx)
   (error "Unfinished skeleton"))
 
+(define (paren-x64-s? s)
+  (match s
+    [`(set! ,reg ,int64)
+     (cond
+	[(not (register? reg))
+	(error 'paren-x64-s? "Expected register for set!, got ~a" reg)]
+	[(not (int64? int64))
+	(error 'paren-x64-s? "Expected int64 for set!, got ~a" int64)]
+	[else #t])]
+    [`(set! ,reg1 ,reg2)
+     (cond 
+       [(not (and (register? reg1) (register? reg2)))
+	    (error 'paren-x64-s? "Expected two registers for set!, got ~a and ~a" reg1 reg2)]
+       [else #t])]
+    [`(set! ,reg1 (,binop ,reg1 ,int32))
+     (cond
+       [(not (register? reg1))
+	    (error 'paren-x64-s? "Expected a register for reg1, got ~a" reg1)]
+	[(not (paren-x64-binop? binop))
+      	(error 'paren-x64-s? "Expected one of + or *, got ~a" binop)]
+	[(not (int32? int32))
+      	(error 'paren-x64-s? "Expected an int32, got ~a" int32)]
+	[else #t])]
+    [`(set! ,reg1 (,binop ,reg1 ,reg))
+     (cond 
+       [(not (register? reg1))
+	    (error 'paren-x64-s? "Expected a register, got ~a" reg1)]
+
+       [(not (paren-x64-binop? binop))
+	    (error 'paren-x64-s? "Expected one of + or *, got ~a" binop)]
+
+       [(not (register? reg))
+	    (error 'paren-x64-s? "Expected a register, got ~a" reg)]
+      [else #t])]
+	[_ (error 'paren-x64-s? "Unrecognized statement ~a" s)]))
+
+
+(define (register? r)
+  (and
+   (member r '(rsp rbp rax rbx rcx rdx rsi rdi r8 r9 r10 r11 r12 r13 r14 r15))
+	#t)) 
+
+(define (paren-x64-binop? op)
+  (and 
+     (member op '(* +)) 
+     #t))
+
+
+
 ;; Optional; if you choose not to complete, implement a stub that returns the input
 (define (check-paren-x64-init p)
-  (TODO ...))
+  (p))
 
 ;; Optional; if you choose not to complete, implement a stub that returns the input
 (define (check-paren-x64-syntax p)
-  (TODO ...))
+  (define process-p p)
+  (match p
+    [`(begin ,s ...)
+     (paren-x64-s? s)])
+  (process-p p))
 
 (define (check-paren-x64 p)
   (check-paren-x64-init (check-paren-x64-syntax p)))
