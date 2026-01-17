@@ -22,10 +22,34 @@
 
 ; An x64 Program
 ;; Copy the x64 program implementing fact.s into the here string, between the #<<EOS EOF.
-(define FACT_S #<<EOS
-Fill in with the x64 program implementing fact.s,
-represented as a string. You may want to use a "here string", as demonstrated here.
-Consult the Racket documentation to better understand how here strings work.
+;;#<<EOS
+;;global start
+;;Fill in with the x64 program implementing fact.s,
+;;represented as a string. You may want to use a "here string", as demonstrated here.
+;;Consult the Racket documentation to better understand how here strings work.
+;;EOS
+(define FACT_S
+
+#<<EOS
+section .text
+
+start:
+  mov r8, 5
+
+fact:
+  mov r9, 1
+
+fact_acc:
+  cmp r8, 0
+  je fact_done
+  imul r9, r8
+  dec r8
+  jmp fact_acc
+fact_done:
+exit:
+  mov	rax, 60
+  mov 	rdi, r9
+  syscall
 EOS
 )
 
@@ -33,7 +57,6 @@ EOS
 ; Takes an x64 Program, compiles it to an executable, and returns the name of
 ; the generated executable.
 (define (compile str)
-  (TODO "Read the implementation of this procedure (compile), then remove this TODO.")
   (define p (path->string (make-temporary-file "~a.s")))
 
   (define o (string-replace p ".s" ".o"))
@@ -49,7 +72,6 @@ EOS
 ; Takes an x64 Program, compiles it to an executable, and runs it, returning
 ; the error code.
 (define (execute str)
-  (TODO "Read the implementation of this procedure (execute), then remove this TODO.")
   (system/exit-code! (compile str) number?))
 
 (module+ test
