@@ -1,9 +1,4 @@
-#lang racket
-
-(require
- cpsc411/compiler-lib
- cpsc411/2c-run-time)
-
+#lang racket (require cpsc411/compiler-lib cpsc411/2c-run-time)
 (provide
  check-values-lang
  uniquify
@@ -62,6 +57,84 @@
 
 ;; TODO: Fill in.
 ;; You might want to reuse check-paren-x64 and generate-x64 from milestone-1
+(define (triv? t)
+  (or (int64? t) (name? t)))
+
+(define (binop? op)
+  (and (member op '(+ *)) #t))
+
+(define (value? val)
+  (match val
+    [(? triv? val)
+    #t]
+    [`(,op ,t1 ,t2)
+     (and (binop? op) (triv? t1) (triv? t2))]
+    [`(let ([,xs ,vs] ...) ,body)
+    (and (andmap (name? xs)) (andmap (value? vs)) (value? body))]
+    [_ #f]))
+ 
+(define (tail? tail)
+    (match tail
+        [(? value? tail) #t]
+        [`(let ([,xs ,vs] ...) ,body)
+        (and 
+        (andmap (name? xs)) 
+        (andmap (value? vs)) 
+        (tail? body))]
+        [_ #f]))
+
+;; Validator for Values-lang-v3
+(define (check-values-lang p)
+    (match p
+    [`(module ,tail)
+    (if (tail? tail)
+        p
+        (error "wasn't values-lang-v3"))]
+    [_ (error "wasn't values-lang-v3")])
+  )
+
+(define (uniquify-triv triv env)
+    (match triv
+        [(? int64?) triv]
+        [(? name?)
+            (dict-ref env triv  (lambda () (raise (make-exn:fail))))] ;; We found a name, it is supposed to be trivial, which means it should exist in our environment, so raise error if it isn't in our environment 
+            ;; (it not being in our environment would mean we have an unbound name)
+        [_ (error "Expected triv but got ~a" triv)]))
+
+(define (uniquify-value value env)
+    (match value
+    [(? triv? value)
+        (uniquify-triv value env)]
+    [`(,op ,triv1 ,triv2)
+        ]))
+
+(define (uniquify-tail tail env)
+    (match tail
+    [(? value? tail) ; could be int64, then just return that, could be binop triv triv, then we'd have to check if the trivs have name?'s in them, passing environment along
+        (uniquify-value tail env)]
+    [`(let ([,xs ,vs] ...) ,body)
+        ]
+    ))
+;; Assumes that p is a  valid values-lang-v3 program
+;; uniquify should go through the program, find all names used, and for each name
+;; use fresh to map that name to an abstract location (fresh returns a new aloc)
+;; we probably need to pass some map data structure throughout, to manage our mappings
+;; for example if x is bound higher up, then used again way later without a new mappings
+;; id imagine this boils down to:
+;; 1. We find a name
+;; 2. Check if we have the name in our map
+;; 3. If the name is in our map replace the name with its aloc that is in the map
+;; 4. Otherwise, generate a fresh aloc for that name, add it to map, continue until no more unbound names
+;; 5. Additionally, whenever we find a "let", we will be seeing 0 or more [x v] pairs, 
+;; for each of these, we add an entry x to our map, and map it to whatever a new call to fresh returns
+;; , but if x was already in our map, then we just update the value/location
+;; this should naturally handle scoping, if we are using immutable data structures. but who cares about how fast it is anyways.
+(define (uniquify p)
+    (match p
+    [`(module ,tail)
+    (~a "(module " (uniquify-tail tail (define env '())) ")")])) ;; environment would initially be empty, not sure if this is a good way to implement
+
+
 
 (define (select-instructions p)
 
