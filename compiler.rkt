@@ -14,48 +14,10 @@
  implement-fvars
  check-paren-x64
  generate-x64
-
  interp-values-lang
-
  interp-paren-x64)
 
-;; STUBS; delete when you've begun to implement the passes or replaced them with
-;; your own stubs.
-(define-values (check-values-lang
-                interp-values-lang
-                uniquify
-                sequentialize-let
-                normalize-bind
-                ;select-instructions
-                assign-homes
-                uncover-locals
-                assign-fvars
-                replace-locations
-                flatten-begins
-                patch-instructions
-                implement-fvars
-                check-paren-x64
-                ;generate-x64
-                )
-  (values
-   values
-   values
-   values
-   values
-   ; values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   ;values
-   ))
 
-;; TODO: Fill in.
 ;; You might want to reuse check-paren-x64 and generate-x64 from milestone-1
 (define (triv? t)
   (or (int64? t) (name? t)))
@@ -65,7 +27,7 @@
 
 (define (value? val)
   (match val
-    [(? triv? val)
+    [(? triv?)
     #t]
     [`(,op ,t1 ,t2)
      (and (binop? op) (triv? t1) (triv? t2))]
@@ -75,7 +37,7 @@
  
 (define (tail? tail)
     (match tail
-        [(? value? tail) #t]
+        [(? value?) #t]
         [`(let ([,xs ,vs] ...) ,body)
         (and 
         (andmap (name? xs)) 
@@ -103,39 +65,62 @@
 
 (define (uniquify-value value env)
     (match value
-    [(? triv? value)
+    [(? triv?)
         (uniquify-triv value env)]
     [`(,op ,triv1 ,triv2)
-        ]))
+        `(,op ,(uniquify-triv triv1 env) ,(uniquify-triv triv2 env))]
+    [`(let ([,xs ,vs] ...) ,body)
+        (define alocs (map (lambda (_) (fresh)) xs))
+        (define env*
+            (let loop ([xs xs] [as alocs] [e env])
+            (if (empty? xs)
+                e
+                (loop (cdr xs) (cdr as) (cons (cons (car xs) (car as)) e)))))
+        (define vs* (map (lambda (v) (uniquify-value v env)) vs))
+        `(let (,@(map list alocs vs*)) ,(uniquify-value body env*))]
+    [_ (error 'uniquify-value "Expected a value, got: ~a" value)]))
 
 (define (uniquify-tail tail env)
     (match tail
-    [(? value? tail) ; could be int64, then just return that, could be binop triv triv, then we'd have to check if the trivs have name?'s in them, passing environment along
+    [(? value?) ; could be int64, then just return that, could be binop triv triv, then we'd have to check if the trivs have name?'s in them, passing environment along
         (uniquify-value tail env)]
     [`(let ([,xs ,vs] ...) ,body)
-        ]
+        (define alocs (map (lambda (_) (fresh)) xs))
+        (define env* 
+            (let loop ([xs xs]
+                [as alocs]
+                [e env])
+            (if (empty? xs)
+                e
+                (loop (cdr xs) (cdr as) (cons (cons (car xs) (car as)) e)))))
+        (define vs* (map (lambda (v) (uniquify-value v env)) vs))
+        `(let (,@(map list alocs vs*)) ,(uniquify-tail body env*))]
+    [_ (error 'uniquify-tail "Expected a tail, got: ~a" tail)]
     ))
-;; Assumes that p is a  valid values-lang-v3 program
-;; uniquify should go through the program, find all names used, and for each name
-;; use fresh to map that name to an abstract location (fresh returns a new aloc)
-;; we probably need to pass some map data structure throughout, to manage our mappings
-;; for example if x is bound higher up, then used again way later without a new mappings
-;; id imagine this boils down to:
-;; 1. We find a name
-;; 2. Check if we have the name in our map
-;; 3. If the name is in our map replace the name with its aloc that is in the map
-;; 4. Otherwise, generate a fresh aloc for that name, add it to map, continue until no more unbound names
-;; 5. Additionally, whenever we find a "let", we will be seeing 0 or more [x v] pairs, 
-;; for each of these, we add an entry x to our map, and map it to whatever a new call to fresh returns
-;; , but if x was already in our map, then we just update the value/location
-;; this should naturally handle scoping, if we are using immutable data structures. but who cares about how fast it is anyways.
+    
+;; (values-lang-v3) -> (values-unique-lang-v3)
+;; Resolves all lexical identifiers to abstract locations
 (define (uniquify p)
+    (check-values-lang p)
     (match p
     [`(module ,tail)
-    (~a "(module " (uniquify-tail tail (define env '())) ")")])) ;; environment would initially be empty, not sure if this is a good way to implement
+    `(module ,(uniquify-tail tail '()))]
+    [_ (error 'uniquify "Expected  (module tail), got: ~a" p)]))
 
 
+;; (values-unique-lang-v3) -> (imp-mf-lang-v3)
+;; Picks a particular ordering for let expressions using 'set!'
+(define (sequentialize-let p)
+    p)
 
+;; (imp-mf-lang-v3) -> (imp-cmf-lang-v3)
+;; Pushes 'set!' under 'begin' so that RHS of each 'set!' is a simple value producing operation
+(define (normalize-bind p)
+    p)
+
+
+;; (imp-cmf-lang-v3) -> (asm-lang-v2)
+;; Selects appropriate sequences of abstract assembly instructions to implement ops of src lang
 (define (select-instructions p)
 
   ; (Imp-cmf-lang-v3 value) -> (List-of (Asm-lang-v2 effect)) and (Asm-lang-v2 aloc)
@@ -196,6 +181,53 @@
 
   (program->x64 p))
 
+
+
+;; (asm-lang-v2/assignments) -> (nested-asm-lang-v2)
+;; Replaces each aloc with its assigned physical location from the assignment info field
+(define (replace-locations p)
+    p)
+
+;; (asm-lang-v2/locals) -> (asm-lang-v2/assignments)
+;; Assigns each aloc from the locals info field to a fresh frame variable
+(define (assign-fvars p)
+    p)
+
+;; (asm-lang-v2) -> (asm-lang-v2/locals)
+;; Analyzes which alocs are used in p and decorates program with set of variables in info field
+(define (uncover-locals p)
+    p)
+
+;; (asm-lang-v2) -> (nested-asm-lang-v2)
+;; Replaces each aloc its with assigned physical location from assignment info field
+(define (assign-homes p)
+    (replace-locations (assign-fvars (uncover-locals p))))
+
+;; (nested-asm-lang-v2) -> (para-asm-lang-v2)
+;; Flatten all nested begin expressions
+(define (flatten-begins p)
+    p)
+
+
+;; (para-asm-lang-v2) -> (paren-x64-fvars-v2)
+;; Patches instructions in p that have no x64 analogue
+(define (patch-instructions p)
+    p)
+
+;; (paren-x64-fvars-v2) -> (paren-x64-v2)
+;; Reifies fvars into displacement mode operands
+(define (implement-fvars p)
+    p)
+
+
+
+(define (check-paren-x64 p)
+    p)
+
+
+(define (interp-values-lang p)
+    0)
+
 (current-pass-list
  (list
   check-values-lang
@@ -235,3 +267,60 @@
      interp-paren-x64-fvars-v2
      interp-paren-x64-v2
      #f #f))))
+
+(module+ test
+;; First five tests taken from book
+    (check-eq? (uniquify '(module (+ 2 2)))     
+                        '(module (+ 2 2)))
+    (check-eq? (uniquify '(module (* 2 2)))     
+                        '(module (* 2 2)))
+    (check-eq? (uniquify '(module (let ([x 5]) x))) 
+                '(module (let ([x.1 5]) x.1)))
+    (check-eq? (uniquify '(module (let ([x (+ 2 2)]) x))) 
+                        '(module (let ([x.2 (+ 2 2)]) x.2)))
+    (check-eq? (uniquify '(module (let ([x 2]) (let ([y 2]) (+ x y)))))
+                    '(module (let ((x.3 2)) (let ((y.4 2)) (+ x.3 y.4)))))
+    (check-eq? (uniquify '(module (let ([x 2]) (let ([x 2]) (+ x x))))) 
+                    '(module (let ((x.5 2)) (let ((x.6 2)) (+ x.6 x.6)))))  
+    (check-eq? (uniquify '(module (let '() 0))) '(module (let '() 0)))
+    (check-eq? (uniquify '(module (let '() (+ 2 2)))) '(module (let '() (+ 2 2))))
+    (check-eq? (uniquify '(module (let '() (let '() 42)))) 
+                            '(module (let '() (let '() 42))))
+    (check-eq? (uniquify '(module (let '() (let ([x 0]) (+ (max-int 64) x))))) 
+                        '(module (let '() (let ([x.7 0]) (+ (max-int 64) x.7))))) 
+    (check-eq? (uniquify '(module (let '() (let '() (let '() -1)))))
+                        '(module (let '() (let '() (let '() -1)))))
+    (check-eq? (uniquify '(module 0)) '(module 0))
+    (check-eq? (uniquify '(module 9223372036854775807)) '(module 9223372036854775807))
+    (check-eq? (uniquify '(module 9223372036854775806)) '(module 9223372036854775806))
+    (check-eq? (uniquify '(module -9223372036854775808)) '(module -9223372036854775808))
+    (check-eq? (uniquify '(module -9223372036854775807)) '(module -9223372036854775807))
+    (check-exn exn:fail?
+        (lambda () (uniquify '(module 9223372036854775808))))
+    (check-exn exn:fail?
+        (lambda () (uniquify '(module -9223372036854775809))))
+    (check-exn exn:fail? 
+        (lambda () (uniquify '(module x))))
+    (check-exn exn:fail? 
+        (lambda () (uniquify '(module (+ x y)))))
+    (check-exn exn:fail? 
+        (lambda () (uniquify '(module (* x y)))))
+    (check-exn exn:fail? 
+        (lambda () (uniquify '(module ))))
+    (check-exn exn:fail? 
+        (lambda () (uniquify '(module (add1 2 2)))))
+    ;; Nested binop
+    (check-exn exn:fail? 
+        (lambda () (uniquify '(module (+ 1 (+ 1 1))))))
+    ;; Binop with one triv OOB for int64
+    (check-exn exn:fail? 
+        (lambda () (uniquify '(module (* 2 9223372036854775808)))))
+    ;; Binop with both triv OOB for int64
+    (check-exn exn:fail? 
+        (lambda () (uniquify '(module (* 9223372036854775808 9223372036854775808)))))
+    (check-exn exn:fail? 
+        (lambda () (uniquify '(module (* -9223372036854775809 -9223372036854775808)))))
+    (check-exn exn:fail? 
+        (lambda () (uniquify '(module (* -9223372036854775809 9223372036854775808)))))
+    )
+
