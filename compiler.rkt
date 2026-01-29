@@ -108,10 +108,21 @@
     [_ (error 'uniquify "Expected  (module tail), got: ~a" p)]))
 
 
+(define (sequentialize-tail tail)
+    (match tail
+    [(? value?)
+        (sequentialize-value tail)]
+    [`(begin ,f1 ... ,t2)
+        `(begin ,(sequenti))]))
+
+
 ;; (values-unique-lang-v3) -> (imp-mf-lang-v3)
 ;; Picks a particular ordering for let expressions using 'set!'
 (define (sequentialize-let p)
-    p)
+    (match p
+    [`(module ,tail)
+        `(module ,(sequentialize-tail tail '()))])
+    [_ (error "Expected values-unique-lang-v3, got: ~a" p)])  
 
 ;; (imp-mf-lang-v3) -> (imp-cmf-lang-v3)
 ;; Pushes 'set!' under 'begin' so that RHS of each 'set!' is a simple value producing operation
@@ -323,4 +334,45 @@
     (check-exn exn:fail? 
         (lambda () (uniquify '(module (* -9223372036854775809 9223372036854775808)))))
     )
+    
+(module+ test
+    (check-eq? (sequentialize-let '(module 0)) '(module 0))
+    (check-eq? (sequentialize-let '(module 9223372036854775807)) '(module 9223372036854775807))
+    (check-eq? (sequentialize-let '(module -9223372036854775808)) '(module -9223372036854775808))
+    (check-eq? (sequentialize-let '(module (let '() 0))) '(module (begin 0)))
+    (check-eq? (sequentialize-let '(module (let '() 9223372036854775807))) 
+                                    '(module (begin 9223372036854775807)))
+    (check-eq? (sequentialize-let '(module (let '() -9223372036854775808))) 
+                                    '(module (begin -9223372036854775808)))
+    (check-eq? (sequentialize-let '(module (let ([x.1 0]) 1)))
+                '(module (begin (set! x.1 0) 1)))
+    (check-eq? (sequentialize-let '(module (let ([x.2 1]) x.2)))
+                '(module (begin (set! x.2 1) x.2)))    
+    (check-eq? (sequentialize-let '(module (+ 0 1)))
+                '(module (+ 0 1)))     
+    (check-eq? (sequentialize-let '(module (* -1 2)))
+                '(module (* -1 2)))  
+    (check-eq? (sequentialize-let '(module x.2))
+                '(module x.2))  
+    (check-eq? (sequentialize-let '(module (let ([x.1 1] [x.2 -1] [x.3 4]) (* x.3 x.2))))
+                '(module (begin (set! x.1 1) (set! x.2 -1) (set! x.3 4) (* x.3 x.2))))
+    (check-eq? (sequentialize-let '(module (let ([x.1 (let ([x.2 5]) x.2)]) x.1)))
+                '(module (begin (set! x.1 (begin (set! x.2 5) x.2)) x.1)))
+    (check-eq? (sequentialize-let '(module (let ([x.1 
+                                            (let ([x.2 
+                                            (let ([x.3 3]) (* x.3 x.3))]) x.2)]) (* 2 x.1))))
+                '(module (begin (set! x.1 
+                            (begin (set! x.2 
+                                (begin (set! x.3 3) (* x.3 x.3))) x.2)) (* 2 x.1))))
+    (check-eq? (sequentialize-let '(module 
+                                    (let ([x.1 (+ 1 2)]) 
+                                    (let ([x.2 (+ x.1 3)]) 0))))
+            '(module (begin (set! x.1 (+ 1 2)) (begin (set! x.2 (+ x.1 3)) 0))))
+    (check-eq? (sequentialize-let '(module (let ([x.1 (+ 1 2)]) (let ([x.2 (+ x.1 3)]) (* 2 x.1)))))
+            '(module (begin (set! x.1 (+ 1 2)) (begin (set! x.2 (+ x.1 3)) (* 2 x.1)))))
+    (check-eq? (sequentialize-let '(module (let ([x.1 (+ 1 2)]) (let ([x.2 (+ x.1 3)]) (+ x.2 x.1)))))
+            '(module (begin (set! x.1 (+ 1 2)) (begin (set! x.2 (+ x.1 3)) (+ x.2 x.1)))))
+    (check-eq? (sequentialize-let '(module (let ([x.1 (+ 1 2)]) (let ([x.2 (+ x.1 3)]) (* x.2 x.1)))))
+            '(module (begin (set! x.1 (+ 1 2)) (begin (set! x.2 (+ x.1 3)) (* x.2 x.1)))))
+)
 
