@@ -376,3 +376,69 @@
             '(module (begin (set! x.1 (+ 1 2)) (begin (set! x.2 (+ x.1 3)) (* x.2 x.1)))))
 )
 
+(module+ test
+    (check-eq? (normalize-bind '(module 0)) '(module 0))
+)
+
+(module+ test
+    (check-eq? (select-instructions '(module (+ 2 2))) 
+            '(module () (begin (set! tmp.1 2) (set! tmp.1 (+ tmp.1 2)) (halt tmp.1))))
+
+    (check-eq? (select-instructions '(module (begin (set! x.1 5) x.1)))
+                '(module () (begin (set! x.1 5) (halt x.1))))
+
+    (check-eq? (select-instructions '(module (begin (set! x.1 (+ 2 2)) x.1)))
+        '(module () (begin (set! x.1 2) (set! x.1 (+ x.1 2)) (halt x.1))))
+
+    (check-eq? (select-instructions '(module (begin (set! x.1 2) (set! x.2 2) (+ x.1 x.2)))) 
+        '(module () (begin (set! x.1 2) (set! x.2 2) (set! tmp.2 x.1) 
+                (set! tmp.2 (+ tmp.2 x.2)) (halt tmp.2))))
+)
+
+(module+ test
+    (check-eq? (uncover-locals '(module () (begin (set! x.1 0) (halt x.1))))
+                '(module ((locals (x.1))) (begin (set! x.1 0) (halt x.1))))
+    (check-eq? (uncover-locals '(module () (begin (set! x.1 0) (set! y.1 x.1)
+                                            (set! y.1 (+ y.1 x.1)) (halt y.1))))
+                '(module ((locals (x.1 y.1))) (begin (set! x.1 0) (set! y.1 x.1) 
+                                                (set! y.1 (+ y.1 x.1)) (halt y.1))))
+)
+
+(module+ test
+    (check-eq?  (assign-fvars '(module ((locals (x.1))) (begin (set! x.1 0) (halt x.1))))
+            '(module ((locals (x.1)) (assignment ((x.1 fv0)))) (begin (set! x.1 0) (halt x.1))))
+    (check-eq? (assign-fvars '(module ((locals (x.1 y.1 w.1))) (begin (set! x.1 0) (set! y.1 x.1)
+                    (set! w.1 1) (set! w.1 (+ w.1 y.1)) (halt w.1)))) 
+        '(module ((locals (x.1 y.1 w.1)) (assignment ((x.1 fv0) (y.1 fv1) (w.1 fv2))))
+           (begin (set! x.1 0) (set! y.1 x.1) (set! w.1 1) (set! w.1 (+ w.1 y.1)) (halt w.1))))
+)
+
+(module+ test
+    (check-eq? (replace-locations '(module ((locals (x.1)) (assignment ((x.1 rax))))
+                    (begin (set! x.1 0) (halt x.1))))
+                    '(begin (set! rax 0) (halt rax)))
+    (check-eq? (replace-locations '(module ((locals (x.1 y.1 w.1)) 
+                    (assignment ((x.1 rax) (y.1 rbx) (w.1 r9)))) 
+            (begin (set! x.1 0) (set! y.1 x.1) (set! w.1 1) (set! w.1 (+ w.1 y.1)) (halt w.1))))
+            '(begin (set! rax 0) (set! rbx rax) (set! r9 1) (set! r9 (+ r9 rbx)) (halt r9)))
+)
+
+(module+ test
+    (check-eq? (flatten-begins '(halt 0)) '(begin (halt 0)))
+
+)
+
+(module+ test
+    (check-eq? (patch-instructions '(begin (set! rbx 42) (halt rbx)))
+                '(begin (set! rbx 42) (set! rax rbx)))
+    (check-eq? (patch-instructions '(begin (set! fv0 0) (set! fv1 42) (set! fv0 fv1) (halt fv0)))
+                '(begin (set! fv0 0) (set! fv1 42) (set! r10 fv1) (set! fv0 r10) (set! rax fv0)))
+    (check-eq? (patch-instructions '(begin (set! rbx 0) (set! rcx 0) (set! r9 42) (set! rbx rcx)
+                        (set! rbx (+ rbx r9)) (halt rbx))) 
+                        '(begin (set! rbx 0) (set! rcx 0) (set! r9 42) (set! rbx rcx)
+                         (set! rbx (+ rbx r9)) (set! rax rbx)))
+)
+
+(module+ test
+    (check-eq? (implement-fvars '(begin)) '(begin))
+)
