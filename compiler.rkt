@@ -107,13 +107,31 @@
     `(module ,(uniquify-tail tail '()))]
     [_ (error 'uniquify "Expected  (module tail), got: ~a" p)]))
 
+(define (sequentialize-value value)
+    (match value
+    [(? triv?)
+            value]
+    [`(,op ,triv1 ,triv2)
+        (if (and (binop? op) (triv? triv1) (triv? triv2))
+            `(,op ,triv1 ,triv2)
+            (error "Expected a value, got: ~a" value))]
+    [`(let ([,as ,vs] ...) ,body)
+        `(begin ,@(map (lambda (a v) `(set! ,a ,(sequentialize-value v))) as vs)
+                    ,(sequentialize-value body))]
+
+    [_ (error "Expected a value, got: ~a" value)]
+    ))
+
 
 (define (sequentialize-tail tail)
     (match tail
-    [(? value?)
+    [(? triv?) (sequentialize-value tail)]
+    [`(,op ,triv1 ,triv2)
         (sequentialize-value tail)]
-    [`(begin ,f1 ... ,t2)
-        `(begin ,(sequenti))]))
+    [`(let ([,as ,vs] ...) ,body)
+        `(begin ,@(map (lambda (a v) `(set! ,a ,(sequentialize-value v))) as vs) 
+                ,(sequentialize-tail body))]
+    [_ (error "Expected a tail, got: ~a" tail)]))
 
 
 ;; (values-unique-lang-v3) -> (imp-mf-lang-v3)
@@ -121,7 +139,7 @@
 (define (sequentialize-let p)
     (match p
     [`(module ,tail)
-        `(module ,(sequentialize-tail tail '()))])
+        `(module ,(sequentialize-tail tail))])
     [_ (error "Expected values-unique-lang-v3, got: ~a" p)])  
 
 ;; (imp-mf-lang-v3) -> (imp-cmf-lang-v3)
