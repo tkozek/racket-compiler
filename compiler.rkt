@@ -194,30 +194,57 @@
         `(module ,(normalize-tail tail))]
     [_ (error "Expected (module tail), got: ~a" p)]))
 
-
 ;; (imp-cmf-lang-v3) -> (asm-lang-v2)
 ;; Selects appropriate sequences of abstract assembly instructions to implement ops of src lang
 (define (select-instructions p)
-
   ; (Imp-cmf-lang-v3 value) -> (List-of (Asm-lang-v2 effect)) and (Asm-lang-v2 aloc)
   ; Assigns the value v to a fresh temporary, returning two values: the list of
   ; statements the implement the assignment in Loc-lang, and the aloc that the
   ; value is stored in.
   (define (assign-tmp v)
-    (TODO "Consider implementing assign-tmp."))
+    (define tmp (fresh))
+    (match v
+        [`(,op ,triv1 ,triv2)
+            (if (and (binop? op) (triv? triv1) (triv? triv2))
+                (values (list `(set! ,tmp ,triv1) (set! ,tmp (,op ,tmp ,triv2))) tmp) ;; values returns all its args
+                (error "Expected op and two trivial values, got: ~a, ~a and ~a" op triv1 triv2))]
+        [_ (error "Expected a value, got: ~a" v)]
+        ))
 
   (define (select-tail e)
-    (TODO "Implement select-tail"))
+    (match e
+        [(? triv?)
+            `(halt ,e)]
+        [`(,op ,triv1 ,triv2)
+            (define-values (insts tmp) (select-value e))
+            `(begin ,@insts (halt ,tmp))]
+        [`(begin ,effects ,body)
+            `(begin ,@(map select-effect effects) ,(select-tail body))]
+        [_ (error "Expected a tail, got ~a" e)]))
 
   (define (select-value e)
-    (TODO "Implement select-value"))
+    (match e
+    [(? triv?) (values '() e)]
+    [`(,op ,triv1 ,triv2)
+        (if (and (binop? op) (triv? triv1) (triv? triv2))
+            (assign-tmp e)
+            (error "Expected binop and two trivs, got: ~a, ~a, ~a" op triv1 triv2))]
+    [_ (error "Expected value, got: ~a" e)]))
 
   (define (select-effect e)
-    (TODO "Implement select-value"))
+    (match e
+        [`(set! ,aloc ,v)
+        (define-values (insts tmp) (select-value v))
+            `(begin ,@insts (set! ,aloc ,tmp))]
+        [`(begin ,rest ... ,last)
+            `(begin ,@(map select-effect rest)
+                    ,(select-effect last))]
+        [_ (error "Expected an effect, got: ~a" e)]))
 
   (match p
     [`(module ,tail)
-     `(module () ,(select-tail tail))]))
+     `(module () ,(select-tail tail))]
+    [_ (error "Expected a p, got: ~a" p)]))
 
 (define (interp-paren-x64 p)
   ; Environment (List-of (paren-x64-v2 Statements)) -> Integer
@@ -524,18 +551,26 @@
 )
 
 (module+ test
-    (check-eq? (select-instructions '(module (+ 2 2))) 
-            '(module () (begin (set! tmp.1 2) (set! tmp.1 (+ tmp.1 2)) (halt tmp.1))))
-
-    (check-eq? (select-instructions '(module (begin (set! x.1 5) x.1)))
-                '(module () (begin (set! x.1 5) (halt x.1))))
-
+    (check-eq? (select-instructions '(module 0))
+                    '(module () (halt 0)))
+    (check-eq? (select-instructions '(module 9223372036854775807))
+                    '(module () (halt 9223372036854775807)))
+    (check-eq? (select-instructions '(module -9223372036854775808))
+                    '(module () (halt -9223372036854775808)))
+    (check-match (select-instructions '(module (+ 2 2))) 
+            '(module () (begin (set! ,t 2) (set! ,t (+ ,t 2)) (halt ,t))))
+    (check-match (select-instructions '(module (* -3 2))) 
+            '(module () (begin (set! ,t -3) (set! ,t (* ,t 2)) (halt ,t))))
+    (check-match (select-instructions '(module (begin (set! ,t 5) ,t)))
+                '(module () (begin (set! ,t 5) (halt ,t))))
     (check-eq? (select-instructions '(module (begin (set! x.1 (+ 2 2)) x.1)))
         '(module () (begin (set! x.1 2) (set! x.1 (+ x.1 2)) (halt x.1))))
-
-    (check-eq? (select-instructions '(module (begin (set! x.1 2) (set! x.2 2) (+ x.1 x.2)))) 
-        '(module () (begin (set! x.1 2) (set! x.2 2) (set! tmp.2 x.1) 
-                (set! tmp.2 (+ tmp.2 x.2)) (halt tmp.2))))
+    (check-match (select-instructions '(module (begin (set! x.1 2) (set! x.2 2) (+ x.1 x.2)))) 
+        '(module () (begin (set! x.1 2) (set! x.2 2) (set! ,t x.1) 
+                (set! ,t (+ ,t x.2)) (halt ,t))))
+    (check-match (select-instructions '(module (begin (begin (set! ,t 3)) ,t)))
+                '(module () (begin (begin (set! ,t 3)) (halt ,t))))
+    
 )
 
 (module+ test
