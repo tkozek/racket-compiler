@@ -1,4 +1,16 @@
-#lang racket (require cpsc411/compiler-lib cpsc411/2c-run-time)
+#lang racket 
+(require cpsc411/compiler-lib 
+        cpsc411/2c-run-time)
+(require    values-lang-v3.rkt
+            values-unique-lang-v3.rkt
+            imp-mf-lang-v3.rkt
+            imp-cmf-lang-v3.rkt
+            asm-lang-v2.rkt
+            nested-asm-v3.rkt
+            para-asm-v2.rkt
+            paren-x64-fvars-v2.rkt
+            paren-x64-v2.rkt
+                )
 (provide
  check-values-lang
  uniquify
@@ -15,7 +27,8 @@
  check-paren-x64
  generate-x64
  interp-values-lang
- interp-paren-x64)
+ interp-paren-x64
+ triv)
 
 
 ;; You might want to reuse check-paren-x64 and generate-x64 from milestone-1
@@ -53,219 +66,7 @@
         p
         (error "wasn't values-lang-v3"))]
     [_ (error "wasn't values-lang-v3")])
-  )
-
-(define (uniquify-triv triv env)
-    (match triv
-        [(? int64?) triv]
-        [(? name?)
-            (dict-ref env triv  (lambda () (raise (make-exn:fail))))] ;; We found a name, it is supposed to be trivial, which means it should exist in our environment, so raise error if it isn't in our environment 
-            ;; (it not being in our environment would mean we have an unbound name)
-        [_ (error "Expected triv but got ~a" triv)]))
-
-(define (uniquify-value value env)
-    (match value
-    [(? triv?)
-        (uniquify-triv value env)]
-    [`(,op ,triv1 ,triv2)
-        `(,op ,(uniquify-triv triv1 env) ,(uniquify-triv triv2 env))]
-    [`(let ([,xs ,vs] ...) ,body)
-        (define alocs (map (lambda (_) (fresh)) xs))
-        (define env*
-            (let loop ([xs xs] [as alocs] [e env])
-            (if (empty? xs)
-                e
-                (loop (cdr xs) (cdr as) (cons (cons (car xs) (car as)) e)))))
-        (define vs* (map (lambda (v) (uniquify-value v env)) vs))
-        `(let (,@(map list alocs vs*)) ,(uniquify-value body env*))]
-    [_ (error 'uniquify-value "Expected a value, got: ~a" value)]))
-
-(define (uniquify-tail tail env)
-    (match tail
-    [(? value?) ; could be int64, then just return that, could be binop triv triv, then we'd have to check if the trivs have name?'s in them, passing environment along
-        (uniquify-value tail env)]
-    [`(let ([,xs ,vs] ...) ,body)
-        (define alocs (map (lambda (_) (fresh)) xs))
-        (define env* 
-            (let loop ([xs xs]
-                [as alocs]
-                [e env])
-            (if (empty? xs)
-                e
-                (loop (cdr xs) (cdr as) (cons (cons (car xs) (car as)) e)))))
-        (define vs* (map (lambda (v) (uniquify-value v env)) vs))
-        `(let (,@(map list alocs vs*)) ,(uniquify-tail body env*))]
-    [_ (error 'uniquify-tail "Expected a tail, got: ~a" tail)]
-    ))
-    
-;; (values-lang-v3) -> (values-unique-lang-v3)
-;; Resolves all lexical identifiers to abstract locations
-(define (uniquify p)
-    (check-values-lang p)
-    (match p
-    [`(module ,tail)
-    `(module ,(uniquify-tail tail '()))]
-    [_ (error 'uniquify "Expected  (module tail), got: ~a" p)]))
-
-(define (sequentialize-value value)
-    (match value
-    [(? triv?)
-            value]
-    [`(,op ,triv1 ,triv2)
-        (if (and (binop? op) (triv? triv1) (triv? triv2))
-            `(,op ,triv1 ,triv2)
-            (error "Expected a value, got: ~a" value))]
-    [`(let ([,as ,vs] ...) ,body)
-        `(begin ,@(map (lambda (a v) `(set! ,a ,(sequentialize-value v))) as vs)
-                    ,(sequentialize-value body))]
-
-    [_ (error "Expected a value, got: ~a" value)]
-    ))
-
-
-(define (sequentialize-tail tail)
-    (match tail
-    [(? triv?) (sequentialize-value tail)]
-    [`(,op ,triv1 ,triv2)
-        (sequentialize-value tail)]
-    [`(let ([,as ,vs] ...) ,body)
-        `(begin ,@(map (lambda (a v) `(set! ,a ,(sequentialize-value v))) as vs) 
-                ,(sequentialize-tail body))]
-    [_ (error "Expected a tail, got: ~a" tail)]))
-
-
-;; (values-unique-lang-v3) -> (imp-mf-lang-v3)
-;; Picks a particular ordering for let expressions using 'set!'
-(define (sequentialize-let p)
-    (match p
-    [`(module ,tail)
-        `(module ,(sequentialize-tail tail))])
-    [_ (error "Expected values-unique-lang-v3, got: ~a" p)])  
-
-;; (Imp-mf-lang-v3 effect) -> (Imp-cmf-lang-v3 effect)
-(define (normalize-effect effect)
-    (match effect
-    [`(set! ,aloc (begin ,effects ... ,value))
-        `(begin ,@(map normalize-effect effects)
-                (set! ,aloc ,(normalize-value value)))]
-    [`(set! ,aloc ,value)
-        `(set! ,aloc ,(normalize-value value))]
-    [`(begin ,effects ... ,effect2)
-        `(begin ,@(map normalize-effect effects)
-                    ,(normalize-effect effect2))]
-    [_ (error "Expected an effect, got: ~a" effect)]
-    
-    ))
-
-;; (Imp-mf-lang-v3 value) -> (Imp-cmf-lang-v3 value)
-(define (normalize-value value)
-    (match value
-    [(? triv?)
-        value]
-    [`(,op ,triv1 ,triv2)
-        (if (and (binop? op) (triv? triv1) (triv? triv2))
-            value
-            (error "Expected a value, got: ~a" value))]
-    [`(begin ,effects ... ,body)
-        `(begin ,@(map normalize-effect effects)
-                    ,(normalize-value body))]
-    [_ (error "Expected a value, got: ~a" value)]
-        
-        ))
-
-;; (Imp-mf-lang-v3 tail) -> (Imp-cmf-lang-v3 tail)
-(define (normalize-tail tail)
-    (match tail
-    [(? triv?)
-        (normalize-value tail)]
-    [`(,op ,triv1 ,triv2)
-        (normalize-value tail)]
-    [`(begin ,effects ... ,body)
-        `(begin ,@(map normalize-effect effects)
-                ,(normalize-tail body))]
-    [_ (error "Expected a tail, got: ~a" tail)]))
-
-
-;; (imp-mf-lang-v3 p) -> (imp-cmf-lang-v3 p)
-;; Pushes 'set!' under 'begin' so that RHS of each 'set!' is a simple value producing operation
-(define (normalize-bind p)
-    (match p
-    [`(module ,tail)
-        `(module ,(normalize-tail tail))]
-    [_ (error "Expected (module tail), got: ~a" p)]))
-
-;; (imp-cmf-lang-v3) -> (asm-lang-v2)
-;; Selects appropriate sequences of abstract assembly instructions to implement ops of src lang
-(define (select-instructions p)
-  ; (Imp-cmf-lang-v3 value) -> (List-of (Asm-lang-v2 effect)) and (Asm-lang-v2 aloc)
-  ; Assigns the value v to a fresh temporary, returning two values: the list of
-  ; statements the implement the assignment in Loc-lang, and the aloc that the
-  ; value is stored in.
-  (define (assign-tmp v)
-    (define tmp (fresh))
-    (match v
-        [`(,op ,triv1 ,triv2)
-            (if (and (binop? op) (triv? triv1) (triv? triv2))
-                (values (list `(set! ,tmp ,triv1) (set! ,tmp (,op ,tmp ,triv2))) tmp) ;; values returns all its args
-                (error "Expected op and two trivial values, got: ~a, ~a and ~a" op triv1 triv2))]
-        [_ (error "Expected a value, got: ~a" v)]
-        ))
-
-  (define (select-tail e)
-    (match e
-        [(? triv?)
-            `(halt ,e)]
-        [`(,op ,triv1 ,triv2)
-            (define-values (insts tmp) (select-value e))
-            `(begin ,@insts (halt ,tmp))]
-        [`(begin ,effects ,body)
-            `(begin ,@(map select-effect effects) ,(select-tail body))]
-        [_ (error "Expected a tail, got ~a" e)]))
-
-  (define (select-value e)
-    (match e
-    [(? triv?) (values '() e)]
-    [`(,op ,triv1 ,triv2)
-        (if (and (binop? op) (triv? triv1) (triv? triv2))
-            (assign-tmp e)
-            (error "Expected binop and two trivs, got: ~a, ~a, ~a" op triv1 triv2))]
-    [_ (error "Expected value, got: ~a" e)]))
-
-  (define (select-effect e)
-    (match e
-        [`(set! ,aloc ,v)
-        (define-values (insts tmp) (select-value v))
-            `(begin ,@insts (set! ,aloc ,tmp))]
-        [`(begin ,rest ... ,last)
-            `(begin ,@(map select-effect rest)
-                    ,(select-effect last))]
-        [_ (error "Expected an effect, got: ~a" e)]))
-
-  (match p
-    [`(module ,tail)
-     `(module () ,(select-tail tail))]
-    [_ (error "Expected a p, got: ~a" p)]))
-
-(define (interp-paren-x64 p)
-  ; Environment (List-of (paren-x64-v2 Statements)) -> Integer
-  (define (eval-instruction-sequence env sls)
-    (if (empty? sls)
-        (dict-ref env 'rax)
-        (TODO "Implement the fold over a sequence of Paren-x64-v2 /s/.")))
-
-  ; Environment Statement -> Environment
-  (define (eval-statement env s)
-    (TODO "Implement the transition function evaluating a Paren-x64-v2 /s/."))
-
-  ; (Paren-x64-v2 binop) -> procedure?
-  (define (eval-binop b)
-    (TODO "Implement the interpreter for Paren-x64-v2 /binop/."))
-
-  ; Environment (Paren-x64-v2 triv) -> Integer
-  (define (eval-triv regfile t)
-    (TODO "Implement the interpreter for Paren-x64-v2 /triv/."))
-
-  (TODO "Implement the interpreter for Paren-x64-v2 /p/."))
+  ) 
 
 (define (generate-x64 p)
   (define (program->x64 p)
@@ -285,49 +86,11 @@
   (program->x64 p))
 
 
-
-;; (asm-lang-v2/assignments) -> (nested-asm-lang-v2)
-;; Replaces each aloc with its assigned physical location from the assignment info field
-(define (replace-locations p)
-    p)
-
-;; (asm-lang-v2/locals) -> (asm-lang-v2/assignments)
-;; Assigns each aloc from the locals info field to a fresh frame variable
-(define (assign-fvars p)
-    p)
-
-;; (asm-lang-v2) -> (asm-lang-v2/locals)
-;; Analyzes which alocs are used in p and decorates program with set of variables in info field
-(define (uncover-locals p)
-    p)
-
-;; (asm-lang-v2) -> (nested-asm-lang-v2)
-;; Replaces each aloc its with assigned physical location from assignment info field
-(define (assign-homes p)
-    (replace-locations (assign-fvars (uncover-locals p))))
-
-;; (nested-asm-lang-v2) -> (para-asm-lang-v2)
-;; Flatten all nested begin expressions
-(define (flatten-begins p)
-    p)
-
-
-;; (para-asm-lang-v2) -> (paren-x64-fvars-v2)
-;; Patches instructions in p that have no x64 analogue
-(define (patch-instructions p)
-    p)
-
-;; (paren-x64-fvars-v2) -> (paren-x64-v2)
-;; Reifies fvars into displacement mode operands
-(define (implement-fvars p)
-    p)
-
-
-
+;; Optional
 (define (check-paren-x64 p)
     p)
 
-
+;; Optional
 (define (interp-values-lang p)
     0)
 
@@ -561,6 +324,12 @@
             '(module () (begin (set! ,t 2) (set! ,t (+ ,t 2)) (halt ,t))))
     (check-match (select-instructions '(module (* -3 2))) 
             '(module () (begin (set! ,t -3) (set! ,t (* ,t 2)) (halt ,t))))
+    (check-match (select-instructions '(module (+ 9223372036854775807 9223372036854775807))) 
+            '(module () (begin (set! ,t 9223372036854775807) (set! ,t (+ ,t 9223372036854775807))
+             (halt ,t))))
+    (check-match (select-instructions '(module (* -9223372036854775808 9223372036854775807))) 
+            '(module () (begin (set! ,t -9223372036854775808) (set! ,t (* ,t 9223372036854775807)) 
+                                                (halt ,t))))
     (check-match (select-instructions '(module (begin (set! ,t 5) ,t)))
                 '(module () (begin (set! ,t 5) (halt ,t))))
     (check-eq? (select-instructions '(module (begin (set! x.1 (+ 2 2)) x.1)))
@@ -569,17 +338,26 @@
         '(module () (begin (set! x.1 2) (set! x.2 2) (set! ,t x.1) 
                 (set! ,t (+ ,t x.2)) (halt ,t))))
     (check-match (select-instructions '(module (begin (begin (set! ,t 3)) ,t)))
-                '(module () (begin (begin (set! ,t 3)) (halt ,t))))
-    
+                '(module () (begin (begin (set! ,t 3)) (halt ,t))))    
 )
 
 (module+ test
+    (check-eq? (uncover-locals '(module () (halt 0)))
+                '(module ((locals ())) (halt 0)))
+    (check-eq? (uncover-locals '(module () (halt 9223372036854775807)))
+                '(module ((locals ())) (halt 9223372036854775807)))
+    (check-eq? (uncover-locals '(module () (halt -9223372036854775808)))
+                '(module ((locals ())) (halt -9223372036854775808)))
+    (check-exn exn:fail? (lambda () (uncover-locals '(module () (halt x.1)))))
+
     (check-eq? (uncover-locals '(module () (begin (set! x.1 0) (halt x.1))))
                 '(module ((locals (x.1))) (begin (set! x.1 0) (halt x.1))))
     (check-eq? (uncover-locals '(module () (begin (set! x.1 0) (set! y.1 x.1)
                                             (set! y.1 (+ y.1 x.1)) (halt y.1))))
                 '(module ((locals (x.1 y.1))) (begin (set! x.1 0) (set! y.1 x.1) 
                                                 (set! y.1 (+ y.1 x.1)) (halt y.1))))
+    
+
 )
 
 (module+ test
