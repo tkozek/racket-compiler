@@ -9,16 +9,57 @@
          replace-locations
          assign-homes)
 
-(define (uncover-tails tail)
-    (match tail
-        [`()]))
+(define (uncover-triv triv)
+    ())
+
+
+
 ;; (asm-lang-v2) -> (asm-lang-v2/locals)
 ;; Analyzes which alocs are used in p and decorates program with set of variables in info field
 (define (uncover-locals p)
-    (match p
-    [`(module () ,tail)
-        `(module (locals ,(uncover-tail '())) ,tail)]
-    [_ (error "Expected asm-lang-v2 p, got: ~a" p)]))
+    (define locals '())
+
+    (define (uncover-aloc aloc)
+        (when (and (aloc? aloc) 
+            (not (memq aloc locals)))
+            (set! locals (cons aloc locals))))
+    
+    ; (define (uncover-triv triv)
+    ;         (uncover-aloc triv))
+
+    (define (uncover-effect effect)
+        (match effect
+            [`(set! ,aloc1 (binop ,aloc1 ,triv))
+                (uncover-aloc aloc1)
+                (uncover-aloc triv)]
+            [`(set! ,aloc ,triv)
+                (uncover-aloc aloc)
+                (uncover-aloc triv)] 
+            [`(begin ,first ,rest ...)
+                (uncover-effect first)
+                (for-each uncover-effect rest)]
+            [_ (error "Expected an effect, got: ~a" effect)]))
+
+    (define (uncover-tails tail)
+        (match tail
+            [`(halt triv)
+                (uncover-aloc triv)]
+            [`(begin ,effect ... ,tail)
+                (for-each uncover-effect effect)
+                (uncover-tails tail)]
+            [_ (error "Expected a tail, got: ~a" tail)]))
+
+
+    (define (uncover-p p)
+        (match p
+            [`(module ,info ,tail)
+                (uncover-tails tail)
+                `(module ,(cons locals info) ,tail)]
+            [_ (error "Expected asm-lang-v2 p, got: ~a" p)]))
+    (uncover-p p)
+)
+
+    
 
 
 ;; (asm-lang-v2/assignments) -> (nested-asm-lang-v2)
