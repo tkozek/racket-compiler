@@ -66,6 +66,36 @@
 ;; (asm-lang-v2/assignments) -> (nested-asm-lang-v2)
 ;; Replaces each aloc with its assigned physical location from the assignment info field
 (define (replace-locations p)
+    (define assignments '())
+
+    (define (replace-aloc aloc)
+        (when (and (aloc? aloc)
+                    (memv ))))
+
+    (define (replace-effect effect)
+        (match effect
+            [`(set! ,aloc1 (binop ,aloc1 ,triv))
+                `(set! ,(replace-aloc aloc1) (binop ,(replace-aloc aloc1) ,(replace-aloc triv)))]
+            [`(set! ,aloc ,triv)
+                `(set! ,(replace-aloc aloc) (replace-aloc triv))]
+            [`(begin ,first ,rest ...)
+                `(begin 
+                    ,(replace-effect first)
+                    ,@(map replace-effect rest))]
+            [_ (error "Expected an effect, got: ~a" effect)]))
+
+    (define (replace-tail tail)
+        (match tail
+            [`(halt ,triv)
+                `(halt ,(replace-aloc triv))]
+            [`(begin ,effects ... ,tail)
+                `(begin ,@(map replace-effect effects) ,(replace-tail tail))]
+            [_ (error "Expected a tail, got: ~a" tail)]))
+
+    (define (replace-p p)
+        (match p
+            [`(module ,info ,tail)
+                (set! assignments (info-ref info 'assignment))]))
     p)
 
 ;; (asm-lang-v2/locals) -> (asm-lang-v2/assignments)
