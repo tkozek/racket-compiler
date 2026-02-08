@@ -356,8 +356,6 @@
                                             (set! y.1 (+ y.1 x.1)) (halt y.1))))
                 '(module ((locals (x.1 y.1))) (begin (set! x.1 0) (set! y.1 x.1) 
                                                 (set! y.1 (+ y.1 x.1)) (halt y.1))))
-    
-
 )
 
 (module+ test

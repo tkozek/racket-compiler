@@ -54,14 +54,15 @@
         (match p
             [`(module ,info ,tail)
                 (uncover-tails tail)
-                `(module ,(cons locals info) ,tail)]
+                (info-set info 'locals locals)
+                `(module info ,tail)]
             [_ (error "Expected asm-lang-v2 p, got: ~a" p)]))
     (uncover-p p)
 )
 
     
 
-
+  
 ;; (asm-lang-v2/assignments) -> (nested-asm-lang-v2)
 ;; Replaces each aloc with its assigned physical location from the assignment info field
 (define (replace-locations p)
@@ -70,7 +71,43 @@
 ;; (asm-lang-v2/locals) -> (asm-lang-v2/assignments)
 ;; Assigns each aloc from the locals info field to a fresh frame variable
 (define (assign-fvars p)
-    p)
+    (define fvar-counter 0)
+    (define assignments (make-hash))
+    (define (assign-aloc aloc)
+        (when (and (aloc? aloc)
+                (not (hash-has-key? assignments aloc)))
+                (hash-set! assignments aloc (make-fvar fvar-counter))
+                (set! fvar-counter (add1 fvar-counter))))
+
+    (define (assign-effect effect)
+        (match effect
+            [`(set! ,aloc1 (binop ,aloc1 ,triv))]
+            [`(set! ,aloc ,triv)
+                (assign-aloc aloc)
+                (assign-aloc triv)]
+            [`(begin ,first ,rest)
+                (assign-effect first)
+                (for-each assign-effect rest)]
+            [_ (error "Expected an effect, got: ~a" effect)]))
+
+    (define (assign-tail tail)
+        (match tail
+            [`(halt ,triv)
+                #when (triv? triv)
+                (assign-aloc triv)]
+            [`(begin ,effects ... ,tail)
+                (for-each assign-effect effects)
+                (assign-tail tail)]
+            [_ (error "Expected a tail, got: ~a" tail)]))
+    
+    (define (assign-p p)
+        (match p
+            [`(module ,info ,tail)
+                (assign-tail tail) ; (list (k v)) for k, v in assignments
+                (info-set info 'assignment (hash->list assignments)) 
+                `(module info tail)]
+            [_ (error "Expected asm-lang-v2, got: ~a" p)]))
+    (assign-p p))
 
 ;; (asm-lang-v2) -> (nested-asm-lang-v2)
 ;; Replaces each aloc its with assigned physical location from assignment info field
