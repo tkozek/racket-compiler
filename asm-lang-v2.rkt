@@ -66,11 +66,21 @@
 ;; (asm-lang-v2/assignments) -> (nested-asm-lang-v2)
 ;; Replaces each aloc with its assigned physical location from the assignment info field
 (define (replace-locations p)
-    (define assignments '())
+    (define assignments (make-hash))
+
+;; for every assignment pair in info, add an entry to assignments that maps
+;; the aloc to the fvar
+    (define (init-assignments info) 
+        (for-each (lambda (pair)
+                    (let ([aloc (first pair)]
+                          [fvar (second pair)])
+                          (hash-set! assignments aloc fvar)))
+                (info-ref info 'assignment)))
 
     (define (replace-aloc aloc)
         (when (and (aloc? aloc)
-                    (memv ))))
+                    (hash-ref assignments aloc #f))
+                (hash-ref assignments aloc)))
 
     (define (replace-effect effect)
         (match effect
@@ -95,8 +105,17 @@
     (define (replace-p p)
         (match p
             [`(module ,info ,tail)
-                (set! assignments (info-ref info 'assignment))]))
-    p)
+            ;; do I need begin here? I don't think I do
+            (init-assignments info)
+            `(module ,info ,@(replace-tail tail))]))
+
+    (replace-p p))
+
+
+;; want to get the pairs from assignments in info.
+;; then when we see an aloc we replace it and return it replaced
+;; 
+
 
 ;; (asm-lang-v2/locals) -> (asm-lang-v2/assignments)
 ;; Assigns each aloc from the locals info field to a fresh frame variable
