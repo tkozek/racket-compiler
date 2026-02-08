@@ -8,4 +8,36 @@
 ;; (nested-asm-lang-v2) -> (para-asm-lang-v2)
 ;; Flatten all nested begin expressions
 (define (flatten-begins p)
-    p)
+
+
+    (define (flatten-effect effect)
+        (match effect
+            [`(set! ,loc1 (binop ,loc1 ,triv))
+                effect]
+            [`(set! ,loc ,triv)
+                effect]
+            [`(begin ,first ,rest ...)
+                (append (flatten-effect first)
+                        (map flatten-effect rest))]
+            [_ (error "Expected an effect, got: ~a" effect)]))
+
+
+    (define (flatten-tail tail)
+        (match tail
+            [`(halt ,triv)
+                tail]
+            [`(begin ,effects ... ,tail)
+                (append (map flatten-effect effects)
+                        (flatten-tail tail))]
+            [_ (error "Expected tail, got: ~a" tail)]))
+    
+    (define (flatten-p p)
+        (match p
+            [`(begin ,effects ... tail)
+                `(begin ,@(flatten-tail p))]
+            [`(halt ,triv)
+                `(begin ,p)]
+            [` (error "Expected Nested-asm-lang-v2, got: ~a" p)]))
+            
+    (flatten-p p))
+    
