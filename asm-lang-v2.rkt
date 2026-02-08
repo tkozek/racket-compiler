@@ -29,7 +29,7 @@
 
     (define (uncover-effect effect)
         (match effect
-            [`(set! ,aloc1 (binop ,aloc1 ,triv))
+            [`(set! ,aloc1 (,binop ,aloc1 ,triv))
                 (uncover-aloc aloc1)
                 (uncover-aloc triv)]
             [`(set! ,aloc ,triv)
@@ -77,17 +77,26 @@
                           (hash-set! assignments aloc fvar)))
                 (info-ref info 'assignment)))
 
+    ; (define (replace-aloc aloc)
+    ;     (when (and (aloc? aloc)
+    ;                 (hash-ref assignments aloc #f))
+    ;             (hash-ref assignments aloc)))
     (define (replace-aloc aloc)
-        (when (and (aloc? aloc)
-                    (hash-ref assignments aloc #f))
-                (hash-ref assignments aloc)))
+        (match aloc
+            [(? int64?)
+                aloc]
+            [(? aloc?)
+                (when (and (aloc? aloc)
+                            (hash-ref assignments aloc #f))
+                (hash-ref assignments aloc))]
+            [_ (error "Expected aloc, got: " aloc)]))
 
     (define (replace-effect effect)
         (match effect
-            [`(set! ,aloc1 (binop ,aloc1 ,triv))
-                `(set! ,(replace-aloc aloc1) (binop ,(replace-aloc aloc1) ,(replace-aloc triv)))]
+            [`(set! ,aloc1 (,binop ,aloc1 ,triv))
+                `(set! ,(replace-aloc aloc1) (,binop ,(replace-aloc aloc1) ,(replace-aloc triv)))]
             [`(set! ,aloc ,triv)
-                `(set! ,(replace-aloc aloc) (replace-aloc triv))]
+                `(set! ,(replace-aloc aloc) ,(replace-aloc triv))]
             [`(begin ,first ,rest ...)
                 `(begin 
                     ,(replace-effect first)
@@ -107,7 +116,7 @@
             [`(module ,info ,tail)
             ;; do I need begin here? I don't think I do
             (init-assignments info)
-            `(module ,info ,@(replace-tail tail))]))
+            (replace-tail tail)]))
 
     (replace-p p))
 
@@ -130,7 +139,7 @@
 
     (define (assign-effect effect)
         (match effect
-            [`(set! ,aloc1 (binop ,aloc1 ,triv))]
+            [`(set! ,aloc1 (,binop ,aloc1 ,triv))]
             [`(set! ,aloc ,triv)
                 (assign-aloc aloc)
                 (assign-aloc triv)]

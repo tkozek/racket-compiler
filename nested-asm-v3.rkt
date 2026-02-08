@@ -9,10 +9,9 @@
 ;; Flatten all nested begin expressions
 (define (flatten-begins p)
 
-
     (define (flatten-effect effect)
         (match effect
-            [`(set! ,loc1 (binop ,loc1 ,triv))
+            [`(set! ,loc1 (,binop ,loc1 ,triv))
                 effect]
             [`(set! ,loc ,triv)
                 effect]
