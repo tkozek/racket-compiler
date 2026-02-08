@@ -1,7 +1,7 @@
 #lang racket
 
 (require cpsc411/compiler-lib
-        compiler.rkt)
+    "util.rkt")
 
 
 (provide uncover-locals
@@ -9,8 +9,7 @@
          replace-locations
          assign-homes)
 
-(define (uncover-triv triv)
-    ())
+
 
 
 
@@ -38,16 +37,16 @@
             [`(begin ,first ,rest ...)
                 (uncover-effect first)
                 (for-each uncover-effect rest)]
-            [_ (error "Expected an effect, got: ~a" effect)]))
+            [_ (error (format "Expected an effect, got: ~a" effect))]))
 
     (define (uncover-tails tail)
         (match tail
-            [`(halt triv)
+            [`(halt ,triv)
                 (uncover-aloc triv)]
             [`(begin ,effect ... ,tail)
                 (for-each uncover-effect effect)
                 (uncover-tails tail)]
-            [_ (error "Expected a tail, got: ~a" tail)]))
+            [_ (error (format "Expected a tail, got: ~a" tail))]))
 
 
     (define (uncover-p p)
@@ -56,12 +55,9 @@
                 (uncover-tails tail)
                 (info-set info 'locals locals)
                 `(module info ,tail)]
-            [_ (error "Expected asm-lang-v2 p, got: ~a" p)]))
+            [_ (error (format "Expected asm-lang-v2 p, got: ~a" p))]))
     (uncover-p p)
 )
-
-    
-
   
 ;; (asm-lang-v2/assignments) -> (nested-asm-lang-v2)
 ;; Replaces each aloc with its assigned physical location from the assignment info field
@@ -89,7 +85,7 @@
                 (when (and (aloc? aloc)
                             (hash-ref assignments aloc #f))
                 (hash-ref assignments aloc))]
-            [_ (error "Expected aloc, got: " aloc)]))
+            [_ (error (format "Expected aloc, got: ~a" aloc))]))
 
     (define (replace-effect effect)
         (match effect
@@ -101,7 +97,7 @@
                 `(begin 
                     ,(replace-effect first)
                     ,@(map replace-effect rest))]
-            [_ (error "Expected an effect, got: ~a" effect)]))
+            [_ (error (format "Expected an effect, got: ~a" effect))]))
 
     (define (replace-tail tail)
         (match tail
@@ -109,7 +105,7 @@
                 `(halt ,(replace-aloc triv))]
             [`(begin ,effects ... ,tail)
                 `(begin ,@(map replace-effect effects) ,(replace-tail tail))]
-            [_ (error "Expected a tail, got: ~a" tail)]))
+            [_ (error (format "Expected a tail, got: ~a" tail))]))
 
     (define (replace-p p)
         (match p
@@ -139,24 +135,26 @@
 
     (define (assign-effect effect)
         (match effect
-            [`(set! ,aloc1 (,binop ,aloc1 ,triv))]
+            [`(set! ,aloc1 (,binop ,aloc1 ,triv))
+                (assign-aloc aloc1)
+                (assign-aloc triv)]
             [`(set! ,aloc ,triv)
                 (assign-aloc aloc)
                 (assign-aloc triv)]
             [`(begin ,first ,rest)
                 (assign-effect first)
                 (for-each assign-effect rest)]
-            [_ (error "Expected an effect, got: ~a" effect)]))
+            [_ (error (format "Expected an effect, got: ~a" effect))]))
 
     (define (assign-tail tail)
         (match tail
             [`(halt ,triv)
-                #when (triv? triv)
+                #:when (triv? triv)
                 (assign-aloc triv)]
             [`(begin ,effects ... ,tail)
                 (for-each assign-effect effects)
                 (assign-tail tail)]
-            [_ (error "Expected a tail, got: ~a" tail)]))
+            [_ (error (format "Expected a tail, got: ~a" tail))]))
     
     (define (assign-p p)
         (match p
@@ -164,7 +162,7 @@
                 (assign-tail tail) ; (list (k v)) for k, v in assignments
                 (info-set info 'assignment (hash->list assignments)) 
                 `(module info tail)]
-            [_ (error "Expected asm-lang-v2, got: ~a" p)]))
+            [_ (error (format "Expected asm-lang-v2, got: ~a" p))]))
     (assign-p p))
 
 ;; (asm-lang-v2) -> (nested-asm-lang-v2)

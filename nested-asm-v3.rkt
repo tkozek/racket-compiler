@@ -1,7 +1,7 @@
 #lang racket
 
 (require cpsc411/compiler-lib
-        compiler.rkt)
+        )
 
 (provide flatten-begins)
 
@@ -18,7 +18,7 @@
             [`(begin ,first ,rest ...)
                 (append (flatten-effect first)
                         (map flatten-effect rest))]
-            [_ (error "Expected an effect, got: ~a" effect)]))
+            [_ (error (format "Expected an effect, got: ~a" effect))]))
 
 
     (define (flatten-tail tail)
@@ -28,7 +28,7 @@
             [`(begin ,effects ... ,tail)
                 (append (map flatten-effect effects)
                         (flatten-tail tail))]
-            [_ (error "Expected tail, got: ~a" tail)]))
+            [_ (error (format "Expected tail, got: ~a" tail))]))
     
     (define (flatten-p p)
         (match p
@@ -36,7 +36,7 @@
                 `(begin ,@(flatten-tail p))]
             [`(halt ,triv)
                 `(begin ,p)]
-            [` (error "Expected Nested-asm-lang-v2, got: ~a" p)]))
+            [_ (error (format "Expected Nested-asm-lang-v2, got: ~a" p))]))
             
     (flatten-p p))
     

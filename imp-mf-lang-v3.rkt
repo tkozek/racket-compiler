@@ -1,7 +1,8 @@
 #lang racket
 
 (require cpsc411/compiler-lib
-        compiler.rkt)
+"util.rkt"
+        )
 
 (provide normalize-bind)
 
@@ -16,7 +17,7 @@
     [`(begin ,effects ... ,effect2)
         `(begin ,@(map normalize-effect effects)
                     ,(normalize-effect effect2))]
-    [_ (error "Expected an effect, got: ~a" effect)]
+    [_ (error (format "Expected an effect, got: ~a" effect))]
     
     ))
 
@@ -28,11 +29,11 @@
     [`(,op ,triv1 ,triv2)
         (if (and (binop? op) (triv? triv1) (triv? triv2))
             value
-            (error "Expected a value, got: ~a" value))]
+            (error (format "Expected a value, got: ~a" value)))]
     [`(begin ,effects ... ,body)
         `(begin ,@(map normalize-effect effects)
                     ,(normalize-value body))]
-    [_ (error "Expected a value, got: ~a" value)]
+    [_ (error (format "Expected a value, got: ~a" value))]
         
         ))
 
@@ -46,7 +47,7 @@
     [`(begin ,effects ... ,body)
         `(begin ,@(map normalize-effect effects)
                 ,(normalize-tail body))]
-    [_ (error "Expected a tail, got: ~a" tail)]))
+    [_ (error (format "Expected a tail, got: ~a" tail))]))
 
 
 ;; (imp-mf-lang-v3 p) -> (imp-cmf-lang-v3 p)
@@ -55,4 +56,4 @@
     (match p
     [`(module ,tail)
         `(module ,(normalize-tail tail))]
-    [_ (error "Expected (module tail), got: ~a" p)]))
+    [_ (error (format "Expected (module tail), got: ~a" p))]))

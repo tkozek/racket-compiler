@@ -1,7 +1,7 @@
 #lang racket
 
 (require cpsc411/compiler-lib
-        compiler.rkt)
+        )
     
 (provide interp-paren-x64)
 

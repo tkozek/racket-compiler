@@ -1,7 +1,8 @@
 #lang racket
 
 (require cpsc411/compiler-lib
-        compiler.rkt)
+        "util.rkt"
+        )
 
 
 (provide sequentialize-let)
@@ -13,12 +14,12 @@
     [`(,op ,triv1 ,triv2)
         (if (and (binop? op) (triv? triv1) (triv? triv2))
             `(,op ,triv1 ,triv2)
-            (error "Expected a value, got: ~a" value))]
+            (error (format "Expected a value, got: ~a" value)))]
     [`(let ([,as ,vs] ...) ,body)
         `(begin ,@(map (lambda (a v) `(set! ,a ,(sequentialize-value v))) as vs)
                     ,(sequentialize-value body))]
 
-    [_ (error "Expected a value, got: ~a" value)]
+    [_ (error (format "Expected a value, got: ~a" value))]
     ))
 
 
@@ -30,7 +31,7 @@
     [`(let ([,as ,vs] ...) ,body)
         `(begin ,@(map (lambda (a v) `(set! ,a ,(sequentialize-value v))) as vs) 
                 ,(sequentialize-tail body))]
-    [_ (error "Expected a tail, got: ~a" tail)]))
+    [_ (error (format "Expected a tail, got: ~a" tail))]))
 
 
 ;; (values-unique-lang-v3) -> (imp-mf-lang-v3)
@@ -38,5 +39,5 @@
 (define (sequentialize-let p)
     (match p
     [`(module ,tail)
-        `(module ,(sequentialize-tail tail))])
-    [_ (error "Expected values-unique-lang-v3, got: ~a" p)]) 
+        `(module ,(sequentialize-tail tail))]
+    [_ (error (format "Expected values-unique-lang-v3, got: ~a" p))]) )

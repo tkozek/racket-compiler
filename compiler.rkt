@@ -1,16 +1,8 @@
 #lang racket 
 (require cpsc411/compiler-lib 
         cpsc411/2c-run-time)
-(require    values-lang-v3.rkt
-            values-unique-lang-v3.rkt
-            imp-mf-lang-v3.rkt
-            imp-cmf-lang-v3.rkt
-            asm-lang-v2.rkt
-            nested-asm-v3.rkt
-            para-asm-v2.rkt
-            paren-x64-fvars-v2.rkt
-            paren-x64-v2.rkt
-                )
+; (require cpsc411/test-suite/public/v2)
+
 (provide
  check-values-lang
  uniquify
@@ -27,46 +19,23 @@
  check-paren-x64
  generate-x64
  interp-values-lang
- interp-paren-x64
- triv)
+ interp-paren-x64)
 
+(require "values-lang-v3.rkt"
+            "values-unique-lang-v3.rkt"
+            "imp-mf-lang-v3.rkt"
+            "imp-cmf-lang-v3.rkt"
+            "asm-lang-v2.rkt"
+            "nested-asm-v3.rkt"
+            "para-asm-v2.rkt"
+            "paren-x64-fvars-v2.rkt"
+            "paren-x64-v2.rkt"
+            "util.rkt"
+                )
 
 ;; You might want to reuse check-paren-x64 and generate-x64 from milestone-1
-(define (triv? t)
-  (or (int64? t) (name? t)))
 
-(define (binop? op)
-  (and (member op '(+ *)) #t))
 
-(define (value? val)
-  (match val
-    [(? triv?)
-    #t]
-    [`(,op ,t1 ,t2)
-     (and (binop? op) (triv? t1) (triv? t2))]
-    [`(let ([,xs ,vs] ...) ,body)
-    (and (andmap (name? xs)) (andmap (value? vs)) (value? body))]
-    [_ #f]))
- 
-(define (tail? tail)
-    (match tail
-        [(? value?) #t]
-        [`(let ([,xs ,vs] ...) ,body)
-        (and 
-        (andmap (name? xs)) 
-        (andmap (value? vs)) 
-        (tail? body))]
-        [_ #f]))
-
-;; Validator for Values-lang-v3
-(define (check-values-lang p)
-    (match p
-    [`(module ,tail)
-    (if (tail? tail)
-        p
-        (error "wasn't values-lang-v3"))]
-    [_ (error "wasn't values-lang-v3")])
-  ) 
 
 (define (generate-x64 p)
   (define (program->x64 p)
@@ -113,13 +82,23 @@
   (require
    rackunit
    rackunit/text-ui
-   cpsc411/test-suite/public/v3
+   cpsc411/test-suite/public/v2
    ;; NB: Workaround typo in shipped version of cpsc411-lib
    (except-in cpsc411/langs/v3 values-lang-v3)
    cpsc411/langs/v2)
+;    (require
+;   (submod "values-lang-v3.rkt" test)
+;   (submod "values-unique-lang-v3.rkt" test)
+;   (submod "imp-mf-lang-v3.rkt" test)
+;   (submod "imp-cmf-lang-v3.rkt" test)
+;   (submod "asm-lang-v2.rkt" test)
+;   (submod "nested-asm-v3.rkt" test)
+;   (submod "para-asm-v2.rkt" test)
+;   (submod "paren-x64-fvars-v2.rkt" test)
+;   (submod "paren-x64-v2.rkt" test))
 
   (run-tests
-   (v3-public-test-sutie
+   (v2-public-test-suite
     (current-pass-list)
     (list
      interp-values-lang-v3

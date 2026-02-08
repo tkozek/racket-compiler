@@ -1,7 +1,8 @@
 #lang racket
 
 (require cpsc411/compiler-lib
-        compiler.rkt)
+
+        )
 
 (provide patch-instructions)
 
@@ -10,12 +11,8 @@
 ;; Patches instructions in p that have no x64 analogue
 (define (patch-instructions p)
     (define aux-reg (current-patch-instructions-registers))
-    
-
-
 
         (define (patch-p p)
-            ()
-        )
+            p)
 
     (patch-p p))
