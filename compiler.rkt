@@ -84,21 +84,35 @@
         ; If no more instructions, return exit code modulo 256 (since operating
         ; systems return exit code modulo 256).
         (modulo (dict-ref regfile 'rax) 256)
-        (TODO ...)))
-  (TODO ...))
+        0))
+  0)
 
 (define (generate-x64 p)
   ; Paren-x64-v1 -> x64-instruction-sequence
   (define (program->x64 p)
     (match p
       [`(begin ,s ...)
-       (TODO ...)]))
+       (string-join (map statement->x64 s) "\n")]))
 
   (define (statement->x64 s)
-    (TODO ... ))
+    (match s
+        [`(set! ,reg1 (,op ,reg1 ,reg))
+            #:when (register? reg) ;; do i only need to check this part to disambiguate?
+            (format "~a ~a, ~a\n" (binop->ins op) reg1 reg)]
+        [`(set! ,reg1 (,op ,reg1 ,val))
+            (format "~a ~a, ~a\n" (binop->ins op) reg1 reg)]
+        [`(set! ,reg1 ,reg2)
+            #:when (register? reg2)
+            (format "mov ~a, ~a\n" reg1 reg2)]
+        [`(set! ,reg ,val)
+            (format "mov ~a, ~a\n" reg1 val)]
+            ))
 
-  (define (binop->ins b)
-    (TODO ... ))
+  (define (binop->ins op)
+    (match op
+        ['+ "add"]
+        ['* "imul"]
+        [_ (error (format "Invalid binop"))]))
 
   (program->x64 p))
 

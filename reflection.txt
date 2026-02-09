@@ -1,4 +1,0 @@
-Reflection:
-I didn't see a specification for how this was supposed to be submitted. I am sorry for not submitting by the deadline. I went to Yanze's office hour this morning and found out that the format didn't matter. 
-
-I did not complete this milestone, or finish much of anything for it before the deadline. I read the relevant book chapters and think I understand the high-level goals. I need to spend more time coding in Racket to gain comfort implementingthe requirements. I will start working on Milestone 2 with priority towards submitting it in time for feedback, and will circle back to Milestone-1 afterwards.
