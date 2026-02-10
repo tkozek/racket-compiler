@@ -36,8 +36,7 @@
                 (uncover-aloc triv)] 
             [`(begin ,first ,rest ...)
                 (uncover-effect first)
-                (for-each uncover-effect rest)]
-            [_ (error (format "Expected an effect, got: ~a" effect))]))
+                (for-each uncover-effect rest)]))
 
     (define (uncover-tails tail)
         (match tail
@@ -45,8 +44,7 @@
                 (uncover-aloc triv)]
             [`(begin ,effect ... ,tail)
                 (for-each uncover-effect effect)
-                (uncover-tails tail)]
-            [_ (error (format "Expected a tail, got: ~a" tail))]))
+                (uncover-tails tail)]))
 
 
     (define (uncover-p p)
@@ -54,8 +52,7 @@
             [`(module ,info ,tail)
                 (uncover-tails tail)
                 (info-set info 'locals locals)
-                `(module info ,tail)]
-            [_ (error (format "Expected asm-lang-v2 p, got: ~a" p))]))
+                `(module info ,tail)]))
     (uncover-p p)
 )
   
@@ -84,8 +81,7 @@
             [(? aloc?)
                 (when (and (aloc? aloc)
                             (hash-ref assignments aloc #f))
-                (hash-ref assignments aloc))]
-            [_ (error (format "Expected aloc, got: ~a" aloc))]))
+                (hash-ref assignments aloc))]))
 
     (define (replace-effect effect)
         (match effect
@@ -96,16 +92,14 @@
             [`(begin ,first ,rest ...)
                 `(begin 
                     ,(replace-effect first)
-                    ,@(map replace-effect rest))]
-            [_ (error (format "Expected an effect, got: ~a" effect))]))
+                    ,@(map replace-effect rest))]))
 
     (define (replace-tail tail)
         (match tail
             [`(halt ,triv)
                 `(halt ,(replace-aloc triv))]
             [`(begin ,effects ... ,tail)
-                `(begin ,@(map replace-effect effects) ,(replace-tail tail))]
-            [_ (error (format "Expected a tail, got: ~a" tail))]))
+                `(begin ,@(map replace-effect effects) ,(replace-tail tail))]))
 
     (define (replace-p p)
         (match p
@@ -143,8 +137,7 @@
                 (assign-aloc triv)]
             [`(begin ,first ,rest)
                 (assign-effect first)
-                (for-each assign-effect rest)]
-            [_ (error (format "Expected an effect, got: ~a" effect))]))
+                (for-each assign-effect rest)]))
 
     (define (assign-tail tail)
         (match tail
@@ -153,16 +146,14 @@
                 (assign-aloc triv)]
             [`(begin ,effects ... ,tail)
                 (for-each assign-effect effects)
-                (assign-tail tail)]
-            [_ (error (format "Expected a tail, got: ~a" tail))]))
+                (assign-tail tail)]))
     
     (define (assign-p p)
         (match p
             [`(module ,info ,tail)
                 (assign-tail tail) ; (list (k v)) for k, v in assignments
                 (info-set info 'assignment (hash->list assignments)) 
-                `(module info tail)]
-            [_ (error (format "Expected asm-lang-v2, got: ~a" p))]))
+                `(module info tail)]))
     (assign-p p))
 
 ;; (asm-lang-v2) -> (nested-asm-lang-v2)

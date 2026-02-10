@@ -17,8 +17,7 @@
                 effect]
             [`(begin ,first ,rest ...)
                 (append (flatten-effect first)
-                        (map flatten-effect rest))]
-            [_ (error (format "Expected an effect, got: ~a" effect))]))
+                        (map flatten-effect rest))]))
 
 
     (define (flatten-tail tail)
@@ -27,16 +26,14 @@
                 tail]
             [`(begin ,effects ... ,tail)
                 (append (map flatten-effect effects)
-                        (flatten-tail tail))]
-            [_ (error (format "Expected tail, got: ~a" tail))]))
+                        (flatten-tail tail))]))
     
     (define (flatten-p p)
         (match p
             [`(begin ,effects ... tail)
                 `(begin ,@(flatten-tail p))]
             [`(halt ,triv)
-                `(begin ,p)]
-            [_ (error (format "Expected Nested-asm-lang-v2, got: ~a" p))]))
+                `(begin ,p)]))
             
     (flatten-p p))
     

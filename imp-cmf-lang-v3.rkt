@@ -20,9 +20,7 @@
         [`(,op ,triv1 ,triv2)
             (if (and (binop? op) (triv? triv1) (triv? triv2))
                 (values (list `(set! ,tmp ,triv1) `(set! ,tmp (,op ,tmp ,triv2))) tmp) ;; values returns all its args
-                (error (format "Expected op and two trivial values, got: ~a, ~a and ~a" op triv1 triv2)))]
-        [_ (error (format "Expected a value, got: ~a" v))]
-        ))
+                (error (format "Expected op and two trivial values, got: ~a, ~a and ~a" op triv1 triv2)))]))
 
   (define (select-tail e)
     (match e
@@ -32,8 +30,7 @@
             (define-values (insts tmp) (select-value e))
             `(begin ,@insts (halt ,tmp))]
         [`(begin ,effects ,body)
-            `(begin ,@(map select-effect effects) ,(select-tail body))]
-        [_ (error (format "Expected a tail, got ~a" e))]))
+            `(begin ,@(map select-effect effects) ,(select-tail body))]))
 
   (define (select-value e)
     (match e
@@ -41,8 +38,7 @@
     [`(,op ,triv1 ,triv2)
         (if (and (binop? op) (triv? triv1) (triv? triv2))
             (assign-tmp e)
-            (error (format "Expected binop and two trivs, got: ~a, ~a, ~a" op triv1 triv2)))]
-    [_ (error (format "Expected value, got: ~a" e))]))
+            (error (format "Expected binop and two trivs, got: ~a, ~a, ~a" op triv1 triv2)))]))
 
   (define (select-effect e)
     (match e
@@ -51,10 +47,8 @@
             `(begin ,@insts (set! ,aloc ,tmp))]
         [`(begin ,rest ... ,last)
             `(begin ,@(map select-effect rest)
-                    ,(select-effect last))]
-        [_ (error (format "Expected an effect, got: ~a" e))]))
+                    ,(select-effect last))]))
 
   (match p
     [`(module ,tail)
-     `(module () ,(select-tail tail))]
-    [_ (error (format "Expected a p, got: ~a" p))]))
+     `(module () ,(select-tail tail))]))

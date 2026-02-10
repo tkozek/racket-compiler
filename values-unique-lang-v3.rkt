@@ -17,10 +17,7 @@
             (error (format "Expected a value, got: ~a" value)))]
     [`(let ([,as ,vs] ...) ,body)
         `(begin ,@(map (lambda (a v) `(set! ,a ,(sequentialize-value v))) as vs)
-                    ,(sequentialize-value body))]
-
-    [_ (error (format "Expected a value, got: ~a" value))]
-    ))
+                    ,(sequentialize-value body))]))
 
 
 (define (sequentialize-tail tail)
@@ -30,8 +27,7 @@
         (sequentialize-value tail)]
     [`(let ([,as ,vs] ...) ,body)
         `(begin ,@(map (lambda (a v) `(set! ,a ,(sequentialize-value v))) as vs) 
-                ,(sequentialize-tail body))]
-    [_ (error (format "Expected a tail, got: ~a" tail))]))
+                ,(sequentialize-tail body))]))
 
 
 ;; (values-unique-lang-v3) -> (imp-mf-lang-v3)
@@ -39,5 +35,4 @@
 (define (sequentialize-let p)
     (match p
     [`(module ,tail)
-        `(module ,(sequentialize-tail tail))]
-    [_ (error (format "Expected values-unique-lang-v3, got: ~a" p))]) )
+        `(module ,(sequentialize-tail tail))]) )

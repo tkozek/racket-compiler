@@ -16,10 +16,7 @@
         `(set! ,aloc ,(normalize-value value))]
     [`(begin ,effects ... ,effect2)
         `(begin ,@(map normalize-effect effects)
-                    ,(normalize-effect effect2))]
-    [_ (error (format "Expected an effect, got: ~a" effect))]
-    
-    ))
+                    ,(normalize-effect effect2))]))
 
 ;; (Imp-mf-lang-v3 value) -> (Imp-cmf-lang-v3 value)
 (define (normalize-value value)
@@ -32,10 +29,7 @@
             (error (format "Expected a value, got: ~a" value)))]
     [`(begin ,effects ... ,body)
         `(begin ,@(map normalize-effect effects)
-                    ,(normalize-value body))]
-    [_ (error (format "Expected a value, got: ~a" value))]
-        
-        ))
+                    ,(normalize-value body))]))
 
 ;; (Imp-mf-lang-v3 tail) -> (Imp-cmf-lang-v3 tail)
 (define (normalize-tail tail)
@@ -46,8 +40,7 @@
         (normalize-value tail)]
     [`(begin ,effects ... ,body)
         `(begin ,@(map normalize-effect effects)
-                ,(normalize-tail body))]
-    [_ (error (format "Expected a tail, got: ~a" tail))]))
+                ,(normalize-tail body))]))
 
 
 ;; (imp-mf-lang-v3 p) -> (imp-cmf-lang-v3 p)
@@ -55,5 +48,4 @@
 (define (normalize-bind p)
     (match p
     [`(module ,tail)
-        `(module ,(normalize-tail tail))]
-    [_ (error (format "Expected (module tail), got: ~a" p))]))
+        `(module ,(normalize-tail tail))]))
