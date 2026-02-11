@@ -1,8 +1,7 @@
 #lang racket
 
-(require cpsc411/compiler-lib
-        )
-    
+(require cpsc411/compiler-lib)
+
 (provide interp-paren-x64)
 
 (define (interp-paren-x64 p)
