@@ -82,17 +82,3 @@
 
     (patch-p p))
 
-;; loc is a register or an fvar, and we want to 
-
-;; we replace halt with (set! rax halt's arg)
-;; for-each is when only the effects are desired, map is when effects and return values are desired
-
-;; cases to handle:
-; 1. fvar fvar
-; 2. fvar int64
-; 3. fvar (binop fvar fvar)
-; 4. Any fvar (binop), which includes fvar (binop fvar fvar)
-    ; fvar (binop fvar reg)
-    ; fvar (binop fvar int64)
-
-; 3. register (binop register int64)
