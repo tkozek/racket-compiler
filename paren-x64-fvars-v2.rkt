@@ -58,4 +58,4 @@
         (match p
             [`(begin ,s ...)
                 `(begin ,@(map implement-s s))]))
-    p)
+    (implement-p p))
