@@ -90,13 +90,17 @@
   (define (binop->ins op)
     (match op
       ['+ "add"]
-      ['* "imul"]
-      [_ (error (format "Invalid binop"))]))
+      ['* "imul"]))
 
   (program->x64 p))
 
+;; Rum-time system for paren-x64-v1
+(define run-time-exit (string-append "mov rdi, rax\n" "mov rax, 60\n"))
+
+;; x64-instruction-sequence -> x64-instruction-sequence
+;; Installs the paren-x64-v1 run-time system by appending it to input sequence
 (define (wrap-x64-run-time str)
-  (TODO ...))
+  (string-append str run-time-exit))
 
 (define (wrap-x64-boilerplate str)
   (TODO ...))
@@ -158,4 +162,86 @@
                     (set! rax r12)))
    "mov rdx, 2\nmov rsi, 3\nmov r11, 4\nimul rsi, rdx\nadd r11, -1\nadd r12, r11\nmov rax, r12\n"))
 
-(define val (min-int 64))
+(module+ test
+
+  (check-equal? (wrap-x64-run-time (generate-x64 `(begin
+                                                    (set! rax 0))))
+                (string-append (generate-x64 `(begin
+                                                (set! rax 0)))
+                               run-time-exit))
+
+  (check-equal? (wrap-x64-run-time (generate-x64 `(begin
+                                                    (set! rax 0)
+                                                    (set! rax (+ rax 42)))))
+                (string-append (generate-x64 `(begin
+                                                (set! rax 0)
+                                                (set! rax (+ rax 42))))
+                               run-time-exit))
+
+  (check-equal? (wrap-x64-run-time (generate-x64 `(begin
+                                                    (set! rax ,(max-int 64))
+                                                    (set! rdi ,(min-int 64))
+                                                    (set! rdi rax))))
+                (string-append (generate-x64 `(begin
+                                                (set! rax ,(max-int 64))
+                                                (set! rdi ,(min-int 64))
+                                                (set! rdi rax)))
+                               run-time-exit))
+
+  (check-equal? (wrap-x64-run-time (generate-x64 `(begin
+                                                    (set! rax ,(max-int 64))
+                                                    (set! rdi ,(min-int 64))
+                                                    (set! rdi (+ rdi rax)))))
+                (string-append (generate-x64 `(begin
+                                                (set! rax ,(max-int 64))
+                                                (set! rdi ,(min-int 64))
+                                                (set! rdi (+ rdi rax))))
+                               run-time-exit))
+
+  (check-equal? (wrap-x64-run-time (generate-x64 `(begin
+                                                    (set! rax 3)
+                                                    (set! rdi 2)
+                                                    (set! rdi (* rdi rax)))))
+                (string-append (generate-x64 `(begin
+                                                (set! rax 3)
+                                                (set! rdi 2)
+                                                (set! rdi (* rdi rax))))
+                               run-time-exit))
+
+  (check-equal? (wrap-x64-run-time (generate-x64 `(begin
+                                                    (set! rax -1)
+                                                    (set! rbx -1)
+                                                    (set! rbx (+ rbx ,(max-int 32))))))
+                (string-append (generate-x64 `(begin
+                                                (set! rax -1)
+                                                (set! rbx -1)
+                                                (set! rbx (+ rbx ,(max-int 32)))))
+                               run-time-exit))
+
+  (check-equal? (wrap-x64-run-time (generate-x64 `(begin
+                                                    (set! rcx -1)
+                                                    (set! rax rcx)
+                                                    (set! rcx (+ rcx ,(min-int 32))))))
+                (string-append (generate-x64 `(begin
+                                                (set! rcx -1)
+                                                (set! rax rcx)
+                                                (set! rcx (+ rcx ,(min-int 32)))))
+                               run-time-exit))
+
+  (check-equal? (wrap-x64-run-time (generate-x64 `(begin
+                                                    (set! rdx 2)
+                                                    (set! rsi 3)
+                                                    (set! r11 4)
+                                                    (set! rsi (* rsi rdx))
+                                                    (set! r11 (+ r11 -1))
+                                                    (set! r12 (+ r12 r11))
+                                                    (set! rax r12))))
+                (string-append (generate-x64 `(begin
+                                                (set! rdx 2)
+                                                (set! rsi 3)
+                                                (set! r11 4)
+                                                (set! rsi (* rsi rdx))
+                                                (set! r11 (+ r11 -1))
+                                                (set! r12 (+ r12 r11))
+                                                (set! rax r12)))
+                               run-time-exit)))
