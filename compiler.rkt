@@ -8,36 +8,40 @@
          wrap-x64-run-time
          wrap-x64-boilerplate)
 
+;; Paren-x64-v1 grammar:
+;   p	 	::=	 	(begin s ...)
+
+;   s	 	::=	 	(set! reg int64)
+;  	 	|	 	(set! reg reg)
+;  	 	|	 	(set! reg_1 (binop reg_1 int32))
+;  	 	|	 	(set! reg_1 (binop reg_1 reg))
+
+;   reg	 	::=	 	rsp
+;  	 	|	 	rbp
+;  	 	|	 	rax
+;  	 	|	 	rbx
+;  	 	|	 	rcx
+;  	 	|	 	rdx
+;  	 	|	 	rsi
+;  	 	|	 	rdi
+;  	 	|	 	r8
+;  	 	|	 	r9
+;  	 	|	 	r10
+;  	 	|	 	r11
+;  	 	|	 	r12
+;  	 	|	 	r13
+;  	 	|	 	r14
+;  	 	|	 	r15
+
+;   binop	 	::=	 	*
+;  	 	|	 	+
+
+;   int64	 	::=	 	int64?
+
+;   int32	 	::=	 	int32?
+
 (define-syntax-rule (TODO . stx)
   (error "Unfinished skeleton"))
-
-(define (paren-x64-s? s)
-  (match s
-    [`(set! ,reg ,int64)
-     (cond
-       [(not (register? reg)) (error 'paren-x64-s? "Expected register for set!, got ~a" reg)]
-       [(not (int64? int64)) (error 'paren-x64-s? "Expected int64 for set!, got ~a" int64)]
-       [else #t])]
-    [`(set! ,reg1 ,reg2)
-     (cond
-       [(not (and (register? reg1) (register? reg2)))
-        (error 'paren-x64-s? "Expected two registers for set!, got ~a and ~a" reg1 reg2)]
-       [else #t])]
-    [`(set! ,reg1 (,binop ,reg1 ,int32))
-     (cond
-       [(not (register? reg1)) (error 'paren-x64-s? "Expected a register for reg1, got ~a" reg1)]
-       [(not (paren-x64-binop? binop)) (error 'paren-x64-s? "Expected one of + or *, got ~a" binop)]
-       [(not (int32? int32)) (error 'paren-x64-s? "Expected an int32, got ~a" int32)]
-       [else #t])]
-    [`(set! ,reg1 (,binop ,reg1 ,reg))
-     (cond
-       [(not (register? reg1)) (error 'paren-x64-s? "Expected a register, got ~a" reg1)]
-
-       [(not (paren-x64-binop? binop)) (error 'paren-x64-s? "Expected one of + or *, got ~a" binop)]
-
-       [(not (register? reg)) (error 'paren-x64-s? "Expected a register, got ~a" reg)]
-       [else #t])]
-    [_ (error 'paren-x64-s? "Unrecognized statement ~a" s)]))
 
 (define (register? r)
   (and (member r '(rsp rbp rax rbx rcx rdx rsi rdi r8 r9 r10 r11 r12 r13 r14 r15)) #t))
@@ -51,12 +55,7 @@
 
 ;; Optional; if you choose not to complete, implement a stub that returns the input
 (define (check-paren-x64-syntax p)
-  (define process-p p)
-  (match p
-    [`(begin
-        ,s ...)
-     (paren-x64-s? s)])
-  (process-p p))
+  p)
 
 (define (check-paren-x64 p)
   (check-paren-x64-init (check-paren-x64-syntax p)))
@@ -71,24 +70,22 @@
         0))
   0)
 
+;; (paren-x64-v1 p) -> x64-instruction-sequence
+;; Compiles a Paren-x64 v1 program into x64 instruction sequence, represented as a string
 (define (generate-x64 p)
-  ; Paren-x64-v1 -> x64-instruction-sequence
+  ; (paren-x64-v1 p) -> x64-instruction-sequence
   (define (program->x64 p)
     (match p
       [`(begin
           ,s ...)
-       (string-join (map statement->x64 s) "\n")]))
+       (string-join (map statement->x64 s) "")]))
 
+  ; (paren-x64-v1 s) -> x64-instruction-sequence
   (define (statement->x64 s)
     (match s
-      [`(set! ,reg1 (,op ,reg1 ,reg))
-       #:when (register? reg) ;; do i only need to check this part to disambiguate?
-       (format "~a ~a, ~a\n" (binop->ins op) reg1 reg)]
-      [`(set! ,reg1 (,op ,reg1 ,val)) (format "~a ~a, ~a\n" (binop->ins op) reg1 reg)]
-      [`(set! ,reg1 ,reg2)
-       #:when (register? reg2)
-       (format "mov ~a, ~a\n" reg1 reg2)]
-      [`(set! ,reg ,val) (format "mov ~a, ~a\n" reg1 val)]))
+      [`(set! ,reg1 (,op ,reg1 ,val))
+       (format "~a ~a, ~a\n" (binop->ins op) reg1 val)] ;; val can be int32 or reg
+      [`(set! ,reg ,val) (format "mov ~a, ~a\n" reg val)])) ;; val can be int32 or reg
 
   (define (binop->ins op)
     (match op
@@ -115,3 +112,50 @@
               (list interp-paren-x64-v1 interp-paren-x64-v1 #f #f)
               check-paren-x64
               interp-paren-x64)))
+(module+ test
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax 0)))
+                "mov rax, 0\n")
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax 0)
+                                 (set! rax (+ rax 42))))
+                "mov rax, 0\nadd rax, 42\n")
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax ,(max-int 64))
+                                 (set! rdi ,(min-int 64))
+                                 (set! rdi rax)))
+                "mov rax, 9223372036854775807\nmov rdi, -9223372036854775808\nmov rdi, rax\n")
+
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax ,(max-int 64))
+                                 (set! rdi ,(min-int 64))
+                                 (set! rdi (+ rdi rax))))
+                "mov rax, 9223372036854775807\nmov rdi, -9223372036854775808\nadd rdi, rax\n")
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax 3)
+                                 (set! rdi 2)
+                                 (set! rdi (* rdi rax))))
+                "mov rax, 3\nmov rdi, 2\nimul rdi, rax\n")
+
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax -1)
+                                 (set! rbx -1)
+                                 (set! rbx (+ rbx ,(max-int 32)))))
+                "mov rax, -1\nmov rbx, -1\nadd rbx, 2147483647\n")
+  (check-equal? (generate-x64 `(begin
+                                 (set! rcx -1)
+                                 (set! rax rcx)
+                                 (set! rcx (+ rcx ,(min-int 32)))))
+                "mov rcx, -1\nmov rax, rcx\nadd rcx, -2147483648\n")
+  (check-equal?
+   (generate-x64 `(begin
+                    (set! rdx 2)
+                    (set! rsi 3)
+                    (set! r11 4)
+                    (set! rsi (* rsi rdx))
+                    (set! r11 (+ r11 -1))
+                    (set! r12 (+ r12 r11))
+                    (set! rax r12)))
+   "mov rdx, 2\nmov rsi, 3\nmov r11, 4\nimul rsi, rdx\nadd r11, -1\nadd r12, r11\nmov rax, r12\n"))
+
+(define val (min-int 64))
