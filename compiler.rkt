@@ -94,16 +94,37 @@
 
   (program->x64 p))
 
-;; Rum-time system for paren-x64-v1
-(define run-time-exit (string-append "mov rdi, rax\n" "mov rax, 60\n"))
-
+;; Run-time system for paren-x64-v1
+; (define run-time-exit "mov rdi, rax\nmov rax, 60")
+(define run-time-exit "mov rdi, rax\n")
 ;; x64-instruction-sequence -> x64-instruction-sequence
 ;; Installs the paren-x64-v1 run-time system by appending it to input sequence
 (define (wrap-x64-run-time str)
   (string-append str run-time-exit))
 
+;; x64-instruction-sequence -> x64-instruction-sequence
+;; Wraps x64-instruction-sequence with necessary boilerplate
+;;  to return a complete x64 program in Intel syntax
 (define (wrap-x64-boilerplate str)
-  (TODO ...))
+  (define start
+    #<<EOS
+global start
+
+section .text
+start:
+    mov rbx, 0
+
+EOS
+    )
+  ; (define exit (format "exit:\nmov rax, ~a\nsyscall\n" (sys-exit 'unix))
+  ; (define exit "syscall\n")
+  (define exit
+    (string-append "exit:\nmov rax, "
+                   (number->string (sys-exit 'unix))
+                   "\nsyscall\nsection .data \n\ndummy db 0")
+    )
+
+  (~a start str exit #:separator "\n"))
 
 (module+ test
   (require rackunit
@@ -176,7 +197,7 @@
                 (string-append (generate-x64 `(begin
                                                 (set! rax 0)
                                                 (set! rax (+ rax 42))))
-                               run-time-exit))
+                               `run-time-exit))
 
   (check-equal? (wrap-x64-run-time (generate-x64 `(begin
                                                     (set! rax ,(max-int 64))
@@ -245,3 +266,6 @@
                                                 (set! r12 (+ r12 r11))
                                                 (set! rax r12)))
                                run-time-exit)))
+
+(module+ test
+  )
