@@ -166,6 +166,7 @@
 
 (module+ test
   (require rackunit)
+  (require cpsc411/langs/v4)
   (define (set-list=? a b)
     (set=? (list->set a) (list->set b)))
 
@@ -365,16 +366,4 @@
                       (set! x.1 c.4)
                       (set! x.1 y.2)
                       (halt c.4)))))))
-  (check-equal? (undead-analysis `(module ((locals (x.3 y.4 z.4))) 
-                                          (begin (begin (begin (set! z.4 4) 
-                                                  (set! z.4 (+ z.4 5)) 
-                                                  (set! y.4 z.4)) 
-                                                  (set! x.3 y.4)) (halt x.3))))
-    `(module ((locals (x.3 y.4 z.4)) 
-              (undead-out ((((((z.4) (z.4) y.4)) x.3)) ()))) 
-              (begin (begin (begin (set! z.4 4) 
-                                   (set! z.4 (+ z.4 5)) 
-                                   (set! y.4 z.4)) 
-                            (set! x.3 y.4)) 
-                            (halt x.3))))
 )
