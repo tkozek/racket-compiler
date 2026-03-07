@@ -37,6 +37,17 @@
     (set! triv-names names)
     names)
 
+  (define (generate-let depth env body-func)
+    (define xs
+      (take (shuffle (append triv-names env))
+            (if (zero? (random 2))
+                (random 1 4)
+                (random 4))))
+    (define bindings
+      (for/list ([x xs])
+        `[,x ,(generate-value (sub1 depth) env)]))
+    `(let ,bindings ,(body-func (sub1 depth) (remove-duplicates (append xs env)))))
+
   ;; () -> int64
   ;; pseudorandomly generates an int64, with additional weight towards edge cases (0, 1, minint, maxint)
   (define (generate-int64)
@@ -70,20 +81,14 @@
         (case (random 3)
           [(0) (generate-triv env)]
           [(1) `(,(generate-binop) ,(generate-triv env) ,(generate-triv env))]
-          [(2)
-           (let ([x (get-random-triv-name)])
-             `(let ([,x ,(generate-value (sub1 depth) env)])
-                ,(generate-value (sub1 depth) (cons x env))))])))
+          [(2) (generate-let depth env generate-value)])))
 
   (define (generate-tail depth env)
     (if (zero? depth)
         (generate-value 0 env)
         (case (random 2)
           [(0) (generate-value depth env)] ;; can't sub1 or might get nothing in tail position
-          [(1)
-           (let ([x (get-random-triv-name)])
-             `(let ([,x ,(generate-value (sub1 depth) env)])
-                ,(generate-tail (sub1 depth) (cons x env))))])))
+          [(1) (generate-let depth env generate-tail)])))
 
   (define (generate-program)
     (generate-triv-names 10)

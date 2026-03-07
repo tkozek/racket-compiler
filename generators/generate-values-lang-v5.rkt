@@ -41,6 +41,17 @@
     (set! triv-names names)
     names)
 
+  (define (generate-let depth env body-func)
+    (define xs
+      (take (shuffle (append triv-names env))
+            (if (zero? (random 2))
+                (random 1 4)
+                (random 4))))
+    (define bindings
+      (for/list ([x xs])
+        `[,x ,(generate-value (sub1 depth) env)]))
+    `(let ,bindings ,(body-func (sub1 depth) (remove-duplicates (append xs env)))))
+
   ;; () -> symbol
   ;; gets a random procedure name, such as to be used in call context
   ;; this procedure name may be reused in such context multiple times
@@ -113,10 +124,7 @@
           [(1) '(true)]
           [(2) '(false)]
           [(3) `(not ,(generate-pred (sub1 depth) env))]
-          [(4)
-           (let ([new-x (get-random-triv-name)])
-             `(let ([,new-x ,(generate-value (sub1 depth) env)])
-                ,(generate-pred (sub1 depth) (cons new-x env))))]
+          [(4) (generate-let depth env generate-pred)]
           [(5)
            `(if ,(generate-pred (sub1 depth) env)
                 ,(generate-pred (sub1 depth) env)
@@ -128,10 +136,7 @@
         (case (random 4)
           [(0) (generate-triv env)]
           [(1) `(,(generate-binop) ,(generate-triv env) ,(generate-triv env))]
-          [(2)
-           (let ([x (get-random-triv-name)])
-             `(let ([,x ,(generate-value (sub1 depth) env)])
-                ,(generate-value (sub1 depth) (cons x env))))]
+          [(2) (generate-let depth env generate-value)]
           [(3)
            `(if ,(generate-pred (sub1 depth) env)
                 ,(generate-value (sub1 depth) env)
@@ -142,10 +147,7 @@
         (generate-value 0 env)
         (case (random 4)
           [(0) (generate-value depth env)] ;; can't sub1 or might get nothing in tail position
-          [(1)
-           (let ([x (get-random-triv-name)])
-             `(let ([,x ,(generate-value (sub1 depth) env)])
-                ,(generate-tail (sub1 depth) (cons x env))))]
+          [(1) (generate-let depth env generate-tail)]
           [(2)
            `(if ,(generate-pred (sub1 depth) env)
                 ,(generate-tail (sub1 depth) env)
