@@ -123,10 +123,26 @@
 
   (generate-program))
 
-; (for ([i (in-range 10)])
-;   (pretty-display (format "(check-by-interp '~a)" (generate-values-lang-v4)))
-;   (newline))
+(define (runs-within-time? p)
+  (define ch (make-channel))
 
-(for ([i (in-range 1000)])
-  (pretty-display (format "(check-by-interp '~a)" (generate-values-lang-v4)))
-  (newline))
+  (define thr
+    (thread (lambda ()
+              (channel-put ch
+                           (with-handlers ([exn:fail? (lambda (e) 'error)])
+                             (interp-values-lang-v4 p))))))
+
+  (define result (sync/timeout 3 ch))
+
+  (cond
+    [(not result) ; timeout
+     (kill-thread thr)
+     #f]
+    [(eq? result 'error) #f]
+    [else #t]))
+
+(for ([i (in-range 80)])
+  (define p (generate-values-lang-v4))
+  (when (runs-within-time? p)
+    (pretty-display (format "'~a #" p))
+    (newline)))

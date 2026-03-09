@@ -42,11 +42,7 @@
     names)
 
   (define (generate-let depth env body-func)
-    (define xs
-      (take (shuffle (append triv-names env))
-            (if (zero? (random 2))
-                (random 1 4)
-                (random 4))))
+    (define xs (take (shuffle (append triv-names env)) (random 2 4)))
     (define bindings
       (for/list ([x xs])
         `[,x ,(generate-value (sub1 depth) env)]))
@@ -175,11 +171,31 @@
       (for/list ([_ (in-range num-defs)])
         (let ([def (generate-define 3)]) def)))
 
-    `(module ,@defs ,(generate-tail (random 1 3) '())
+    `(module ,@defs ,(generate-tail (random 2 3) '())
        ))
 
   (generate-program))
 
-(for ([i (in-range 10)])
-  (pretty-display (format "(check-by-interp '~a)" (generate-values-lang-v5)))
-  (newline))
+(define (runs-within-time? p)
+  (define ch (make-channel))
+
+  (define thr
+    (thread (lambda ()
+              (channel-put ch
+                           (with-handlers ([exn:fail? (lambda (e) 'error)])
+                             (interp-values-lang-v5 p))))))
+
+  (define result (sync/timeout 3 ch))
+
+  (cond
+    [(not result) ; timeout
+     (kill-thread thr)
+     #f]
+    [(eq? result 'error) #f]
+    [else #t]))
+
+(for ([i (in-range 50)])
+  (define p (generate-values-lang-v5))
+  (when (runs-within-time? p)
+    (pretty-display (format "'~a #" p))
+    (newline)))
