@@ -43,7 +43,7 @@
            cpsc411/langs/v2
            cpsc411/langs/v3)
   (define-syntax-rule (check-by-interp p)
-    (check-equal? (interp-nested-asm-lang-v2 p) (interp-para-asm-lang-v2 (uniquify p))))
+    (check-equal? (interp-nested-asm-lang-v2 p) (interp-para-asm-lang-v2 (flatten-begins p))))
 
   ;; Added March 8th, 2026
 

@@ -169,7 +169,7 @@
            cpsc411/langs/v2
            cpsc411/langs/v3)
   (define-syntax-rule (check-by-interp-assign-homes p)
-    (check-equal? (interp-asm-lang-v2 p) (interp-nested-asm-lang-v2 (uniquify p))))
+    (check-equal? (interp-asm-lang-v2 p) (interp-nested-asm-lang-v2 (assign-homes p))))
 
   ;; Added March 8th, 2026
   (check-by-interp-assign-homes '(module 0))

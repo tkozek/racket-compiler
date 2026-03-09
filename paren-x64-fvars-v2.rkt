@@ -64,7 +64,7 @@
            cpsc411/langs/v2
            cpsc411/langs/v3)
   (define-syntax-rule (check-by-interp p)
-    (check-equal? (interp-paren-x64-fvars-v2 p) (interp-paren-x64-v2 (uniquify p))))
+    (check-equal? (interp-paren-x64-fvars-v2 p) (interp-paren-x64-v2 (implement-fvars p))))
 
   ;; Added March 8th, 2026
   (check-by-interp '(module (* 3 1)))
