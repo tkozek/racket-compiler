@@ -86,13 +86,13 @@
   (define (generate-tail depth env)
     (if (zero? depth)
         (generate-value 0 env)
-        (case (random 2)
+        (case (random 4)
           [(0) (generate-value depth env)] ;; can't sub1 or might get nothing in tail position
-          [(1) (generate-let depth env generate-tail)])))
+          [(1 2 3) (generate-let depth env generate-tail)])))
 
   (define (generate-program)
     (generate-triv-names 10)
-    `(module ,(generate-tail (random 1 3) '())))
+    `(module ,(generate-tail (random 1 5) '())))
 
   (generate-program))
 
@@ -100,6 +100,29 @@
 ;   (pretty-display (format "(check-by-interp '~a)" (generate-values-lang-v4)))
 ;   (newline))
 
-(for ([i (in-range 1000)])
-  (pretty-display (format "(check-by-interp '~a)" (generate-values-lang-v3)))
-  (newline))
+; (for ([i (in-range 100)])
+;   (pretty-display (format "'~a#" (generate-values-lang-v3)))
+;   (newline))
+
+(define (runs-within-time? p)
+  (define ch (make-channel))
+
+  (define thr
+    (thread (lambda ()
+              (channel-put ch
+                           (with-handlers ([exn:fail? (lambda (e) 'error)])
+                             (interp-values-lang-v3 p))))))
+
+  (define result (sync/timeout 10 ch))
+
+  (cond
+    [(not result) ; timeout
+     (kill-thread thr)
+     #f]
+    [(eq? result 'error) #f]
+    [else #t]))
+
+(for ([i (in-range 65)])
+  (define p (generate-values-lang-v3))
+  (when (runs-within-time? p)
+    (pretty-display (format "'~a#" p))))

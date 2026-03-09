@@ -58,3 +58,11 @@
        `(begin
           ,@(map implement-s s))]))
   (implement-p p))
+
+(module+ test
+  (require rackunit
+           cpsc411/langs/v3)
+  (define-syntax-rule (check-by-interp p)
+    (check-equal? (interp-values-lang-v3 p) (interp-values-unique-lang-v3 (uniquify p))))
+
+  (check-equal? (implement-fvars '(begin)) '(begin)))

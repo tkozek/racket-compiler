@@ -121,3 +121,90 @@
     (TODO "Implement the interpreter for Paren-x64-v2 /triv/."))
 
   (TODO "Implement the interpreter for Paren-x64-v2 /p/."))
+
+
+(module+ test
+  (require rackunit
+           cpsc411/langs/v3)
+  (define-syntax-rule (check-by-interp p)
+    (check-equal? (interp-values-lang-v3 p) (interp-values-unique-lang-v3 (uniquify p))))
+   
+    ;; START OF MILESTONE-1 generate-x64 TESTS
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax 0)))
+                "mov rax, 0\n")
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax 0)
+                                 (set! rax (+ rax 42))))
+                "mov rax, 0\nadd rax, 42\n")
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax ,(max-int 64))
+                                 (set! rdi ,(min-int 64))
+                                 (set! rdi rax)))
+                "mov rax, 9223372036854775807\nmov rdi, -9223372036854775808\nmov rdi, rax\n")
+
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax ,(max-int 64))
+                                 (set! rdi ,(min-int 64))
+                                 (set! rdi (+ rdi rax))))
+                "mov rax, 9223372036854775807\nmov rdi, -9223372036854775808\nadd rdi, rax\n")
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax 3)
+                                 (set! rdi 2)
+                                 (set! rdi (* rdi rax))))
+                "mov rax, 3\nmov rdi, 2\nimul rdi, rax\n")
+
+  (check-equal? (generate-x64 `(begin
+                                 (set! rax -1)
+                                 (set! rbx -1)
+                                 (set! rbx (+ rbx ,(max-int 32)))))
+                "mov rax, -1\nmov rbx, -1\nadd rbx, 2147483647\n")
+  (check-equal? (generate-x64 `(begin
+                                 (set! rcx -1)
+                                 (set! rax rcx)
+                                 (set! rcx (+ rcx ,(min-int 32)))))
+                "mov rcx, -1\nmov rax, rcx\nadd rcx, -2147483648\n")
+  (check-equal?
+   (generate-x64 `(begin
+                    (set! rdx 2)
+                    (set! rsi 3)
+                    (set! r11 4)
+                    (set! rsi (* rsi rdx))
+                    (set! r11 (+ r11 -1))
+                    (set! r12 (+ r12 r11))
+                    (set! rax r12)))
+   "mov rdx, 2\nmov rsi, 3\nmov r11, 4\nimul rsi, rdx\nadd r11, -1\nadd r12, r11\nmov rax, r12\n")
+
+  ;; END OF MILESTONE-1 generate-x64 TESTS
+  (check-equal (generate-x64 '(begin
+                                (set! (rbp - 0) 0)
+                                (set! (rbp - 8) 42)
+                                (set! rax (rbp - 0))
+                                (set! rax (+ rax (rbp - 8)))))
+               (~a "mov QWORD [rbp - 0], 0"
+                   "mov QWORD [rbp - 8], 42"
+                   "mov rax, QWORD [rbp - 0]"
+                   "add rax, QWORD [rbp - 8]"
+                   #:separator "\n"))
+  (check-equal (generate-x64 '(begin
+                                (set! (rbp - 0) -1)
+                                (set! (rbp - 8) 42)
+                                (set! rax (rbp - 0))
+                                (set! rax (* rax (rbp - 8)))))
+               (~a "mov QWORD [rbp - 0], -1"
+                   "mov QWORD [rbp - 8], 42"
+                   "mov rax, QWORD [rbp - 0]"
+                   "imul rax, QWORD [rbp - 8]"
+                   #:separator "\n"))
+
+  (check-equal (generate-x64 '(begin
+                                (set! (rbp - 8) ,(max-int 32))
+                                (set! (rbp - 0) ,(min-int 32))
+                                (set! rax (rbp - 0))
+                                (set! rax (+ rax (rbp - 8)))))
+               (~a "mov QWORD [rbp - 8], 2147483647\n"
+                   "mov QWORD [rbp - 0], -2147483648\n"
+                   "mov rax, QWORD [rbp - 0]"
+                   "add rax, QWORD [rbp - 8]"
+                   #:separator "\n"))
+)

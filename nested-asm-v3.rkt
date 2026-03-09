@@ -37,3 +37,15 @@
           ,p)]))
 
   (flatten-p p))
+
+
+(module+ test
+  (require rackunit
+           cpsc411/langs/v3)
+  (define-syntax-rule (check-by-interp p)
+    (check-equal? (interp-values-lang-v3 p) (interp-values-unique-lang-v3 (uniquify p))))
+    
+  (check-equal? (flatten-begins '(halt 0))
+                '(begin
+                   (halt 0)))
+)

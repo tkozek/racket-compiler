@@ -163,3 +163,102 @@
 ;; Replaces each aloc its with assigned physical location from assignment info field
 (define (assign-homes p)
   (replace-locations (assign-fvars (uncover-locals p))))
+
+(module+ test
+  (require rackunit
+           cpsc411/langs/v3)
+  (define-syntax-rule (check-by-interp p)
+    (check-equal? (interp-values-lang-v3 p) (interp-values-unique-lang-v3 (uniquify p))))
+
+  (check-equal? (uncover-locals '(module () (halt 0)
+                                   ))
+                '(module ((locals ())) (halt 0)
+                   ))
+  (check-equal? (uncover-locals '(module () (halt 9223372036854775807)
+                                   ))
+                '(module ((locals ())) (halt 9223372036854775807)
+                   ))
+  (check-equal? (uncover-locals '(module () (halt -9223372036854775808)
+                                   ))
+                '(module ((locals ())) (halt -9223372036854775808)
+                   ))
+  (check-exn exn:fail?
+             (lambda ()
+               (uncover-locals '(module () (halt x.1)
+                                  ))))
+
+  (check-match (uncover-locals '(module ()
+                                        (begin
+                                          (set! x.1 0)
+                                          (halt x.1))
+                                  ))
+               `(module ((locals (,x)))
+                        (begin
+                          (set! ,x 0)
+                          (halt ,x))
+                  ))
+  (check-match (uncover-locals '(module ()
+                                        (begin
+                                          (set! x.1 0)
+                                          (set! y.1 x.1)
+                                          (set! y.1 (+ y.1 x.1))
+                                          (halt y.1))
+                                  ))
+               `(module ((locals (,x ,y)))
+                        (begin
+                          (set! ,x 0)
+                          (set! ,y ,x)
+                          (set! ,y (+ ,y ,x))
+                          (halt ,y))
+                  ))
+
+  (check-match (assign-fvars '(module ((locals (x.1)))
+                                      (begin
+                                        (set! x.1 0)
+                                        (halt x.1))
+                                ))
+               `(module ((locals (,x.1)) (assignment ((,x.1 ,fv0))))
+                        (begin
+                          (set! ,x.1 0)
+                          (halt ,x.1))
+                  ))
+  (check-match (assign-fvars '(module ((locals (x.1 y.1 w.1)))
+                                      (begin
+                                        (set! x.1 0)
+                                        (set! y.1 x.1)
+                                        (set! w.1 1)
+                                        (set! w.1 (+ w.1 y.1))
+                                        (halt w.1))
+                                ))
+               `(module ((locals (,x.1 ,y.1 ,w.1)) (assignment ((,x.1 ,fv0) (,y.1 ,fv1) (,w.1 ,fv2))))
+                        (begin
+                          (set! ,x.1 0)
+                          (set! ,y.1 ,x.1)
+                          (set! ,w.1 1)
+                          (set! ,w.1 (+ ,w.1 ,y.1))
+                          (halt ,w.1))
+                  ))
+
+  (check-equal? (replace-locations '(module ((locals (x.1)) (assignment ((x.1 rax))))
+                                            (begin
+                                              (set! x.1 0)
+                                              (halt x.1))
+                                      ))
+                '(begin
+                   (set! rax 0)
+                   (halt rax)))
+  (check-equal? (replace-locations '(module ((locals (x.1 y.1 w.1)) (assignment ((x.1 rax) (y.1 rbx)
+                                                                                           (w.1 r9))))
+                                            (begin
+                                              (set! x.1 0)
+                                              (set! y.1 x.1)
+                                              (set! w.1 1)
+                                              (set! w.1 (+ w.1 y.1))
+                                              (halt w.1))
+                                      ))
+                '(begin
+                   (set! rax 0)
+                   (set! rbx rax)
+                   (set! r9 1)
+                   (set! r9 (+ r9 rbx))
+                   (halt r9))))

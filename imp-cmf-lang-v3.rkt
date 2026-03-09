@@ -63,3 +63,86 @@
     [`(module ,tail)
      `(module () ,(select-tail tail)
         )]))
+
+(module+ test
+  (require rackunit
+           cpsc411/langs/v3)
+  (define-syntax-rule (check-by-interp p)
+    (check-equal? (interp-values-lang-v3 p) (interp-values-unique-lang-v3 (uniquify p))))
+
+  (check-equal? (select-instructions '(module 0))
+                '(module () (halt 0)
+                   ))
+  (check-equal? (select-instructions '(module 9223372036854775807))
+                '(module () (halt 9223372036854775807)
+                   ))
+  (check-equal? (select-instructions '(module -9223372036854775808))
+                '(module () (halt -9223372036854775808)
+                   ))
+  (check-match (select-instructions '(module (+ 2 2)))
+               '(module ()
+                        (begin
+                          (set! ,t 2)
+                          (set! ,t (+ ,t 2))
+                          (halt ,t))
+                  ))
+  (check-match (select-instructions '(module (* -3 2)))
+               '(module ()
+                        (begin
+                          (set! ,t -3)
+                          (set! ,t (* ,t 2))
+                          (halt ,t))
+                  ))
+  (check-match (select-instructions '(module (+ 9223372036854775807 9223372036854775807)))
+               '(module ()
+                        (begin
+                          (set! ,t 9223372036854775807)
+                          (set! ,t (+ ,t 9223372036854775807))
+                          (halt ,t))
+                  ))
+  (check-match (select-instructions '(module (* -9223372036854775808 9223372036854775807)))
+               '(module ()
+                        (begin
+                          (set! ,t -9223372036854775808)
+                          (set! ,t (* ,t 9223372036854775807))
+                          (halt ,t))
+                  ))
+  (check-match (select-instructions '(module (begin
+                                               (set! ,t 5)
+                                               ,t)))
+               '(module ()
+                        (begin
+                          (set! ,t 5)
+                          (halt ,t))
+                  ))
+  (check-equal? (select-instructions '(module (begin
+                                                (set! x.1 (+ 2 2))
+                                                x.1)))
+                '(module ()
+                         (begin
+                           (set! x.1 2)
+                           (set! x.1 (+ x.1 2))
+                           (halt x.1))
+                   ))
+  (check-match (select-instructions '(module (begin
+                                               (set! x.1 2)
+                                               (set! x.2 2)
+                                               (+ x.1 x.2))))
+               '(module ()
+                        (begin
+                          (set! x.1 2)
+                          (set! x.2 2)
+                          (set! ,t x.1)
+                          (set! ,t (+ ,t x.2))
+                          (halt ,t))
+                  ))
+  (check-match (select-instructions '(module (begin
+                                               (begin
+                                                 (set! ,t 3))
+                                               ,t)))
+               '(module ()
+                        (begin
+                          (begin
+                            (set! ,t 3))
+                          (halt ,t))
+                  )))

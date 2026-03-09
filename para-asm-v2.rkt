@@ -74,3 +74,40 @@
           (set! ,(current-return-value-register) ,triv))]))
 
   (patch-p p))
+
+(module+ test
+  (require rackunit
+           cpsc411/langs/v3)
+  (define-syntax-rule (check-by-interp p)
+    (check-equal? (interp-values-lang-v3 p) (interp-values-unique-lang-v3 (uniquify p))))
+  (check-equal? (patch-instructions '(begin
+                                       (set! rbx 42)
+                                       (halt rbx)))
+                '(begin
+                   (set! rbx 42)
+                   (set! rax rbx)))
+  (check-equal? (patch-instructions '(begin
+                                       (set! fv0 0)
+                                       (set! fv1 42)
+                                       (set! fv0 fv1)
+                                       (halt fv0)))
+                '(begin
+                   (set! fv0 0)
+                   (set! fv1 42)
+                   (set! r10 fv1)
+                   (set! fv0 r10)
+                   (set! rax fv0)))
+  (check-equal? (patch-instructions '(begin
+                                       (set! rbx 0)
+                                       (set! rcx 0)
+                                       (set! r9 42)
+                                       (set! rbx rcx)
+                                       (set! rbx (+ rbx r9))
+                                       (halt rbx)))
+                '(begin
+                   (set! rbx 0)
+                   (set! rcx 0)
+                   (set! r9 42)
+                   (set! rbx rcx)
+                   (set! rbx (+ rbx r9))
+                   (set! rax rbx))))
