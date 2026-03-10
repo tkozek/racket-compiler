@@ -3,27 +3,6 @@
 (require cpsc411/compiler-lib)
 
 (provide select-instructions)
-; asm-lang-v2
-;  p	 	::=	 	(module info tail)
-
-; info	 	::=	 	info?
-
-; tail	 	::=	 	(halt triv)
-;  	|	 	(begin effect ... tail)
-
-; effect	 	::=	 	(set! aloc triv)
-;  	|	 	(set! aloc_1 (binop aloc_1 triv))
-;  	|	 	(begin effect ... effect)
-
-; triv	 	::=	 	int64
-;  	|	 	aloc
-
-; binop	 	::=	 	*
-;  	|	 	+
-
-; aloc	 	::=	 	aloc?
-
-; int64	 	::=	 	int64?
 
 ;; (imp-cmf-lang-v5 p) -> (asm-pred-lang-v5 p)
 ;; Compiles imp-cmf-lang-v5 to asm-pred-lang-v5 by selecting appropriate sequences of abstract
@@ -78,7 +57,10 @@
          (if (not begun)
              result
              `(,result)))]
-      [`(jump ,trg ,loc) e]
+      [`(jump ,trg ,loc ...)
+       (if begun
+           `(,e)
+           e)]
       [_
        (match-let ([`(,fxs ,atail) (select-value e)])
          (append (if (not begun)
@@ -100,7 +82,7 @@
   (define (value->effect* loc value)
     (match value
       [`(,binop ,opand1 ,opand2)
-       #:when (not (eq? opand1 loc))
+       #:when (not (equal? opand1 loc))
        `((set! ,loc ,opand1) (set! ,loc (,binop ,loc ,opand2)))]
       [_ `((set! ,loc ,value))]))
 
@@ -109,18 +91,29 @@
     (match e
       [`(set! ,loc ,rest) (value->effect* loc rest)]
       [`(begin
-          ,fxs ...
-          ,fx)
-       (list (append `(begin) (foldr append '() (map select-effect fxs)) (select-effect fx)))]
+          ,fxs ...)
+       (list `(begin
+                ,@(foldr append '() (map select-effect fxs))))]
       [`(if ,pred ,effect1 ,effect2)
+       (define e1 (select-effect effect1))
+       (define e2 (select-effect effect2))
        `((if ,(select-pred pred)
-             ,(select-effect effect1)
-             ,(select-effect effect2)))]))
+             ,(if (null? (rest e1))
+                  (first e1)
+                  `(begin
+                     ,@e1))
+             ,(if (null? (rest e1))
+                  (first e2)
+                  `(begin
+                     ,@e2))))]))
 
   ;; (imp-cmf-lang-v5 definition) -> (imp-cmf-lang-v5 definition)
   (define (select-def def)
     (match def
-      [`(define ,label ,tail) `(define ,label ,(select-tail tail))]))
+      [`(define ,label ,tail)
+       `(define ,label
+          ()
+          ,(select-tail tail))]))
 
   (define (select-p p)
     (match p
@@ -1329,8 +1322,7 @@
                           (* 1337690701 9223372036854775807)
                           (begin
                             (jump L.proc.1.2 rbp)))))
-  (check-by-interp '(module ()
-                            (if (not (begin
+  (check-by-interp '(module (if (not (begin
                                        (set! tmp.1 1)
                                        (> tmp.1 9223372036854775807)))
                                 (if (begin
@@ -1338,8 +1330,7 @@
                                       (>= tmp.2 1197468889))
                                     (halt 9223372036854775807)
                                     (halt 1))
-                                (halt 1))
-                      ))
+                                (halt 1))))
   (check-by-interp '(module (define L.func.0.1
                               (begin
                                 (set! foo.9.5 rdi)
