@@ -102,7 +102,7 @@
                   (first e1)
                   `(begin
                      ,@e1))
-             ,(if (null? (rest e1))
+             ,(if (null? (rest e2))
                   (first e2)
                   `(begin
                      ,@e2))))]))
