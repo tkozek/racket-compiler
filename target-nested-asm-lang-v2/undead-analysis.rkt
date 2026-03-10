@@ -161,7 +161,10 @@
                      [(undead-out-pred ust-pred)
                       (analyze-program-pred (set-union undead-out-tail1 undead-out-tail2) pred)])
          (values undead-out-pred `((,ust-pred ,(first ust-tail1) ,(first ust-tail2)))))]
-      [`(jump ,label ,locs ...) (values locs (cons locs undead-out))]))
+      [`(jump ,label ,locs ...) (values (if (label? label)
+                   locs
+                   (cons label locs))
+               (cons locs undead-out))]))
 
   (match p
     [`(module ,info ,definitions
