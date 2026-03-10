@@ -129,6 +129,7 @@
   (flatten-p bal4))
 (module+ test
   (require rackunit
+           cpsc411/langs/v4
            cpsc411/langs/v5)
   (define-syntax-rule (check-flatten-program bal4 pal4)
     (check-equal? (flatten-program bal4) pal4))

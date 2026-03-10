@@ -63,14 +63,15 @@
 
 (module+ test
   (require rackunit
+           cpsc411/langs/v4
            cpsc411/langs/v5)
   (define-syntax-rule (check func in expected)
     (check-equal? (func in) expected))
   (define-syntax-rule (check-resolve-predicates bpl4 expected)
     (check resolve-predicates bpl4 expected))
   (define-syntax-rule (check-by-interp bpl4)
-    (check-equal? (interp-block-pred-lang-v5 bpl5)
-                  (interp-block-asm-lang-v4 (resolve-predicates bpl5))))
+    (check-equal? (interp-block-pred-lang-v4 bpl4)
+                  (interp-block-asm-lang-v4 (resolve-predicates bpl4))))
 
   ;; M5 tests; Added by Trevor on March 8th 2026, multiple bindings allowed per let
   (check-by-interp '(module (define L.__main.4
