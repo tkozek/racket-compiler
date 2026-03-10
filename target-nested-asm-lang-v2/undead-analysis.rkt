@@ -68,7 +68,7 @@
           (let-values ([(undead-out updated-ust) (analyze-program-effect undead-out effect)])
             (let-values ([(pre-wrap-undead-out pre-wrap-updated-ust) 
               (for/foldr ([undead-out undead-out]
-                          [ust updated-ust])
+                          [ust `(,updated-ust)])
                          ([effect effects])
                 (let-values ([(undead-in new-ust)
                                 (analyze-program-effect undead-out effect)])
@@ -76,7 +76,7 @@
                     undead-in
                     (cons new-ust ust))))])
                     
-              (values pre-wrap-undead-out `(,pre-wrap-updated-ust))))]
+              (values pre-wrap-undead-out pre-wrap-updated-ust)))]
         [`(set! ,aloc_1 (,binop ,aloc_1 ,triv))
           (let ([undead-in (set-add (set-add-triv undead-out triv) aloc_1)])
             (values undead-in undead-out))]
