@@ -2,7 +2,8 @@
 
 (require cpsc411/compiler-lib
          cpsc411/langs/v4
-         "assign-homes.rkt")
+         "assign-homes.rkt"
+         "../generate-x64.rkt")
 
 (provide optimize-predicates
          nested-asm-lang-progs)
@@ -59,6 +60,13 @@
 ;   label	 	::=	 	label?
 ;   int64	 	::=	 	int64?
 
+;; returns x64 function corresponding to this binop
+(define (op->x64-function op)
+  (match op
+
+    ['+ x64-add]
+    ['* x64-mul]))
+
 ;; (nested-asm-lang-v5 p) -> (nested-asm-lang-v5 p)
 ;; Optimizes Nested-asm-lang-v4 programs by analyzing and simplifying predicates
 (define (optimize-predicates p)
@@ -80,11 +88,11 @@
   ;; ((nested-asm-lang-v5 binop opand opand) (list (loc . (triv | 'unknown))))
   ;;      -> 'unknown | int64
   (define (abstract-binop op v1 v2 env)
-    (define v1 (abstract-opand v1 env))
-    (define v2 (abstract-opand v2 env))
-    (match* (v1 v2)
-      [((? int64?) (? int64?)) (op v1 v2)]
-      [(_ _) 'unknown]))
+    (let ([v1 (abstract-opand v1 env)]
+          [v2 (abstract-opand v2 env)])
+      (match* (v1 v2)
+        [((? int64?) (? int64?)) ((op->x64-function op) v1 v2)]
+        [(_ _) 'unknown])))
 
   ;; ('relop) -> (nested-asm-lang-v5 relop)
   ;; Returns the function which op symbolizes.
@@ -95,7 +103,8 @@
       ['= =]
       ['>= >=]
       ['<= <=]
-      ['!= (λ (x y) (not (= x y)))]))
+      ['!= (λ (x y) (not (= x y)))]
+      [_ (error "ffddf")]))
 
   ;; (nested-asm-lang-v5 relop loc opand (list (loc . (triv | 'unknown)))
   ;;                                          -> '(true) | '(false) | 'unknown
@@ -120,24 +129,26 @@
            (hash-set! env loc (hash-ref env triv 'unknown)))]
       [`(set! ,loc1 (,op ,loc1 ,opand))
        (define cur-val (hash-ref env loc1 'unknown))
-       (if (int64? cur-val)
-           (hash-set! env loc1 (abstract-binop op cur-val opand env))
-           (hash-set! env loc1 'unknown))]))
+       (hash-set! env
+                  loc1
+                  (if (int64? cur-val)
+                      (abstract-binop op cur-val opand env)
+                      'unknown))]))
 
   (define (optimize-pred pred env)
     (match pred
       [`(if (not ,pred) ,pred2 ,pred3) (optimize-pred `(if ,pred ,pred3 ,pred2) env)]
-      [`(if ,cond ,then ,else)
-       (define optimized-cond (optimize-pred cond env))
+      [`(if ,conditional ,then ,otherwise)
+       (define optimized-cond (optimize-pred conditional env))
        (define env-then (hash-copy env))
        (define env-else (hash-copy env))
        (cond
          [(equal? optimized-cond '(true)) (optimize-pred then env-then)]
-         [(equal? optimized-cond '(false)) (optimize-pred else env-else)]
+         [(equal? optimized-cond '(false)) (optimize-pred otherwise env-else)]
          [else
           `(if ,optimized-cond
                ,(optimize-pred then env-then)
-               ,(optimize-pred else env-else))])]
+               ,(optimize-pred otherwise env-else))])]
       [`(begin
           ,effects ...
           ,pred)
@@ -145,7 +156,9 @@
           ,@(for/list ([e effects])
               (optimize-effect e env))
           ,(optimize-pred pred env))]
-      [`(,relop ,loc ,opand) (abstract-relop relop loc opand env)]
+      [`(,relop ,loc ,opand)
+       #:when (relop? relop)
+       (abstract-relop relop loc opand env)]
       [_ pred]))
 
   (define (optimize-effect effect env)
@@ -159,24 +172,25 @@
        `(begin
           ,@(for/list ([effect effects])
               (optimize-effect effect env)))]
-      [`(if (not ,cond) ,then ,else) (optimize-effect `(if ,cond ,else ,then) env)]
-      [`(if ,cond ,then ,else)
-       (define optimized-cond (optimize-pred cond env))
+      [`(if (not ,conditional) ,then ,otherwise)
+       (optimize-effect `(if ,conditional ,otherwise ,then) env)]
+      [`(if ,conditional ,then ,otherwise)
+       (define optimized-cond (optimize-pred conditional env))
        (define env-then (hash-copy env))
        (define env-else (hash-copy env))
        (cond
          [(equal? optimized-cond '(true)) (optimize-effect then env-then)]
-         [(equal? optimized-cond '(false)) (optimize-effect else env-else)]
+         [(equal? optimized-cond '(false)) (optimize-effect otherwise env-else)]
          [else
           `(if ,optimized-cond
                ,(optimize-effect then env-then)
-               ,(optimize-effect else env-else))])]))
+               ,(optimize-effect otherwise env-else))])]))
 
   (define (optimize-tail tail env)
     (match tail
       [`(begin
           ,effects ...
-          tail)
+          ,tail)
        `(begin
           ,@(for/list ([effect effects])
               (optimize-effect effect env))

@@ -6,7 +6,8 @@
 (require rackunit)
 
 (provide check-paren-x64
-         generate-x64)
+         generate-x64
+         relop?)
 
 (define-syntax-rule (TODO . stx)
   (error "Unfinished skeleton"))
