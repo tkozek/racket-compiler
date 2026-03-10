@@ -77,13 +77,13 @@
           ,effect)
        (let-values ([(undead-out updated-ust) (analyze-program-effect undead-out effect)])
          (let-values ([(pre-wrap-undead-out pre-wrap-updated-ust)
-                       (for/foldr ([undead-out undead-out] [ust updated-ust])
+                       (for/foldr ([undead-out undead-out] [ust `(,updated-ust)])
                                   ([effect effects])
                                   (let-values ([(undead-in new-ust) (analyze-program-effect undead-out
                                                                                             effect)])
                                     (values undead-in (cons new-ust ust))))])
 
-           (values pre-wrap-undead-out `(,pre-wrap-updated-ust))))]
+           (values pre-wrap-undead-out pre-wrap-updated-ust)))]
       [`(set! ,aloc_1 (,binop ,aloc_1 ,triv))
        (let ([undead-in (set-add (set-add-triv undead-out triv) aloc_1)])
          (values undead-in undead-out))]
@@ -113,13 +113,13 @@
           ,pred)
        (let-values ([(undead-out updated-ust) (analyze-program-pred undead-out pred)])
          (let-values ([(pre-wrap-undead-out pre-wrap-updated-ust)
-                       (for/foldr ([undead-out undead-out] [ust updated-ust])
+                       (for/foldr ([undead-out undead-out] [ust `(,updated-ust)])
                                   ([effect effects])
                                   (let-values ([(undead-in new-ust) (analyze-program-effect undead-out
                                                                                             effect)])
                                     (values undead-in (cons new-ust ust))))])
 
-           (values pre-wrap-undead-out `(,pre-wrap-updated-ust))))]
+           (values pre-wrap-undead-out pre-wrap-updated-ust)))]
       [`(if ,pred1 ,pred2 ,pred3)
        (let*-values ([(undead-out-pred3 ust-pred3) (analyze-program-pred undead-out pred3)]
                      [(undead-out-pred2 ust-pred2) (analyze-program-pred undead-out pred2)]
@@ -2942,16 +2942,13 @@
                                               (set! x.3 y.4))
                                             (halt x.3))
                                     ))
-                `(module ((locals (x.3 y.4 z.4)) (undead-out ((((((z.4) (z.4) y.4)) x.3)) ())))
-                         (begin
-                           (begin
-                             (begin
-                               (set! z.4 4)
-                               (set! z.4 (+ z.4 5))
-                               (set! y.4 z.4))
-                             (set! x.3 y.4))
-                           (halt x.3))
-                   ))
+                `(module
+  ((locals (x.3 y.4 z.4)) (undead-out ((((z.4) (z.4) (y.4)) (x.3)) ())))
+  (begin
+    (begin
+      (begin (set! z.4 4) (set! z.4 (+ z.4 5)) (set! y.4 z.4))
+      (set! x.3 y.4))
+    (halt x.3))))
   (check-equal? (undead-analysis '(module ((locals (x.1)))
                                           (define L.test.1
                                             ((locals (x.1 x.3 y.4 z.4)))
@@ -2967,18 +2964,13 @@
                                       (begin
                                         (set! x.1 1))
                                       (jump L.test.1 x.1))))
-                `(module ((locals (x.1)) (undead-out (((x.1)) (x.1))))
-                         (define L.test.1
-                           ((locals (x.1 x.3 y.4 z.4)) (undead-out ((((((z.4) (z.4) y.4)) x.3)) ())))
-                           (begin
-                             (begin
-                               (begin
-                                 (set! z.4 x.1)
-                                 (set! z.4 (+ z.4 5))
-                                 (set! y.4 z.4))
-                               (set! x.3 y.4))
-                             (halt x.3)))
-                   (begin
-                     (begin
-                       (set! x.1 1))
-                     (jump L.test.1 x.1)))))
+                `(module
+  ((locals (x.1)) (undead-out (((x.1)) (x.1))))
+  (define L.test.1
+    ((locals (x.1 x.3 y.4 z.4)) (undead-out ((((z.4) (z.4) (y.4)) (x.3)) ())))
+    (begin
+      (begin
+        (begin (set! z.4 x.1) (set! z.4 (+ z.4 5)) (set! y.4 z.4))
+        (set! x.3 y.4))
+      (halt x.3)))
+  (begin (begin (set! x.1 1)) (jump L.test.1 x.1)))))
