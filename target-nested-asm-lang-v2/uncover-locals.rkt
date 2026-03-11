@@ -85,6 +85,7 @@
   (define (uncover-triv triv)
     (match triv
       [(? int64?) (set)]
+      [(? register?) (set)]
       [(? aloc?) (set triv)]))
 
   (define (uncover-loc loc)

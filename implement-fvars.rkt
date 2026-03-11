@@ -62,7 +62,7 @@
   (require rackunit
            cpsc411/langs/v5)
   (define-syntax-rule (check-by-interp p)
-    (check-equal? (interp-paren-x64-fvars-v4 p) (interp-paren-x64-v4 (optimize-predicates p))))
+    (check-equal? (interp-paren-x64-fvars-v5 p) (interp-paren-x64-v5 (implement-fvars p))))
     
   ;; M5 tests; Added by Trevor on March 8th 2026, multiple bindings allowed per let
   (check-by-interp '(begin

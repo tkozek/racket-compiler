@@ -88,7 +88,9 @@
           (match-let ([`(,reg ,reg-conflicts) (minimum& conflicts num-values)])
             (loop (map (λ (conflict) (remove-from-loy conflict reg)) (info-remove conflicts reg))
                   (λ (assignments)
-                    (k (info-set assignments reg (get-assignment! reg-conflicts assignments)))))))))
+                    (k (if (register? reg) 
+                            assignments
+                            (info-set assignments reg (get-assignment! reg-conflicts assignments))))))))))
 
   (match p
     [`(module ,info ,definitions
