@@ -102,7 +102,6 @@
        (patch-set-reg s)]
       [`(set! ,loc ,rest) (patch-set-fvar s)]
       [`(with-label ,label ,s)
-       #:when (> (length (patch-s s)) 1) ;; when more than 1 instruction is returned
        (define patched (patch-s s))
        `((with-label ,label ,(first patched)) ,@(rest patched))]
       [`(halt ,opand) `((set! ,(current-return-value-register) ,opand) (jump done))]
@@ -131,6 +130,24 @@
   (define-syntax-rule (check-by-interp p)
     (check-equal? (interp-para-asm-lang-v4 p) (interp-paren-x64-fvars-v4 (patch-instructions p))))
 
+  ;; Manually created by Trevor on March 10th to address (set! fvar label),
+  ;;        (jump-if relop fvar), (jump fvar) cases
+  (check-by-interp '(begin
+                      (set! rsp 3)
+                      (set! fv0 L.__main.4)
+                      (with-label L.__main.4 (set! rsp (- rsp 1)))
+                      (compare rsp 0)
+                      (jump-if = done)
+                      (jump fv0)))
+  (check-by-interp '(begin
+                      (set! rsp 3)
+                      (set! fv0 done)
+                      (set! fv1 L.__main.4)
+                      (with-label L.__main.4 (set! rsp (- rsp 1)))
+                      (compare rsp 2)
+                      (jump-if = fv0)
+                      (jump fv0)))
+  ;;
   ;; M5 tests; Added by Trevor on March 8th 2026, multiple bindings allowed per let
   (check-by-interp '(begin
                       (with-label L.__main.4 (set! r15 -9223372036854775808))
