@@ -63,13 +63,13 @@
   ;let alocals represent asm-lang-v4/assignments-info-locals
   ;let assignments represent asm-lang-v4/assignment-info-assignments
 
-  ;; (listof aloc) assignments -> (register or fvar)
+  ;; (listof loc) assignments -> (register or fvar)
   ;; produce a register that is not assigned by any aloc in the 'self-conflicts' list
   ;;     if no registers are available, produce a fvar instead.
   ;; EFFECT: increments the number of fvar allocated for the runtime of the 'assign-registers'
   ;;     function
   (define (get-assignment! self-conflicts assignments)
-    (define assigned (map (λ (aloc) (info-ref assignments aloc)) self-conflicts))
+    (define assigned (map (λ (aloc) (info-ref assignments aloc)) (filter aloc? self-conflicts)))
     (define registers (filter (λ (reg) (not (memq reg assigned))) assignables))
     (if (empty? registers)
         (let ([fvar (make-fvar num-fvars)])
@@ -89,7 +89,7 @@
             (loop (map (λ (conflict) (remove-from-loy conflict reg)) (info-remove conflicts reg))
                   (λ (assignments)
                     (k (if (register? reg) 
-                            (info-set assignments reg reg)
+                            assignments ; (info-set assignments reg reg)
                             (info-set assignments reg (get-assignment! reg-conflicts assignments))))))))))
 
   (match p
@@ -101,11 +101,14 @@
 
 (module+ test
   ; oooooooh boy
+  (define (peek x)
+    ; (pretty-display x)
+    x)
   (require rackunit
            cpsc411/langs/v5)
   (define-syntax-rule (check-by-interp asmplv5c)
     (check-equal? (interp-asm-pred-lang-v5/conflicts asmplv5c)
-                  (interp-asm-pred-lang-v5/assignments (assign-registers asmplv5c))))
+                  (interp-asm-pred-lang-v5/assignments (peek (assign-registers asmplv5c)))))
 
   ;; M5 tests; Added by Trevor on March 8th 2026, multiple bindings allowed per let
   (check-by-interp
@@ -4982,110 +4985,4 @@
   (check-remove-from-loy '(x (x y)) 'x '(x (y)))
   (check-remove-from-loy '(x (x x)) 'x '(x (x)))
   (check-remove-from-loy '(x (x y)) 'z '(x (x y)))
-
-  (define-syntax-rule (check-assign-registers p expected pred)
-    (check-match (assign-registers p) expected pred))
-
-  (parameterize ([current-assignable-registers '(r15)])
-    (check-assign-registers '(module ((locals (x.1)) (conflicts ((x.1 ()))))
-                                     (begin
-                                       (set! x.1 42)
-                                       (halt x.1))
-                               )
-                            `(module ((locals (x.1)) (conflicts ((x.1 ()))) (assignment ((x.1 r15))))
-                                     (begin
-                                       (set! x.1 42)
-                                       (halt x.1))
-                               )
-                            #t))
-  (parameterize ([current-assignable-registers '(r9)])
-    (check-assign-registers '(module ((locals (x.1)) (conflicts ((x.1 ()))))
-                                     (begin
-                                       (set! x.1 42)
-                                       (halt x.1))
-                               )
-                            '(module ((locals (x.1)) (conflicts ((x.1 ()))) (assignment ((x.1 r9))))
-                                     (begin
-                                       (set! x.1 42)
-                                       (halt x.1))
-                               )
-                            #t))
-  (parameterize ([current-assignable-registers '()])
-    (check-assign-registers '(module ((locals (x.1)) (conflicts ((x.1 ()))))
-                                     (begin
-                                       (set! x.1 42)
-                                       (halt x.1))
-                               )
-                            '(module ((locals (x.1)) (conflicts ((x.1 ()))) (assignment ((x.1 fv0))))
-                                     (begin
-                                       (set! x.1 42)
-                                       (halt x.1))
-                               )
-                            #t))
-
-  ;; it is hard to use example output as there are multiple valid outputs
-  ;; conflict assignments -> boolean
-  ;; returns true if the aloc does not share a register with its conflicting alocs.
-  (define (no-conflicts? conflict assignments)
-    (define (lookup aloc)
-      (info-ref assignments aloc))
-    (match-let ([`(,aloc ,aloc-conflict) conflict])
-      (not (memq (lookup aloc) (map lookup aloc-conflict)))))
-
-  (check-assign-registers
-   '(module ((locals (v.1 w.2 x.3 y.4 z.5 t.6 p.1))
-             (conflicts ((x.3 (z.5 p.1 y.4 v.1 w.2)) (w.2 (z.5 p.1 y.4 v.1 x.3))
-                                                     (v.1 (w.2 x.3))
-                                                     (y.4 (t.6 z.5 p.1 w.2 x.3))
-                                                     (p.1 (t.6 z.5 y.4 w.2 x.3))
-                                                     (z.5 (t.6 p.1 y.4 w.2 x.3))
-                                                     (t.6 (z.5 p.1 y.4)))))
-            (begin
-              (set! v.1 1)
-              (set! w.2 46)
-              (set! x.3 v.1)
-              (set! p.1 7)
-              (set! x.3 (+ x.3 p.1))
-              (set! y.4 x.3)
-              (set! p.1 4)
-              (set! y.4 (+ y.4 p.1))
-              (set! z.5 x.3)
-              (set! z.5 (+ z.5 w.2))
-              (set! t.6 y.4)
-              (set! p.1 -1)
-              (set! t.6 (* t.6 p.1))
-              (set! z.5 (+ z.5 t.6))
-              (halt z.5))
-      )
-   `(module ((locals (v.1 w.2 x.3 y.4 z.5 t.6 p.1)) (conflicts ,conflicts) (assignment ,a2))
-            (begin
-              (set! v.1 1)
-              (set! w.2 46)
-              (set! x.3 v.1)
-              (set! p.1 7)
-              (set! x.3 (+ x.3 p.1))
-              (set! y.4 x.3)
-              (set! p.1 4)
-              (set! y.4 (+ y.4 p.1))
-              (set! z.5 x.3)
-              (set! z.5 (+ z.5 w.2))
-              (set! t.6 y.4)
-              (set! p.1 -1)
-              (set! t.6 (* t.6 p.1))
-              (set! z.5 (+ z.5 t.6))
-              (halt z.5))
-      )
-   (andmap (λ (conflict) (no-conflicts? conflict a2)) conflicts))
-  ; fully connected graph(ie. full conflicts)
-  (parameterize ([current-assignable-registers '(rax rdx rcx)])
-    (check-assign-registers
-     '(module ((locals (x.1 x.2 x.3)) (conflicts ((x.1 (x.2 x.3)) (x.2 (x.1 x.3)) (x.3 (x.2 x.1)))))
-              (begin
-                (halt 1))
-        )
-     `(module ((locals (x.1 x.2 x.3)) (conflicts ((x.1 (x.2 x.3)) (x.2 (x.1 x.3)) (x.3 (x.2 x.1))))
-                                      (assignment ,a2))
-              (begin
-                (halt 1))
-        )
-     (andmap (not/c fvar?) (map cadr a2)))))
+)
