@@ -89,7 +89,7 @@
             (loop (map (λ (conflict) (remove-from-loy conflict reg)) (info-remove conflicts reg))
                   (λ (assignments)
                     (k (if (register? reg) 
-                            assignments
+                            (info-set assignments reg reg)
                             (info-set assignments reg (get-assignment! reg-conflicts assignments))))))))))
 
   (match p
