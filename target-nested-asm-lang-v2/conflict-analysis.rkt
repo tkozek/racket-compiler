@@ -107,8 +107,21 @@
       ;; pred doesn't need to be checked for conflicts,
       ;; as it is impossible to define new variables in pred.
       [(`(if ,pred ,tail1 ,tail2) `(,ust1 ,ust2 ,ust3))
-       (analyze-tree-tail ust3 tail2 (analyze-tree-tail ust2 tail1 graph-init))]))
-
+       (analyze-tree-tail ust3 tail2 
+        (analyze-tree-tail ust2 tail1 
+          (analyze-tree-pred ust1 pred graph-init)))]))
+  
+  ;; Undead-search-tree (Asm-lang-v4/undead pred) -> graph
+  (define (analyze-tree-pred ust pred graph-init)
+    (match* (pred ust)
+      [(`(begin ,fx* ... ,pred0) `(,ust* ... ,ust-pred)) 
+       (analyze-tree-pred ust-pred pred0 (for/fold ([graph graph-init])
+                                                    ([effect fx*]
+                                                    [ust ust*])
+                                                    (analyze-tree-effect ust effect graph)))]
+      [(`(not ,pred0) `(,ust-pred0)) (analyze-tree-pred ust-pred0 pred0)]
+      [(`(,relop ,loc ,opand) _) (update-graph graph-init loc (set-remove-triv ust opand))]
+      [(pred ust) graph-init]))
   (match p
     [`(module ,info ,definitions
         ...

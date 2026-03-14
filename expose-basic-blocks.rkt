@@ -197,8 +197,8 @@
     ;(pretty-display x)
     x)
   (define-syntax-rule (check-by-interp nal5)
-    (check-eq? (interp-nested-asm-lang-v5 nal5)
-               (interp-block-pred-lang-v5 (peek (expose-basic-blocks nal5)))))
+    (check-equal? (interp-nested-asm-lang-v5 nal5)
+                  (interp-block-pred-lang-v5 (peek (expose-basic-blocks nal5)))))
   ;; M5 tests; Added by Trevor on March 8th 2026, multiple bindings allowed per let
   (check-by-interp '(module (define L.fn.0.1
                               (begin
