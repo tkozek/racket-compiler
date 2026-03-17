@@ -41,8 +41,8 @@
     (define xs
       (take (shuffle (append triv-names env))
             (if (zero? (random 2))
-                (random 1 4)
-                (random 4))))
+                (random 3 7)
+                (random 7))))
     (define bindings
       (for/list ([x xs])
         `[,x ,(generate-value (sub1 depth) env)]))
@@ -51,13 +51,15 @@
   ;; () -> int64
   ;; pseudorandomly generates an int64, with additional weight towards edge cases (0, 1, minint, maxint)
   (define (generate-int64)
-    (case (random 6)
+    (case (random 5)
       [(0) 0]
       [(1) 1]
-      [(2) (min-int 64)]
-      [(3) (max-int 64)]
-      [(4) (random (max-int 32))]
-      [(5) (- 0 (random (sub1 (max-int 32))))]))
+      [(2) 
+            (if (zero? (random 1))
+            (min-int 64)
+            (max-int 64))]
+      [(3) (random (max-int 32))]
+      [(4) (- 0 (random (sub1 (max-int 32))))]))
 
   ;; () -> (values-lang relop)
   ;; randomly selects a relop
@@ -71,7 +73,7 @@
 
   ;; (listof symbol) -> symbol | int64
   (define (generate-triv env)
-    (if (and (not (null? env)) (zero? (random 2)))
+    (if (and (not (null? env)) (> (random 7) 0))
         (choose-from-list env)
         (generate-int64)))
 
@@ -109,24 +111,40 @@
   (define (generate-tail depth env)
     (if (zero? depth)
         (generate-value 0 env)
-        (case (random 3)
+        (case (random 5)
           [(0) (generate-value depth env)] ;; can't sub1 or might get nothing in tail position
-          [(1) (generate-let depth env generate-tail)]
-          [(2)
+          [(1 2 3) (generate-let depth env generate-tail)]
+          [(4)
            `(if ,(generate-pred (sub1 depth) env)
                 ,(generate-tail (sub1 depth) env)
                 ,(generate-tail (sub1 depth) env))])))
 
   (define (generate-program)
     (generate-triv-names 10)
-    `(module ,(generate-tail (random 1 3) '())))
+    `(module ,(generate-tail (random 2 5) '())))
 
   (generate-program))
 
-; (for ([i (in-range 10)])
-;   (pretty-display (format "(check-by-interp '~a)" (generate-values-lang-v4)))
-;   (newline))
+(define (runs-within-time? p interp-lang)
+  (define ch (make-channel))
 
-(for ([i (in-range 1000)])
-  (pretty-display (format "(check-by-interp '~a)" (generate-values-lang-v4)))
-  (newline))
+  (define thr
+    (thread (lambda ()
+              (channel-put ch
+                           (with-handlers ([exn:fail? (lambda (e) 'error)])
+                             (interp-lang p))))))
+
+  (define result (sync/timeout 3 ch))
+  (cond
+    [(not result) ; timeout
+     (kill-thread thr)
+     #f]
+    [(eq? result 'error) #f]
+    [else #t]))
+
+(for ([i (in-range 55)])
+    (define p (generate-values-lang-v4))
+    (when (runs-within-time? p interp-values-lang-v4)
+        (pretty-display (format "'~a#" p))
+        )
+  )
