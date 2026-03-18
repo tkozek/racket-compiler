@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../replace-locations.rkt" replace-locations))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-asm-pred-lang-v4/assignments (nested-asm-lang-v4? p))
-                (interp-nested-asm-lang-v4 (nested-asm-lang-v4? (replace-locations p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-asm-pred-lang-v4/assignments p)
+  (if (asm-pred-lang-v4/assignments? p) p #f))
+
+(define (check-nested-asm-lang-v4 p)
+  (if (nested-asm-lang-v4? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-asm-pred-lang-v4/assignments (check-asm-pred-lang-v4/assignments p))
+                (interp-nested-asm-lang-v4 (check-nested-asm-lang-v4 (replace-locations p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module ((locals (tmp.3 tmp.4 tmp.1 tmp.2))
                            (conflicts ((tmp.2 ()) (tmp.1 ()) (tmp.4 ()) (tmp.3 ())))
@@ -2183,4 +2190,4 @@
             (set! foobar.7.22 ball.0.2)
             (halt foobar.7.22))
     ))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

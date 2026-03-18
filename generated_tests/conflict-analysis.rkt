@@ -2,12 +2,19 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../conflict-analysis.rkt" conflict-analysis))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-asm-pred-lang-v4/undead (asm-pred-lang-v4/conflicts? p))
-                (interp-asm-pred-lang-v4/conflicts
-                 (asm-pred-lang-v4/conflicts? (conflict-analysis p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-asm-pred-lang-v4/undead p)
+  (if (asm-pred-lang-v4/undead? p) p #f))
+
+(define (check-asm-pred-lang-v4/conflicts p)
+  (if (asm-pred-lang-v4/conflicts? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-asm-pred-lang-v4/undead (check-asm-pred-lang-v4/undead p))
+                (interp-asm-pred-lang-v4/conflicts
+                 (check-asm-pred-lang-v4/conflicts (conflict-analysis p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp
  '(module ((locals (tmp.3 tmp.4 tmp.1 tmp.2)) (undead-out (() ((tmp.2) (tmp.2) (tmp.1) ())
@@ -1584,4 +1591,4 @@
             (set! foobar.7.22 ball.0.2)
             (halt foobar.7.22))
     ))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

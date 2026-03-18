@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../select-instructions.rkt" select-instructions))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-imp-cmf-lang-v4 (asm-pred-lang-v4? p))
-                (interp-asm-pred-lang-v4 (asm-pred-lang-v4? (select-instructions p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-imp-cmf-lang-v4 p)
+  (if (imp-cmf-lang-v4? p) p #f))
+
+(define (check-asm-pred-lang-v4 p)
+  (if (asm-pred-lang-v4? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-imp-cmf-lang-v4 (check-imp-cmf-lang-v4 p))
+                (interp-asm-pred-lang-v4 (check-asm-pred-lang-v4 (select-instructions p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module (if (true)
                               (* -9223372036854775808 1919678055)
@@ -593,4 +600,4 @@
                                   (set! ball.0.23 0)
                                   (set! foobar.7.22 ball.0.2)
                                   foobar.7.22))))))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

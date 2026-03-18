@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../inline-jumps.rkt" inline-jumps))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-para-asm-lang-v4 (para-asm-lang-v4? p))
-                (interp-para-asm-lang-v4 (para-asm-lang-v4? (inline-jumps p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-para-asm-lang-v4 p)
+  (if (para-asm-lang-v4? p) p #f))
+
+(define (check-para-asm-lang-v4 p)
+  (if (para-asm-lang-v4? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-para-asm-lang-v4 (check-para-asm-lang-v4 p))
+                (interp-para-asm-lang-v4 (check-para-asm-lang-v4 (inline-jumps p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(begin
                     (with-label L.__main.1 (set! r15 -9223372036854775808))
@@ -584,4 +591,4 @@
                     (with-label L.tmp.3 (set! r14 0))
                     (set! r15 r15)
                     (halt 0)))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

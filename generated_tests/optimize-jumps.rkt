@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../optimize-jumps.rkt" optimize-jumps))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-block-asm-lang-v4 (block-asm-lang-v4? p))
-                (interp-block-asm-lang-v4 (block-asm-lang-v4? (optimize-jumps p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-block-asm-lang-v4 p)
+  (if (block-asm-lang-v4? p) p #f))
+
+(define (check-block-asm-lang-v4 p)
+  (if (block-asm-lang-v4? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-block-asm-lang-v4 (check-block-asm-lang-v4 p))
+                (interp-block-asm-lang-v4 (check-block-asm-lang-v4 (optimize-jumps p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module (define L.__main.1
                             (begin
@@ -980,4 +987,4 @@
                         (set! r14 0)
                         (set! r15 r15)
                         (halt 0)))))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

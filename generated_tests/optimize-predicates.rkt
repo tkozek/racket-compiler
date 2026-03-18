@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../optimize-predicates.rkt" optimize-predicates))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-nested-asm-lang-v4 (nested-asm-lang-v4? p))
-                (interp-nested-asm-lang-v4 (nested-asm-lang-v4? (optimize-predicates p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-nested-asm-lang-v4 p)
+  (if (nested-asm-lang-v4? p) p #f))
+
+(define (check-nested-asm-lang-v4 p)
+  (if (nested-asm-lang-v4? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-nested-asm-lang-v4 (check-nested-asm-lang-v4 p))
+                (interp-nested-asm-lang-v4 (check-nested-asm-lang-v4 (optimize-predicates p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module (if (true)
                               (begin
@@ -777,4 +784,4 @@
                             (set! r14 0)
                             (set! r15 r15)
                             (halt r15))))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

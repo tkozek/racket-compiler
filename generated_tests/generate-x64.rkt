@@ -2,10 +2,18 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../generate-x64.rkt" generate-x64))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-paren-x64-v4 (execute? p)) (interp-execute (execute? (generate-x64 p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-paren-x64-v4 p)
+  (if (paren-x64-v4? p) p #f))
+
+(define (check-execute p)
+  (if (execute? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-paren-x64-v4 (check-paren-x64-v4 p))
+                (interp-execute (check-execute (generate-x64 p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(begin
                     (with-label L.__main.1 (set! r15 -9223372036854775808))
@@ -561,4 +569,4 @@
                     (set! r15 r15)
                     (set! rax 0)
                     (jump done)))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

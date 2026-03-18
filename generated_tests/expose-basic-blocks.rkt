@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../expose-basic-blocks.rkt" expose-basic-blocks))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-nested-asm-lang-v4 (block-pred-lang-v4? p))
-                (interp-block-pred-lang-v4 (block-pred-lang-v4? (expose-basic-blocks p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-nested-asm-lang-v4 p)
+  (if (nested-asm-lang-v4? p) p #f))
+
+(define (check-block-pred-lang-v4 p)
+  (if (block-pred-lang-v4? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-nested-asm-lang-v4 (check-nested-asm-lang-v4 p))
+                (interp-block-pred-lang-v4 (check-block-pred-lang-v4 (expose-basic-blocks p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module (begin
                             (set! r15 -9223372036854775808)
@@ -687,4 +694,4 @@
                             (set! r14 0)
                             (set! r15 r15)
                             (halt 0))))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

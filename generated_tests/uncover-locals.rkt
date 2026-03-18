@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../uncover-locals.rkt" uncover-locals))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-asm-pred-lang-v4 (asm-pred-lang-v4/locals? p))
-                (interp-asm-pred-lang-v4/locals (asm-pred-lang-v4/locals? (uncover-locals p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-asm-pred-lang-v4 p)
+  (if (asm-pred-lang-v4? p) p #f))
+
+(define (check-asm-pred-lang-v4/locals p)
+  (if (asm-pred-lang-v4/locals? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-asm-pred-lang-v4 (check-asm-pred-lang-v4 p))
+                (interp-asm-pred-lang-v4/locals (check-asm-pred-lang-v4/locals (uncover-locals p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module ()
                           (if (true)
@@ -841,4 +848,4 @@
                             (set! foobar.7.22 ball.0.2)
                             (halt foobar.7.22))
                     ))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

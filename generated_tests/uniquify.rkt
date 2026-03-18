@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../uniquify.rkt" uniquify))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-values-lang-v4 (values-unique-lang-v4? p))
-                (interp-values-unique-lang-v4 (values-unique-lang-v4? (uniquify p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-values-lang-v4 p)
+  (if (values-lang-v4? p) p #f))
+
+(define (check-values-unique-lang-v4 p)
+  (if (values-unique-lang-v4? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-values-lang-v4 (check-values-lang-v4 p))
+                (interp-values-unique-lang-v4 (check-values-unique-lang-v4 (uniquify p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module (if (true)
                               (* -9223372036854775808 1919678055)
@@ -429,4 +436,4 @@
          (let ([ball.0 0]
                [foobar.7 ball.0])
            foobar.7))))))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

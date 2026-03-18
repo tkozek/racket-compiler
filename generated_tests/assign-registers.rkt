@@ -2,12 +2,19 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../assign-registers.rkt" assign-registers))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-asm-pred-lang-v4/conflicts (asm-pred-lang-v4/assignments? p))
-                (interp-asm-pred-lang-v4/assignments
-                 (asm-pred-lang-v4/assignments? (assign-registers p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-asm-pred-lang-v4/conflicts p)
+  (if (asm-pred-lang-v4/conflicts? p) p #f))
+
+(define (check-asm-pred-lang-v4/assignments p)
+  (if (asm-pred-lang-v4/assignments? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-asm-pred-lang-v4/conflicts (check-asm-pred-lang-v4/conflicts p))
+                (interp-asm-pred-lang-v4/assignments
+                 (check-asm-pred-lang-v4/assignments (assign-registers p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module ((locals (tmp.3 tmp.4 tmp.1 tmp.2))
                            (conflicts ((tmp.2 ()) (tmp.1 ()) (tmp.4 ()) (tmp.3 ()))))
@@ -1791,4 +1798,4 @@
             (set! foobar.7.22 ball.0.2)
             (halt foobar.7.22))
     ))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

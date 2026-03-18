@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v4
          (only-in "../undead-analysis.rkt" undead-analysis))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-asm-pred-lang-v4/locals (asm-pred-lang-v4/undead? p))
-                (interp-asm-pred-lang-v4/undead (asm-pred-lang-v4/undead? (undead-analysis p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-asm-pred-lang-v4/locals p)
+  (if (asm-pred-lang-v4/locals? p) p #f))
+
+(define (check-asm-pred-lang-v4/undead p)
+  (if (asm-pred-lang-v4/undead? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-asm-pred-lang-v4/locals (check-asm-pred-lang-v4/locals p))
+                (interp-asm-pred-lang-v4/undead (check-asm-pred-lang-v4/undead (undead-analysis p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module ((locals (tmp.3 tmp.4 tmp.1 tmp.2)))
                           (if (true)
@@ -1152,4 +1159,4 @@
                             (set! foobar.7.22 ball.0.2)
                             (halt foobar.7.22))
                     ))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18
