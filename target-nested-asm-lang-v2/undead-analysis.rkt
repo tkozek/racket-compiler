@@ -131,7 +131,7 @@
   ; TAKEN FROM LECTURE
   ; adds triv to the undead-set if the triv is an aloc.
   (define (set-add-triv undead-set triv)
-    (if (aloc? triv)
+    (if (or (register? triv) (aloc? triv))
         (set-add undead-set triv)
         undead-set))
 
@@ -164,7 +164,7 @@
       [`(jump ,label ,locs ...) (values (if (label? label)
                    locs
                    (cons label locs))
-               (cons locs undead-out))]))
+               (cons locs '()))]))
 
   (match p
     [`(module ,info ,definitions

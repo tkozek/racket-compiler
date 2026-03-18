@@ -325,6 +325,8 @@
   (require rackunit
            cpsc411/langs/v4
            cpsc411/langs/v5)
+  
+  (current-pass-list (list wrap-x64-run-time wrap-x64-boilerplate))
 
   (define-syntax-rule (check-by-interp p)
     (check-equal? (interp-paren-x64-v4 p) (execute (generate-x64 p))))
