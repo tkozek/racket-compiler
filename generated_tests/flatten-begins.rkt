@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v2
          (only-in "../flatten-begins.rkt" flatten-begins))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-nested-asm-lang-v2 (para-asm-lang-v2? p))
-                (interp-para-asm-lang-v2 (para-asm-lang-v2? (flatten-begins p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-nested-asm-lang-v2 p)
+  (if (nested-asm-lang-v2? p) p #f))
+
+(define (check-para-asm-lang-v2 p)
+  (if (para-asm-lang-v2? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-nested-asm-lang-v2 (check-nested-asm-lang-v2 p))
+                (interp-para-asm-lang-v2 (check-para-asm-lang-v2 (flatten-begins p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(begin
                     (set! fv0 -9223372036854775808)
@@ -669,4 +676,4 @@
                     (set! fv1 fv5)
                     (set! fv0 -220903261)
                     (halt 1)))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

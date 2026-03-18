@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v2
          (only-in "../sequentialize-let.rkt" sequentialize-let))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-values-unique-lang-v3 (imp-mf-lang-v3? p))
-                (interp-imp-mf-lang-v3 (imp-mf-lang-v3? (sequentialize-let p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-values-unique-lang-v3 p)
+  (if (values-unique-lang-v3? p) p #f))
+
+(define (check-imp-mf-lang-v3 p)
+  (if (imp-mf-lang-v3? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-values-unique-lang-v3 (check-values-unique-lang-v3 p))
+                (interp-imp-mf-lang-v3 (check-imp-mf-lang-v3 (sequentialize-let p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module (let ()
                             (let ([ball.4.2 -9223372036854775808]
@@ -475,4 +482,4 @@
                               bar.3.55)]
                   [foo.6.48 -220903261])
               (let () (let () 1))))))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

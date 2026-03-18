@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v2
          (only-in "../implement-fvars.rkt" implement-fvars))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-paren-x64-fvars-v2 (paren-x64-v2? p))
-                (interp-paren-x64-v2 (paren-x64-v2? (implement-fvars p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-paren-x64-fvars-v2 p)
+  (if (paren-x64-fvars-v2? p) p #f))
+
+(define (check-paren-x64-v2 p)
+  (if (paren-x64-v2? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-paren-x64-fvars-v2 (check-paren-x64-fvars-v2 p))
+                (interp-paren-x64-v2 (check-paren-x64-v2 (implement-fvars p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(begin
                     (set! r10 -9223372036854775808)
@@ -1142,4 +1149,4 @@
                     (set! fv1 r10)
                     (set! fv0 -220903261)
                     (set! rax 1)))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18
