@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v3
          (only-in "../assign-homes-opt-check.rkt" assign-homes-opt-check))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-asm-lang-v2 (nested-asm-lang-v2? p))
-                (interp-nested-asm-lang-v2 (nested-asm-lang-v2? (assign-homes-opt-check p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-asm-lang-v2 p)
+  (if (asm-lang-v2? p) p #f))
+
+(define (check-nested-asm-lang-v2 p)
+  (if (nested-asm-lang-v2? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-asm-lang-v2 (check-asm-lang-v2 p))
+                (interp-nested-asm-lang-v2 (check-nested-asm-lang-v2 (assign-homes-opt-check p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module ()
                           (begin
@@ -958,4 +965,4 @@
                             (set! foobar.5.1 -642381767)
                             (halt 1))
                     ))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v3
          (only-in "../uniquify.rkt" uniquify))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-values-lang-v3 (values-unique-lang-v3? p))
-                (interp-values-unique-lang-v3 (values-unique-lang-v3? (uniquify p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-values-lang-v3 p)
+  (if (values-lang-v3? p) p #f))
+
+(define (check-values-unique-lang-v3 p)
+  (if (values-unique-lang-v3? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-values-lang-v3 (check-values-lang-v3 p))
+                (interp-values-unique-lang-v3 (check-values-unique-lang-v3 (uniquify p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module (let ()
                             (let ([bat.2 -221497923]
@@ -607,4 +614,4 @@
                                   [bar.8 (+ -2022017332 -9223372036854775808)])
                               -642381767))])
             1)))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18

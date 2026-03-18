@@ -2,11 +2,18 @@
 (require rackunit
          cpsc411/langs/v3
          (only-in "../normalize-bind.rkt" normalize-bind))
-(define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-imp-mf-lang-v3 (imp-cmf-lang-v3? p))
-                (interp-imp-cmf-lang-v3 (imp-cmf-lang-v3? (normalize-bind p)))))
 
-;;; Added by Trevor on 2026-03-17
+(define (check-imp-mf-lang-v3 p)
+  (if (imp-mf-lang-v3? p) p #f))
+
+(define (check-imp-cmf-lang-v3 p)
+  (if (imp-cmf-lang-v3? p) p #f))
+
+(define-syntax-rule (check-by-interp p)
+  (check-equal? (interp-imp-mf-lang-v3 (check-imp-mf-lang-v3 p))
+                (interp-imp-cmf-lang-v3 (check-imp-cmf-lang-v3 (normalize-bind p)))))
+
+;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module (begin
                             (begin
@@ -872,4 +879,4 @@
                       (set! bar.8.79 (+ -2022017332 -9223372036854775808))
                       -642381767)))
             1)))
-;;; Added by Trevor on 2026-03-17
+;;; Added by Trevor on 2026-03-18
