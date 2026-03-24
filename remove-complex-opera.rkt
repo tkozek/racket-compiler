@@ -62,9 +62,6 @@
 
   (define (rco-value value)
     (match value
-      [(? int64?) value]
-      [(? aloc?) value]
-      [(? label?) value]
       [`(,binop ,value1 ,value2)
        (rco-triv value1
          (λ (value1^)
@@ -84,7 +81,8 @@
       [`(if ,pred ,value1 ,value2)
        `(if ,(rco-pred pred)
             ,(rco-value value1)
-            ,(rco-value value2))]))
+            ,(rco-value value2))]
+      [triv (rco-triv triv)]))
 
   ;; for/list but with continuations
   (define (rco-trivs trivs k)
@@ -96,7 +94,7 @@
               (λ (rest)
                 (k (cons triv^ rest))))))))
   
-  (define (rco-triv triv k)
+  (define (rco-triv triv [k identity])
     (match triv
       [(? int64?) (k triv)]
       [(? aloc?) (k triv)]
