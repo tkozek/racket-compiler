@@ -62,12 +62,6 @@
 
   (define (rco-value value)
     (match value
-      [`(,binop ,value1 ,value2)
-       (rco-triv value1
-         (λ (value1^)
-           (rco-triv value2
-             (λ (value2^)
-               `(,binop ,value1^ ,value2^)))))]
       [`(call ,label ,opands ...)
        (rco-triv label
          (λ (label^)
@@ -78,6 +72,12 @@
        `(let ,(for/list ([aloc alocs] [value values])
                 `(,aloc ,(rco-value value)))
           ,(rco-value value-body))]
+      [`(,binop ,value1 ,value2)
+       (rco-triv value1
+         (λ (value1^)
+           (rco-triv value2
+             (λ (value2^)
+               `(,binop ,value1^ ,value2^)))))]
       [`(if ,pred ,value1 ,value2)
        `(if ,(rco-pred pred)
             ,(rco-value value1)
