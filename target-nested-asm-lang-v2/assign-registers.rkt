@@ -94,183 +94,635 @@
         ,tail)]))
 
 ;; HaYdEnS WacKy DebUGgEr
-#;(module+ test
+#;
+(module+ test
     (require rackunit
-             cpsc411/langs/v6)
-    (check-match
-     (assign-registers '(module ((locals (tmp.1539 tmp-ra.1524 y.1494))
-                                 (conflicts ((y.1494 (rbp tmp-ra.1524)) (tmp-ra.1524 (rax y.1494 rbp))
-                                                                        (tmp.1539 ())
-                                                                        (rbp (rax y.1494 tmp-ra.1524))
-                                                                        (rax (rbp tmp-ra.1524))))
-                                 (assignment ()))
-                                (begin
-                                  (set! tmp-ra.1524 r15)
-                                  (set! y.1494 200)
-                                  (if (begin
-                                        (set! tmp.1539 3)
-                                        (< tmp.1539 y.1494))
-                                      (begin
-                                        (set! rax 1)
-                                        (jump tmp-ra.1524 rbp rax))
-                                      (begin
-                                        (set! rax 0)
-                                        (jump tmp-ra.1524 rbp rax))))
-                          ))
-     '(module ((locals ()) (conflicts ((y.1494 (rbp tmp-ra.1524)) (tmp-ra.1524 (rax y.1494 rbp))
-                                                                  (tmp.1539 ())
-                                                                  (rbp (rax y.1494 tmp-ra.1524))
-                                                                  (rax (rbp tmp-ra.1524))))
-                           (assignment ((tmp-ra.1524 r15) (y.1494 r14) (tmp.1539 r15))))
-              (begin
-                (set! tmp-ra.1524 r15)
-                (set! y.1494 200)
-                (if (begin
-                      (set! tmp.1539 3)
-                      (< tmp.1539 y.1494))
-                    (begin
-                      (set! rax 1)
-                      (jump tmp-ra.1524 rbp rax))
-                    (begin
-                      (set! rax 0)
-                      (jump tmp-ra.1524 rbp rax))))
-        ))
+           cpsc411/langs/v6)
+  (define-syntax-rule (check-by-interp p)
+    (check-equal? (interp-asm-pred-lang-v6/pre-framed p)
+                  (interp-asm-pred-lang-v6/framed (assign-registers p))))
+   
+  
+  (check-by-interp `(module ((locals ()) 
+           (conflicts ((tmp-ra.1187 (rdi rbp)) 
+                       (rbp (r15 rdi tmp-ra.1187)) 
+                       (rdi (r15 rbp tmp-ra.1187)) 
+                       (r15 (rdi rbp)))) 
+          (assignment ((tmp-ra.1187 rsp)))) 
+  (define L.<.4
+  ((locals ())
+   (conflicts
+    ((opand2.8 (tmp.1027 tmp.1025 tmp-ra.1188 rbp opand1.7 r15))
+     (tmp.1028 ())
+     (tmp.1027 (rbp tmp-ra.1188 opand1.7 opand2.8))
+     (tmp.1025 (rbp tmp-ra.1188 opand1.7 opand2.8))
+     (tmp-ra.1188 (rax tmp.1027 tmp.1025 rbp opand1.7 opand2.8))
+     (opand1.7 (tmp.1027 tmp.1025 tmp-ra.1188 opand2.8 rbp r15 rsi))
+     (tmp.1026 ())
+     (rsi (opand1.7))
+     (r15 (opand2.8 opand1.7))
+     (rbp (rax tmp.1027 tmp.1025 tmp-ra.1188 opand2.8 opand1.7))
+     (rax (rbp tmp-ra.1188))))
+   (assignment
+    ((tmp.1026 rsp)
+     (tmp.1028 rsp)
+     (tmp.1025 rdx)
+     (tmp.1027 rdx)
+     (tmp-ra.1188 rcx)
+     (opand2.8 rbx)
+     (opand1.7 rsp))))
+  (begin
+    (set! opand1.7 rdi)
+    (set! opand2.8 rsi)
+    (set! tmp-ra.1188 r15)
+    (if (begin
+          (if (begin
+                (set! tmp.1026 opand1.7)
+                (set! tmp.1026 (bitwise-and tmp.1026 7))
+                (= tmp.1026 0))
+            (set! tmp.1025 14)
+            (set! tmp.1025 6))
+          (!= tmp.1025 6))
+      (if (begin
+            (if (begin
+                  (set! tmp.1028 opand2.8)
+                  (set! tmp.1028 (bitwise-and tmp.1028 7))
+                  (= tmp.1028 0))
+              (set! tmp.1027 14)
+              (set! tmp.1027 6))
+            (!= tmp.1027 6))
+        (if (< opand1.7 opand2.8)
+          (begin (set! rax 14) (jump tmp-ra.1188 rbp rax))
+          (begin (set! rax 6) (jump tmp-ra.1188 rbp rax)))
+        (begin (set! rax 574) (jump tmp-ra.1188 rbp rax)))
+      (begin (set! rax 574) (jump tmp-ra.1188 rbp rax)))))
+  (define L.+.1
+    ((locals ())
+     (conflicts
+      ((opand1.1 (tmp.1031 tmp.1029 tmp-ra.1189 opand2.2 rbp r15 rsi))
+       (tmp.1029 (rbp tmp-ra.1189 opand2.2 opand1.1))
+       (tmp.1030 ())
+       (tmp.1031 (rbp tmp-ra.1189 opand2.2 opand1.1))
+       (tmp.1032 ())
+       (tmp-ra.1189 (rax tmp.1031 tmp.1029 rbp opand2.2 opand1.1))
+       (opand2.2 (rax tmp.1031 tmp.1029 tmp-ra.1189 rbp opand1.1 r15))
+       (rsi (opand1.1))
+       (r15 (opand2.2 opand1.1))
+       (rbp (rax tmp.1031 tmp.1029 tmp-ra.1189 opand2.2 opand1.1))
+       (rax (rbp tmp-ra.1189 opand2.2))))
+     (assignment
+      ((tmp.1032 rsp)
+       (tmp.1030 rsp)
+       (tmp.1031 rdx)
+       (tmp.1029 rdx)
+       (tmp-ra.1189 rcx)
+       (opand2.2 rbx)
+       (opand1.1 rsp))))
+    (begin
+      (set! opand1.1 rdi)
+      (set! opand2.2 rsi)
+      (set! tmp-ra.1189 r15)
+      (if (begin
+            (if (begin
+                  (set! tmp.1030 opand1.1)
+                  (set! tmp.1030 (bitwise-and tmp.1030 7))
+                  (= tmp.1030 0))
+              (set! tmp.1029 14)
+              (set! tmp.1029 6))
+            (!= tmp.1029 6))
+        (if (begin
+              (if (begin
+                    (set! tmp.1032 opand2.2)
+                    (set! tmp.1032 (bitwise-and tmp.1032 7))
+                    (= tmp.1032 0))
+                (set! tmp.1031 14)
+                (set! tmp.1031 6))
+              (!= tmp.1031 6))
+          (begin
+            (set! rax opand1.1)
+            (set! rax (+ rax opand2.2))
+            (jump tmp-ra.1189 rbp rax))
+          (begin (set! rax 574) (jump tmp-ra.1189 rbp rax)))
+        (begin (set! rax 574) (jump tmp-ra.1189 rbp rax)))))
+  (define L.<=.5
+    ((locals ())
+     (conflicts
+      ((opand1.9 (tmp.1035 tmp.1033 tmp-ra.1190 opand2.10 rbp r15 rsi))
+       (opand2.10 (tmp.1035 tmp.1033 tmp-ra.1190 rbp opand1.9 r15))
+       (tmp.1033 (rbp tmp-ra.1190 opand1.9 opand2.10))
+       (tmp.1034 ())
+       (tmp.1035 (rbp tmp-ra.1190 opand1.9 opand2.10))
+       (tmp.1036 ())
+       (tmp-ra.1190 (rax tmp.1035 tmp.1033 rbp opand1.9 opand2.10))
+       (rsi (opand1.9))
+       (r15 (opand2.10 opand1.9))
+       (rbp (rax tmp.1035 tmp.1033 tmp-ra.1190 opand2.10 opand1.9))
+       (rax (rbp tmp-ra.1190))))
+     (assignment
+      ((tmp.1036 rsp)
+       (tmp.1034 rsp)
+       (tmp.1035 rdx)
+       (tmp.1033 rdx)
+       (tmp-ra.1190 rcx)
+       (opand2.10 rbx)
+       (opand1.9 rsp))))
+    (begin
+      (set! opand1.9 rdi)
+      (set! opand2.10 rsi)
+      (set! tmp-ra.1190 r15)
+      (if (begin
+            (if (begin
+                  (set! tmp.1034 opand1.9)
+                  (set! tmp.1034 (bitwise-and tmp.1034 7))
+                  (= tmp.1034 0))
+              (set! tmp.1033 14)
+              (set! tmp.1033 6))
+            (!= tmp.1033 6))
+        (if (begin
+              (if (begin
+                    (set! tmp.1036 opand2.10)
+                    (set! tmp.1036 (bitwise-and tmp.1036 7))
+                    (= tmp.1036 0))
+                (set! tmp.1035 14)
+                (set! tmp.1035 6))
+              (!= tmp.1035 6))
+          (if (<= opand1.9 opand2.10)
+            (begin (set! rax 14) (jump tmp-ra.1190 rbp rax))
+            (begin (set! rax 6) (jump tmp-ra.1190 rbp rax)))
+          (begin (set! rax 574) (jump tmp-ra.1190 rbp rax)))
+        (begin (set! rax 574) (jump tmp-ra.1190 rbp rax)))))
+  (define L.*.3
+    ((locals ())
+     (conflicts
+      ((tmp.1038 ())
+       (tmp.1039 (rbp tmp-ra.1191 opand1.5 opand2.6))
+       (tmp.1040 ())
+       (tmp.1041 (rax rbp tmp-ra.1191 opand1.5))
+       (opand2.6 (tmp.1039 tmp.1037 tmp-ra.1191 rbp opand1.5 r15))
+       (opand1.5 (tmp.1041 tmp.1039 tmp.1037 tmp-ra.1191 opand2.6 rbp r15 rsi))
+       (tmp-ra.1191 (rax tmp.1041 tmp.1039 tmp.1037 rbp opand1.5 opand2.6))
+       (tmp.1037 (rbp tmp-ra.1191 opand1.5 opand2.6))
+       (rsi (opand1.5))
+       (r15 (opand2.6 opand1.5))
+       (rbp (rax tmp.1041 tmp.1039 tmp.1037 tmp-ra.1191 opand2.6 opand1.5))
+       (rax (rbp tmp-ra.1191 tmp.1041))))
+     (assignment
+      ((tmp.1040 rsp)
+       (tmp.1038 rsp)
+       (tmp.1037 rdx)
+       (tmp.1041 rcx)
+       (tmp.1039 rdx)
+       (opand2.6 rcx)
+       (tmp-ra.1191 rbx)
+       (opand1.5 rsp))))
+    (begin
+      (set! opand1.5 rdi)
+      (set! opand2.6 rsi)
+      (set! tmp-ra.1191 r15)
+      (if (begin
+            (if (begin
+                  (set! tmp.1038 opand1.5)
+                  (set! tmp.1038 (bitwise-and tmp.1038 7))
+                  (= tmp.1038 0))
+              (set! tmp.1037 14)
+              (set! tmp.1037 6))
+            (!= tmp.1037 6))
+        (if (begin
+              (if (begin
+                    (set! tmp.1040 opand2.6)
+                    (set! tmp.1040 (bitwise-and tmp.1040 7))
+                    (= tmp.1040 0))
+                (set! tmp.1039 14)
+                (set! tmp.1039 6))
+              (!= tmp.1039 6))
+          (begin
+            (set! tmp.1041 opand2.6)
+            (set! tmp.1041 (arithmetic-shift-right tmp.1041 3))
+            (set! rax opand1.5)
+            (set! rax (* rax tmp.1041))
+            (jump tmp-ra.1191 rbp rax))
+          (begin (set! rax 574) (jump tmp-ra.1191 rbp rax)))
+        (begin (set! rax 574) (jump tmp-ra.1191 rbp rax)))))
+  (define L.-.2
+    ((locals ())
+     (conflicts
+      ((tmp-ra.1192 (rax tmp.1044 tmp.1042 rbp opand2.4 opand1.3))
+       (opand2.4 (rax tmp.1044 tmp.1042 tmp-ra.1192 rbp opand1.3 r15))
+       (tmp.1042 (rbp tmp-ra.1192 opand2.4 opand1.3))
+       (tmp.1043 ())
+       (tmp.1044 (rbp tmp-ra.1192 opand2.4 opand1.3))
+       (tmp.1045 ())
+       (opand1.3 (tmp.1044 tmp.1042 tmp-ra.1192 opand2.4 rbp r15 rsi))
+       (rsi (opand1.3))
+       (r15 (opand2.4 opand1.3))
+       (rbp (rax tmp.1044 tmp.1042 tmp-ra.1192 opand2.4 opand1.3))
+       (rax (rbp tmp-ra.1192 opand2.4))))
+     (assignment
+      ((tmp.1045 rsp)
+       (tmp.1043 rsp)
+       (tmp.1044 rdx)
+       (tmp.1042 rdx)
+       (tmp-ra.1192 rcx)
+       (opand1.3 rbx)
+       (opand2.4 rsp))))
+    (begin
+      (set! opand1.3 rdi)
+      (set! opand2.4 rsi)
+      (set! tmp-ra.1192 r15)
+      (if (begin
+            (if (begin
+                  (set! tmp.1043 opand1.3)
+                  (set! tmp.1043 (bitwise-and tmp.1043 7))
+                  (= tmp.1043 0))
+              (set! tmp.1042 14)
+              (set! tmp.1042 6))
+            (!= tmp.1042 6))
+        (if (begin
+              (if (begin
+                    (set! tmp.1045 opand2.4)
+                    (set! tmp.1045 (bitwise-and tmp.1045 7))
+                    (= tmp.1045 0))
+                (set! tmp.1044 14)
+                (set! tmp.1044 6))
+              (!= tmp.1044 6))
+          (begin
+            (set! rax opand1.3)
+            (set! rax (- rax opand2.4))
+            (jump tmp-ra.1192 rbp rax))
+          (begin (set! rax 574) (jump tmp-ra.1192 rbp rax)))
+        (begin (set! rax 574) (jump tmp-ra.1192 rbp rax)))))
+  (define L.fact.1823
+    ((locals ())
+     (conflicts
+      ((z.1001 (rbp tmp-ra.1193 x.1000))
+       (x.1000 (y.1002 rdi z.1001 tmp.1046 tmp-ra.1193 rbp r15))
+       (tmp-ra.1193 (rsi y.1002 z.1001 rdi rax tmp.1046 rbp x.1000))
+       (y.1002 (rdi rbp tmp-ra.1193 x.1000))
+       (tmp.1046 (rbp tmp-ra.1193 x.1000))
+       (r15 (rsi rdi rbp x.1000))
+       (rbp (r15 rsi y.1002 z.1001 rdi rax tmp.1046 tmp-ra.1193 x.1000))
+       (rax (rdi rbp tmp-ra.1193))
+       (rdi (r15 rsi y.1002 x.1000 rbp tmp-ra.1193 rax))
+       (rsi (r15 rdi rbp tmp-ra.1193))))
+     (assignment
+      ((tmp-ra.1193 fv1)
+       (x.1000 fv0)
+       (tmp.1046 rsp)
+       (z.1001 rsp)
+       (y.1002 rsp))))
+    (begin
+      (set! x.1000 rdi)
+      (set! tmp-ra.1193 r15)
+      (if (begin
+            (if (= x.1000 0) (set! tmp.1046 14) (set! tmp.1046 6))
+            (!= tmp.1046 6))
+        (begin (set! rax 8) (jump tmp-ra.1193 rbp rax))
+        (begin
+          (begin
+            (set! rbp (- rbp 16))
+            (return-point
+             L.return-point.1825
+             (begin
+               (set! rdi x.1000)
+               (set! rsi -8)
+               (set! r15 L.return-point.1825)
+               (jump L.+.1 rbp r15 rdi rsi)))
+            (set! rbp (+ rbp 16)))
+          (set! z.1001 rax)
+          (begin
+            (set! rbp (- rbp 16))
+            (return-point
+             L.return-point.1826
+             (begin
+               (set! rdi z.1001)
+               (set! r15 L.return-point.1826)
+               (jump L.fact.1823 rbp r15 rdi)))
+            (set! rbp (+ rbp 16)))
+          (set! y.1002 rax)
+          (set! rdi x.1000)
+          (set! rsi y.1002)
+          (set! r15 tmp-ra.1193)
+          (jump L.*.3 rbp r15 rdi rsi)))))
+  (begin
+    (set! tmp-ra.1187 r15)
+    (set! rdi 80)
+    (set! r15 tmp-ra.1187)
+    (jump L.fact.1823 rbp r15 rdi))))
 
-    (check-match
-     (assign-registers `(module ((locals (tmp.1540 tmp-ra.1529))
-                                 (conflicts ((tmp-ra.1529 (rax rbp)) (tmp.1540 ())
-                                                                     (rbp (rax tmp-ra.1529))
-                                                                     (rax (rbp tmp-ra.1529))))
-                                 (assignment ()))
-                                (begin
-                                  (set! tmp-ra.1529 r15)
-                                  (if (begin
-                                        (set! tmp.1540 0)
-                                        (= tmp.1540 0))
-                                      (begin
-                                        (set! rax 0)
-                                        (jump tmp-ra.1529 rbp rax))
-                                      (begin
-                                        (set! rax 1)
-                                        (jump tmp-ra.1529 rbp rax))))
-                          ))
-     `(module ((locals ()) (conflicts ((tmp-ra.1529 (rax rbp)) (tmp.1540 ())
-                                                               (rbp (rax tmp-ra.1529))
-                                                               (rax (rbp tmp-ra.1529))))
-                           (assignment ((tmp-ra.1529 r15) (tmp.1540 r15))))
-              (begin
-                (set! tmp-ra.1529 r15)
-                (if (begin
-                      (set! tmp.1540 0)
-                      (= tmp.1540 0))
-                    (begin
-                      (set! rax 0)
-                      (jump tmp-ra.1529 rbp rax))
-                    (begin
-                      (set! rax 1)
-                      (jump tmp-ra.1529 rbp rax))))
-        ))
 
-    (displayln (interp-asm-pred-lang-v6/framed
-                '(module ((locals (tmp.1539 tmp-ra.1524 y.1494))
-                          (conflicts ((y.1494 (rbp tmp-ra.1524)) (tmp-ra.1524 (rax y.1494 rbp))
-                                                                 (tmp.1539 ())
-                                                                 (rbp (rax y.1494 tmp-ra.1524))
-                                                                 (rax (rbp tmp-ra.1524))))
-                          (assignment ()))
-                         (begin
-                           (set! tmp-ra.1524 r15)
-                           (set! y.1494 200)
-                           (if (begin
-                                 (set! tmp.1539 3)
-                                 (< tmp.1539 y.1494))
-                               (begin
-                                 (set! rax 1)
-                                 (jump tmp-ra.1524 rbp rax))
-                               (begin
-                                 (set! rax 0)
-                                 (jump tmp-ra.1524 rbp rax))))
-                   )))
+  (check-by-interp `(module ((locals ()) 
+           (conflicts ((tmp-ra.1187 (rdi rbp)) 
+                       (rbp (r15 rdi tmp-ra.1187)) 
+                       (rdi (r15 rbp tmp-ra.1187)) 
+                       (r15 (rdi rbp)))) 
+          (assignment ((tmp-ra.1187 rsp))))
+    (begin
+    (set! tmp-ra.1187 r15)
+    (set! rdi 80)
+    (set! r15 tmp-ra.1187)
+    (jump L.fact.1823 rbp r15 rdi))))
 
-    #;(displayln
-       (interp-asm-pred-lang-v6/spilled
-        '(module ((locals ()) (conflicts ((y.1494 (rbp tmp-ra.1524)) (tmp-ra.1524 (rax y.1494 rbp))
-                                                                     (tmp.1539 ())
-                                                                     (rbp (rax y.1494 tmp-ra.1524))
-                                                                     (rax (rbp tmp-ra.1524))))
-                              (assignment ((tmp.1539 rsp) (y.1494 rbx) (tmp-ra.1524 rsp))))
-                 (begin
-                   (set! tmp-ra.1524 r15)
-                   (set! y.1494 200)
-                   (if (begin
-                         (set! tmp.1539 3)
-                         (< tmp.1539 y.1494))
-                       (begin
-                         (set! rax 1)
-                         (jump tmp-ra.1524 rbp rax))
-                       (begin
-                         (set! rax 0)
-                         (jump tmp-ra.1524 rbp rax))))
-           )))
-    #;(displayln
-       (interp-asm-pred-lang-v6/spilled
-        '(module ((locals ()) (conflicts ((y.1494 (rbp tmp-ra.1524)) (tmp-ra.1524 (rax y.1494 rbp))
-                                                                     (tmp.1539 ())
-                                                                     (rbp (rax y.1494 tmp-ra.1524))
-                                                                     (rax (rbp tmp-ra.1524))))
-                              (assignment ((tmp-ra.1524 r15) (y.1494 r14) (tmp.1539 r15))))
-                 (begin
-                   (set! tmp-ra.1524 r15)
-                   (set! y.1494 200)
-                   (if (begin
-                         (set! tmp.1539 3)
-                         (< tmp.1539 y.1494))
-                       (begin
-                         (set! rax 1)
-                         (jump tmp-ra.1524 rbp rax))
-                       (begin
-                         (set! rax 0)
-                         (jump tmp-ra.1524 rbp rax))))
-           )))
+  (check-by-interp `(module ((locals ())
+   (conflicts
+    ((opand2.8 (tmp.1027 tmp.1025 tmp-ra.1188 rbp opand1.7 r15))
+     (tmp.1028 ())
+     (tmp.1027 (rbp tmp-ra.1188 opand1.7 opand2.8))
+     (tmp.1025 (rbp tmp-ra.1188 opand1.7 opand2.8))
+     (tmp-ra.1188 (rax tmp.1027 tmp.1025 rbp opand1.7 opand2.8))
+     (opand1.7 (tmp.1027 tmp.1025 tmp-ra.1188 opand2.8 rbp r15 rsi))
+     (tmp.1026 ())
+     (rsi (opand1.7))
+     (r15 (opand2.8 opand1.7))
+     (rbp (rax tmp.1027 tmp.1025 tmp-ra.1188 opand2.8 opand1.7))
+     (rax (rbp tmp-ra.1188))))
+   (assignment
+    ((tmp.1026 rsp)
+     (tmp.1028 rsp)
+     (tmp.1025 rdx)
+     (tmp.1027 rdx)
+     (tmp-ra.1188 rcx)
+     (opand2.8 rbx)
+     (opand1.7 rsp))))
+  (begin
+    (set! opand1.7 rdi)
+    (set! opand2.8 rsi)
+    (set! tmp-ra.1188 r15)
+    (if (begin
+          (if (begin
+                (set! tmp.1026 opand1.7)
+                (set! tmp.1026 (bitwise-and tmp.1026 7))
+                (= tmp.1026 0))
+            (set! tmp.1025 14)
+            (set! tmp.1025 6))
+          (!= tmp.1025 6))
+      (if (begin
+            (if (begin
+                  (set! tmp.1028 opand2.8)
+                  (set! tmp.1028 (bitwise-and tmp.1028 7))
+                  (= tmp.1028 0))
+              (set! tmp.1027 14)
+              (set! tmp.1027 6))
+            (!= tmp.1027 6))
+        (if (< opand1.7 opand2.8)
+          (begin (set! rax 14) (jump tmp-ra.1188 rbp rax))
+          (begin (set! rax 6) (jump tmp-ra.1188 rbp rax)))
+        (begin (set! rax 574) (jump tmp-ra.1188 rbp rax)))
+      (begin (set! rax 574) (jump tmp-ra.1188 rbp rax))))))
 
-    (displayln (interp-asm-pred-lang-v6/framed
-                `(module ((locals (tmp.1540 tmp-ra.1529))
-                          (conflicts ((tmp-ra.1529 (rax rbp)) (tmp.1540 ())
-                                                              (rbp (rax tmp-ra.1529))
-                                                              (rax (rbp tmp-ra.1529))))
-                          (assignment ()))
-                         (begin
-                           (set! tmp-ra.1529 r15)
-                           (if (begin
-                                 (set! tmp.1540 0)
-                                 (= tmp.1540 0))
-                               (begin
-                                 (set! rax 0)
-                                 (jump tmp-ra.1529 rbp rax))
-                               (begin
-                                 (set! rax 1)
-                                 (jump tmp-ra.1529 rbp rax))))
-                   )))
+  (check-by-interp `(module
+    ((locals ())
+     (conflicts
+      ((opand1.1 (tmp.1031 tmp.1029 tmp-ra.1189 opand2.2 rbp r15 rsi))
+       (tmp.1029 (rbp tmp-ra.1189 opand2.2 opand1.1))
+       (tmp.1030 ())
+       (tmp.1031 (rbp tmp-ra.1189 opand2.2 opand1.1))
+       (tmp.1032 ())
+       (tmp-ra.1189 (rax tmp.1031 tmp.1029 rbp opand2.2 opand1.1))
+       (opand2.2 (rax tmp.1031 tmp.1029 tmp-ra.1189 rbp opand1.1 r15))
+       (rsi (opand1.1))
+       (r15 (opand2.2 opand1.1))
+       (rbp (rax tmp.1031 tmp.1029 tmp-ra.1189 opand2.2 opand1.1))
+       (rax (rbp tmp-ra.1189 opand2.2))))
+     (assignment
+      ((tmp.1032 rsp)
+       (tmp.1030 rsp)
+       (tmp.1031 rdx)
+       (tmp.1029 rdx)
+       (tmp-ra.1189 rcx)
+       (opand2.2 rbx)
+       (opand1.1 rsp))))
+    (begin
+      (set! opand1.1 rdi)
+      (set! opand2.2 rsi)
+      (set! tmp-ra.1189 r15)
+      (if (begin
+            (if (begin
+                  (set! tmp.1030 opand1.1)
+                  (set! tmp.1030 (bitwise-and tmp.1030 7))
+                  (= tmp.1030 0))
+              (set! tmp.1029 14)
+              (set! tmp.1029 6))
+            (!= tmp.1029 6))
+        (if (begin
+              (if (begin
+                    (set! tmp.1032 opand2.2)
+                    (set! tmp.1032 (bitwise-and tmp.1032 7))
+                    (= tmp.1032 0))
+                (set! tmp.1031 14)
+                (set! tmp.1031 6))
+              (!= tmp.1031 6))
+          (begin
+            (set! rax opand1.1)
+            (set! rax (+ rax opand2.2))
+            (jump tmp-ra.1189 rbp rax))
+          (begin (set! rax 574) (jump tmp-ra.1189 rbp rax)))
+        (begin (set! rax 574) (jump tmp-ra.1189 rbp rax))))))
+  
+  (check-by-interp `(module
+    ((locals ())
+     (conflicts
+      ((opand1.9 (tmp.1035 tmp.1033 tmp-ra.1190 opand2.10 rbp r15 rsi))
+       (opand2.10 (tmp.1035 tmp.1033 tmp-ra.1190 rbp opand1.9 r15))
+       (tmp.1033 (rbp tmp-ra.1190 opand1.9 opand2.10))
+       (tmp.1034 ())
+       (tmp.1035 (rbp tmp-ra.1190 opand1.9 opand2.10))
+       (tmp.1036 ())
+       (tmp-ra.1190 (rax tmp.1035 tmp.1033 rbp opand1.9 opand2.10))
+       (rsi (opand1.9))
+       (r15 (opand2.10 opand1.9))
+       (rbp (rax tmp.1035 tmp.1033 tmp-ra.1190 opand2.10 opand1.9))
+       (rax (rbp tmp-ra.1190))))
+     (assignment
+      ((tmp.1036 rsp)
+       (tmp.1034 rsp)
+       (tmp.1035 rdx)
+       (tmp.1033 rdx)
+       (tmp-ra.1190 rcx)
+       (opand2.10 rbx)
+       (opand1.9 rsp))))
+    (begin
+      (set! opand1.9 rdi)
+      (set! opand2.10 rsi)
+      (set! tmp-ra.1190 r15)
+      (if (begin
+            (if (begin
+                  (set! tmp.1034 opand1.9)
+                  (set! tmp.1034 (bitwise-and tmp.1034 7))
+                  (= tmp.1034 0))
+              (set! tmp.1033 14)
+              (set! tmp.1033 6))
+            (!= tmp.1033 6))
+        (if (begin
+              (if (begin
+                    (set! tmp.1036 opand2.10)
+                    (set! tmp.1036 (bitwise-and tmp.1036 7))
+                    (= tmp.1036 0))
+                (set! tmp.1035 14)
+                (set! tmp.1035 6))
+              (!= tmp.1035 6))
+          (if (<= opand1.9 opand2.10)
+            (begin (set! rax 14) (jump tmp-ra.1190 rbp rax))
+            (begin (set! rax 6) (jump tmp-ra.1190 rbp rax)))
+          (begin (set! rax 574) (jump tmp-ra.1190 rbp rax)))
+        (begin (set! rax 574) (jump tmp-ra.1190 rbp rax))))))
+  
+  (check-by-interp `(module
+    ((locals ())
+     (conflicts
+      ((tmp.1038 ())
+       (tmp.1039 (rbp tmp-ra.1191 opand1.5 opand2.6))
+       (tmp.1040 ())
+       (tmp.1041 (rax rbp tmp-ra.1191 opand1.5))
+       (opand2.6 (tmp.1039 tmp.1037 tmp-ra.1191 rbp opand1.5 r15))
+       (opand1.5 (tmp.1041 tmp.1039 tmp.1037 tmp-ra.1191 opand2.6 rbp r15 rsi))
+       (tmp-ra.1191 (rax tmp.1041 tmp.1039 tmp.1037 rbp opand1.5 opand2.6))
+       (tmp.1037 (rbp tmp-ra.1191 opand1.5 opand2.6))
+       (rsi (opand1.5))
+       (r15 (opand2.6 opand1.5))
+       (rbp (rax tmp.1041 tmp.1039 tmp.1037 tmp-ra.1191 opand2.6 opand1.5))
+       (rax (rbp tmp-ra.1191 tmp.1041))))
+     (assignment
+      ((tmp.1040 rsp)
+       (tmp.1038 rsp)
+       (tmp.1037 rdx)
+       (tmp.1041 rcx)
+       (tmp.1039 rdx)
+       (opand2.6 rcx)
+       (tmp-ra.1191 rbx)
+       (opand1.5 rsp))))
+    (begin
+      (set! opand1.5 rdi)
+      (set! opand2.6 rsi)
+      (set! tmp-ra.1191 r15)
+      (if (begin
+            (if (begin
+                  (set! tmp.1038 opand1.5)
+                  (set! tmp.1038 (bitwise-and tmp.1038 7))
+                  (= tmp.1038 0))
+              (set! tmp.1037 14)
+              (set! tmp.1037 6))
+            (!= tmp.1037 6))
+        (if (begin
+              (if (begin
+                    (set! tmp.1040 opand2.6)
+                    (set! tmp.1040 (bitwise-and tmp.1040 7))
+                    (= tmp.1040 0))
+                (set! tmp.1039 14)
+                (set! tmp.1039 6))
+              (!= tmp.1039 6))
+          (begin
+            (set! tmp.1041 opand2.6)
+            (set! tmp.1041 (arithmetic-shift-right tmp.1041 3))
+            (set! rax opand1.5)
+            (set! rax (* rax tmp.1041))
+            (jump tmp-ra.1191 rbp rax))
+          (begin (set! rax 574) (jump tmp-ra.1191 rbp rax)))
+        (begin (set! rax 574) (jump tmp-ra.1191 rbp rax))))))
+  
+  (check-by-interp `(module
+    ((locals ())
+     (conflicts
+      ((tmp-ra.1192 (rax tmp.1044 tmp.1042 rbp opand2.4 opand1.3))
+       (opand2.4 (rax tmp.1044 tmp.1042 tmp-ra.1192 rbp opand1.3 r15))
+       (tmp.1042 (rbp tmp-ra.1192 opand2.4 opand1.3))
+       (tmp.1043 ())
+       (tmp.1044 (rbp tmp-ra.1192 opand2.4 opand1.3))
+       (tmp.1045 ())
+       (opand1.3 (tmp.1044 tmp.1042 tmp-ra.1192 opand2.4 rbp r15 rsi))
+       (rsi (opand1.3))
+       (r15 (opand2.4 opand1.3))
+       (rbp (rax tmp.1044 tmp.1042 tmp-ra.1192 opand2.4 opand1.3))
+       (rax (rbp tmp-ra.1192 opand2.4))))
+     (assignment
+      ((tmp.1045 rsp)
+       (tmp.1043 rsp)
+       (tmp.1044 rdx)
+       (tmp.1042 rdx)
+       (tmp-ra.1192 rcx)
+       (opand1.3 rbx)
+       (opand2.4 rsp))))
+    (begin
+      (set! opand1.3 rdi)
+      (set! opand2.4 rsi)
+      (set! tmp-ra.1192 r15)
+      (if (begin
+            (if (begin
+                  (set! tmp.1043 opand1.3)
+                  (set! tmp.1043 (bitwise-and tmp.1043 7))
+                  (= tmp.1043 0))
+              (set! tmp.1042 14)
+              (set! tmp.1042 6))
+            (!= tmp.1042 6))
+        (if (begin
+              (if (begin
+                    (set! tmp.1045 opand2.4)
+                    (set! tmp.1045 (bitwise-and tmp.1045 7))
+                    (= tmp.1045 0))
+                (set! tmp.1044 14)
+                (set! tmp.1044 6))
+              (!= tmp.1044 6))
+          (begin
+            (set! rax opand1.3)
+            (set! rax (- rax opand2.4))
+            (jump tmp-ra.1192 rbp rax))
+          (begin (set! rax 574) (jump tmp-ra.1192 rbp rax)))
+        (begin (set! rax 574) (jump tmp-ra.1192 rbp rax))))))
 
-    (displayln (aloc? `tmp.1540))
+  (check-by-interp `(module
+    ((locals ())
+     (conflicts
+      ((z.1001 (rbp tmp-ra.1193 x.1000))
+       (x.1000 (y.1002 rdi z.1001 tmp.1046 tmp-ra.1193 rbp r15))
+       (tmp-ra.1193 (rsi y.1002 z.1001 rdi rax tmp.1046 rbp x.1000))
+       (y.1002 (rdi rbp tmp-ra.1193 x.1000))
+       (tmp.1046 (rbp tmp-ra.1193 x.1000))
+       (r15 (rsi rdi rbp x.1000))
+       (rbp (r15 rsi y.1002 z.1001 rdi rax tmp.1046 tmp-ra.1193 x.1000))
+       (rax (rdi rbp tmp-ra.1193))
+       (rdi (r15 rsi y.1002 x.1000 rbp tmp-ra.1193 rax))
+       (rsi (r15 rdi rbp tmp-ra.1193))))
+     (assignment
+      ((tmp-ra.1193 fv1)
+       (x.1000 fv0)
+       (tmp.1046 rsp)
+       (z.1001 rsp)
+       (y.1002 rsp))))
+    (begin
+      (set! x.1000 rdi)
+      (set! tmp-ra.1193 r15)
+      (if (begin
+            (if (= x.1000 0) (set! tmp.1046 14) (set! tmp.1046 6))
+            (!= tmp.1046 6))
+        (begin (set! rax 8) (jump tmp-ra.1193 rbp rax))
+        (begin
+          (begin
+            (set! rbp (- rbp 16))
+            (return-point
+             L.return-point.1825
+             (begin
+               (set! rdi x.1000)
+               (set! rsi -8)
+               (set! r15 L.return-point.1825)
+               (jump L.+.1 rbp r15 rdi rsi)))
+            (set! rbp (+ rbp 16)))
+          (set! z.1001 rax)
+          (begin
+            (set! rbp (- rbp 16))
+            (return-point
+             L.return-point.1826
+             (begin
+               (set! rdi z.1001)
+               (set! r15 L.return-point.1826)
+               (jump L.fact.1823 rbp r15 rdi)))
+            (set! rbp (+ rbp 16)))
+          (set! y.1002 rax)
+          (set! rdi x.1000)
+          (set! rsi y.1002)
+          (set! r15 tmp-ra.1193)
+          (jump L.*.3 rbp r15 rdi rsi))))))
+                   
+)
 
-    (displayln (interp-asm-pred-lang-v6/spilled
-                `(module ((locals ()) (conflicts ((tmp-ra.1529 (rax rbp)) (tmp.1540 ())
-                                                                          (rbp (rax tmp-ra.1529))
-                                                                          (rax (rbp tmp-ra.1529))))
-                                      (assignment ((tmp.1540 rsp) (tmp-ra.1529 rsp))))
-                         (begin
-                           (set! tmp-ra.1529 r15)
-                           (if (begin
-                                 (set! tmp.1540 0)
-                                 (= tmp.1540 0))
-                               (begin
-                                 (set! rax 0)
-                                 (jump tmp-ra.1529 rbp rax))
-                               (begin
-                                 (set! rax 1)
-                                 (jump tmp-ra.1529 rbp rax))))
-                   ))))
 
 (module+ test
   (require rackunit
