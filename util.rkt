@@ -3,10 +3,8 @@
 (require cpsc411/compiler-lib
          cpsc411/2c-run-time)
 
-(provide triv?
-         binop?
-         value?
-         tail?)
+(provide (all-defined-out))
+
 (define (triv? t)
   (or (int64? t) (name? t)))
 

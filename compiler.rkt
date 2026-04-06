@@ -20,15 +20,18 @@
          interp-values-lang
          interp-paren-x64)
 
-(require "values-lang-v3.rkt"
-         "values-unique-lang-v3.rkt"
-         "imp-mf-lang-v3.rkt"
-         "imp-cmf-lang-v3.rkt"
-         "asm-lang-v2.rkt"
-         "nested-asm-v3.rkt"
-         "para-asm-v2.rkt"
-         "paren-x64-fvars-v2.rkt"
-         "paren-x64-v2.rkt"
+(require "asm-lang/assign-fvars.rkt"
+         "asm-lang/replace-locations.rkt"
+         "asm-lang/uncover-locals.rkt"
+         "asm-lang/assign-homes.rkt"
+         "asm-lang/flatten-begins.rkt"
+         "asm-lang/patch-instructions.rkt"
+         "imp-lang/normalize-bind.rkt"
+         "imp-=lang/select-instructions.rkt"
+         "paren-x64/implement-fvars.rkt"
+         "paren-x64/generate-x64.rkt"
+         "values-lang/uniquify.rkt"
+         "values-lang/sequentialize-let.rkt"
          "util.rkt")
 
 ;; Optional
@@ -59,15 +62,18 @@
            ;; NB: Workaround typo in shipped version of cpsc411-lib
            (except-in cpsc411/langs/v3 values-lang-v3)
            cpsc411/langs/v2)
-  (require (submod "values-lang-v3.rkt" test)
-           (submod "values-unique-lang-v3.rkt" test)
-           (submod "imp-mf-lang-v3.rkt" test)
-           (submod "imp-cmf-lang-v3.rkt" test)
-           (submod "asm-lang-v2.rkt" test)
-           (submod "nested-asm-v3.rkt" test)
-           (submod "para-asm-v2.rkt" test)
-           (submod "paren-x64-fvars-v2.rkt" test)
-           (submod "paren-x64-v2.rkt" test))
+  (require (submod "asm-lang/assign-fvars.rkt" test)
+           (submod "asm-lang/replace-locations.rkt" test)
+           (submod "asm-lang/uncover-locals.rkt" test)
+           (submod "asm-lang/assign-homes.rkt" test)
+           (submod "asm-lang/flatten-begins.rkt" test)
+           (submod "asm-lang/patch-instructions.rkt" test)
+           (submod "imp-lang/normalize-bind.rkt" test)
+           (submod "imp-lang/select-instructions.rkt" test)
+           (submod "paren-x64/generate-x64.rkt" test)
+           (submod "paren-x64/implement-fvars.rkt" test)
+           (submod "values-lang/uniquify.rkt" test)
+           (submod "values-lang/sequentialize-let.rkt" test))
 
   (run-tests (v3-public-test-sutie (current-pass-list)
                                    (list interp-values-lang-v3

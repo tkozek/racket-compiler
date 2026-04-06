@@ -1,7 +1,7 @@
 #lang racket
 
 (require cpsc411/compiler-lib
-         "util.rkt")
+         "../util.rkt")
 
 (provide normalize-bind)
 
