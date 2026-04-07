@@ -1,6 +1,7 @@
 #lang racket
 (require rackunit
          cpsc411/langs/v2
+         cpsc411/langs/v3
          (only-in "../values-lang/sequentialize-let.rkt" sequentialize-let))
 
 (define (check-values-unique-lang-v3 p)
@@ -13,6 +14,128 @@
   (check-equal? (interp-values-unique-lang-v3 (check-values-unique-lang-v3 p))
                 (interp-imp-mf-lang-v3 (check-imp-mf-lang-v3 (sequentialize-let p)))))
 
+;; Added March 8th, 2026
+(check-by-interp '(module 0))
+(check-by-interp '(module 1672362778))
+
+(check-by-interp '(module (+ 9223372036854775807 0)))
+
+(check-by-interp '(module (+ -379276448 -9223372036854775808)))
+(check-by-interp '(module (let ([bat.5 -1622353956]
+                                [bat.4 1])
+                            1)))
+
+(check-by-interp '(module (let ()
+                            (let ([bar.6.2 1560534029]
+                                  [ball.4.1 9223372036854775807])
+                              -875855756))))
+
+(check-by-interp '(module (let ([ball.1 2070989370])
+                            (let ([foobar.8 ball.1]
+                                  [bar.0 -267352716]
+                                  [ball.1 ball.1])
+                              bar.0))))
+
+(check-by-interp '(module (let ([bar.0 (* 0 123448674)]
+                                [bar.9 -9223372036854775808]
+                                [bar.3 -9223372036854775808])
+                            (+ bar.3 bar.3))))
+(check-by-interp '(module (let ([bar.0.3 (* 0 123448674)]
+                                [bar.9.2 -9223372036854775808]
+                                [bar.3.1 -9223372036854775808])
+                            (+ bar.3.1 bar.3.1))))
+(check-by-interp '(module (let ([bat.7.2 -9223372036854775808]
+                                [bar.0.1 (+ 9223372036854775807 1)])
+                            (let ([ball.9.5 bar.0.1]
+                                  [foo.8.4 bat.7.2]
+                                  [foo.1.3 1])
+                              815346391))))
+
+(check-by-interp '(module (let ([ball.8 1]
+                                [foobar.2 (let ([bat.9 (* 9223372036854775807 1)]
+                                                [foobar.3 92301689])
+                                            (let ([bat.9 2017243593]
+                                                  [foobar.3 9223372036854775807])
+                                              -1476120972))])
+                            (* 0 1))))
+;;
+
+;; Hand-written
+(check-equal? (sequentialize-let '(module 0)) '(module 0))
+(check-equal? (sequentialize-let '(module 9223372036854775807)) '(module 9223372036854775807))
+(check-equal? (sequentialize-let '(module -9223372036854775808)) '(module -9223372036854775808))
+(check-equal? (sequentialize-let '(module (let () 0)))
+              '(module (begin
+                         0)))
+(check-equal? (sequentialize-let '(module (let () 9223372036854775807)))
+              '(module (begin
+                         9223372036854775807)))
+(check-equal? (sequentialize-let `(module (let () -9223372036854775808)))
+              `(module (begin
+                         -9223372036854775808)))
+(check-equal? (sequentialize-let '(module (let ([x.1 0]) 1)))
+              '(module (begin
+                         (set! x.1 0)
+                         1)))
+(check-equal? (sequentialize-let '(module (let ([x.2 1]) x.2)))
+              '(module (begin
+                         (set! x.2 1)
+                         x.2)))
+(check-equal? (sequentialize-let '(module (+ 0 1))) '(module (+ 0 1)))
+(check-equal? (sequentialize-let '(module (* -1 2))) '(module (* -1 2)))
+(check-equal? (sequentialize-let '(module x.2)) '(module x.2))
+(check-equal? (sequentialize-let '(module (let ([x.1 1]
+                                                [x.2 -1]
+                                                [x.3 4])
+                                            (* x.3 x.2))))
+              '(module (begin
+                         (set! x.1 1)
+                         (set! x.2 -1)
+                         (set! x.3 4)
+                         (* x.3 x.2))))
+(check-equal? (sequentialize-let '(module (let ([x.1 (let ([x.2 5]) x.2)]) x.1)))
+              '(module (begin
+                         (set! x.1
+                               (begin
+                                 (set! x.2 5)
+                                 x.2))
+                         x.1)))
+(check-equal? (sequentialize-let '(module (let ([x.1 (let ([x.2 (let ([x.3 3]) (* x.3 x.3))]) x.2)])
+                                            (* 2 x.1))))
+              '(module (begin
+                         (set! x.1
+                               (begin
+                                 (set! x.2
+                                       (begin
+                                         (set! x.3 3)
+                                         (* x.3 x.3)))
+                                 x.2))
+                         (* 2 x.1))))
+(check-equal? (sequentialize-let '(module (let ([x.1 (+ 1 2)]) (let ([x.2 (+ x.1 3)]) 0))))
+              '(module (begin
+                         (set! x.1 (+ 1 2))
+                         (begin
+                           (set! x.2 (+ x.1 3))
+                           0))))
+(check-equal? (sequentialize-let '(module (let ([x.1 (+ 1 2)]) (let ([x.2 (+ x.1 3)]) (* 2 x.1)))))
+              '(module (begin
+                         (set! x.1 (+ 1 2))
+                         (begin
+                           (set! x.2 (+ x.1 3))
+                           (* 2 x.1)))))
+(check-equal? (sequentialize-let '(module (let ([x.1 (+ 1 2)]) (let ([x.2 (+ x.1 3)]) (+ x.2 x.1)))))
+              '(module (begin
+                         (set! x.1 (+ 1 2))
+                         (begin
+                           (set! x.2 (+ x.1 3))
+                           (+ x.2 x.1)))))
+(check-equal? (sequentialize-let '(module (let ([x.1 (+ 1 2)]) (let ([x.2 (+ x.1 3)]) (* x.2 x.1)))))
+              '(module (begin
+                         (set! x.1 (+ 1 2))
+                         (begin
+                           (set! x.2 (+ x.1 3))
+                           (* x.2 x.1)))))
+;;
 ;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module (let ()
