@@ -10,8 +10,8 @@
   (if (para-asm-lang-v2? p) p #f))
 
 (define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-nested-asm-lang-v2 (check-nested-asm-lang-v2 p))
-                (interp-para-asm-lang-v2 (check-para-asm-lang-v2 (flatten-begins p)))))
+  (check-equal? (interp-para-asm-lang-v2 (check-para-asm-lang-v2 (flatten-begins p)))
+                (interp-nested-asm-lang-v2 (check-nested-asm-lang-v2 p))))
 
 ;;; Added by Trevor on 2026-03-18
 

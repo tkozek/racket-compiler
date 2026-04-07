@@ -10,8 +10,8 @@
   (if (asm-lang-v2? p) p #f))
 
 (define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-imp-cmf-lang-v3 (check-imp-cmf-lang-v3 p))
-                (interp-asm-lang-v2 (check-asm-lang-v2 (select-instructions p)))))
+  (check-equal? (interp-asm-lang-v2 (check-asm-lang-v2 (select-instructions p)))
+                (interp-imp-cmf-lang-v3 (check-imp-cmf-lang-v3 p))))
 
 ;;; Added by Trevor on 2026-03-18
 

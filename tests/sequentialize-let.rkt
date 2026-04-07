@@ -11,8 +11,8 @@
   (if (imp-mf-lang-v3? p) p #f))
 
 (define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-values-unique-lang-v3 (check-values-unique-lang-v3 p))
-                (interp-imp-mf-lang-v3 (check-imp-mf-lang-v3 (sequentialize-let p)))))
+  (check-equal? (interp-imp-mf-lang-v3 (check-imp-mf-lang-v3 (sequentialize-let p)))
+                (interp-values-unique-lang-v3 (check-values-unique-lang-v3 p))))
 
 ;; Added March 8th, 2026
 (check-by-interp '(module 0))

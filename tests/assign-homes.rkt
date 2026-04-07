@@ -10,8 +10,8 @@
   (if (nested-asm-lang-v2? p) p #f))
 
 (define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-asm-lang-v2 (check-asm-lang-v2 p))
-                (interp-nested-asm-lang-v2 (check-nested-asm-lang-v2 (assign-homes p)))))
+  (check-equal? (interp-nested-asm-lang-v2 (check-nested-asm-lang-v2 (assign-homes p)))
+                (interp-asm-lang-v2 (check-asm-lang-v2 p))))
 
 ;;; Added by Trevor on 2026-03-18
 

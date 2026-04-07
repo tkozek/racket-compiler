@@ -10,8 +10,8 @@
   (if (paren-x64-fvars-v2? p) p #f))
 
 (define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-para-asm-lang-v2 (check-para-asm-lang-v2 p))
-                (interp-paren-x64-fvars-v2 (check-paren-x64-fvars-v2 (patch-instructions p)))))
+  (check-equal? (interp-paren-x64-fvars-v2 (check-paren-x64-fvars-v2 (patch-instructions p)))
+                (interp-para-asm-lang-v2 (check-para-asm-lang-v2 p))))
 
 ;;; Added by Trevor on 2026-03-18
 

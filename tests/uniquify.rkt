@@ -11,8 +11,8 @@
   (if (values-unique-lang-v3? p) p #f))
 
 (define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-values-lang-v3 (check-values-lang-v3 p))
-                (interp-values-unique-lang-v3 (check-values-unique-lang-v3 (uniquify p)))))
+  (check-equal? (interp-values-unique-lang-v3 (check-values-unique-lang-v3 (uniquify p)))
+                (interp-values-lang-v3 (check-values-lang-v3 p))))
 
 ;;; Added by Trevor on 2026-03-18
 

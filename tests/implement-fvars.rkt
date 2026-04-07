@@ -10,8 +10,8 @@
   (if (paren-x64-v2? p) p #f))
 
 (define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-paren-x64-fvars-v2 (check-paren-x64-fvars-v2 p))
-                (interp-paren-x64-v2 (check-paren-x64-v2 (implement-fvars p)))))
+  (check-equal? (interp-paren-x64-v2 (check-paren-x64-v2 (implement-fvars p)))
+                (interp-paren-x64-fvars-v2 (check-paren-x64-fvars-v2 p))))
 
 ;;; Added by Trevor on 2026-03-18
 
