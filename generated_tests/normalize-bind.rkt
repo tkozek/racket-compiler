@@ -1,7 +1,7 @@
 #lang racket
 (require rackunit
          cpsc411/langs/v2
-         (only-in "../normalize-bind.rkt" normalize-bind))
+         (only-in "../imp-lang/normalize-bind.rkt" normalize-bind))
 
 (define (check-imp-mf-lang-v3 p)
   (if (imp-mf-lang-v3? p) p #f))

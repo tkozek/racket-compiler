@@ -1,7 +1,8 @@
 #lang racket
 (require rackunit
          cpsc411/langs/v2
-         (only-in "../uniquify.rkt" uniquify))
+         cpsc411/langs/v3
+         (only-in "../values-lang/uniquify.rkt" uniquify))
 
 (define (check-values-lang-v3 p)
   (if (values-lang-v3? p) p #f))

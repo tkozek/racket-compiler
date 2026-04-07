@@ -1,7 +1,7 @@
 #lang racket
 (require rackunit
          cpsc411/langs/v2
-         (only-in "../assign-homes.rkt" assign-homes))
+         (only-in "../asm-lang/assign-homes.rkt" assign-homes))
 
 (define (check-asm-lang-v2 p)
   (if (asm-lang-v2? p) p #f))

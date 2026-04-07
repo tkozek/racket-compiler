@@ -1,7 +1,7 @@
 #lang racket
 (require rackunit
          cpsc411/langs/v2
-         (only-in "../patch-instructions.rkt" patch-instructions))
+         (only-in "../asm-lang/patch-instructions.rkt" patch-instructions))
 
 (define (check-para-asm-lang-v2 p)
   (if (para-asm-lang-v2? p) p #f))

@@ -1,7 +1,7 @@
 #lang racket
 (require rackunit
          cpsc411/langs/v2
-         (only-in "../flatten-begins.rkt" flatten-begins))
+         (only-in "../asm-lang/flatten-begins.rkt" flatten-begins))
 
 (define (check-nested-asm-lang-v2 p)
   (if (nested-asm-lang-v2? p) p #f))

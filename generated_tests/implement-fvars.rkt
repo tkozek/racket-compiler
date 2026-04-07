@@ -1,7 +1,7 @@
 #lang racket
 (require rackunit
          cpsc411/langs/v2
-         (only-in "../implement-fvars.rkt" implement-fvars))
+         (only-in "../paren-x64/implement-fvars.rkt" implement-fvars))
 
 (define (check-paren-x64-fvars-v2 p)
   (if (paren-x64-fvars-v2? p) p #f))

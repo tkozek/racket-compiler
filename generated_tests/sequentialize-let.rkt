@@ -1,7 +1,7 @@
 #lang racket
 (require rackunit
          cpsc411/langs/v2
-         (only-in "../sequentialize-let.rkt" sequentialize-let))
+         (only-in "../values-lang/sequentialize-let.rkt" sequentialize-let))
 
 (define (check-values-unique-lang-v3 p)
   (if (values-unique-lang-v3? p) p #f))
