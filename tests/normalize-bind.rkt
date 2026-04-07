@@ -1,6 +1,7 @@
 #lang racket
 (require rackunit
          cpsc411/langs/v2
+         cpsc411/langs/v3
          (only-in "../imp-lang/normalize-bind.rkt" normalize-bind))
 
 (define (check-imp-mf-lang-v3 p)
@@ -10,8 +11,8 @@
   (if (imp-cmf-lang-v3? p) p #f))
 
 (define-syntax-rule (check-by-interp p)
-  (check-equal? (interp-imp-mf-lang-v3 (check-imp-mf-lang-v3 p))
-                (interp-imp-cmf-lang-v3 (check-imp-cmf-lang-v3 (normalize-bind p)))))
+  (check-equal? (interp-imp-cmf-lang-v3 (check-imp-cmf-lang-v3 (normalize-bind p)))
+                (interp-imp-mf-lang-v3 (check-imp-mf-lang-v3 p))))
 
 ;;; Added by Trevor on 2026-03-18
 
