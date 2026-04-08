@@ -1,6 +1,7 @@
 #lang racket
 
-(require cpsc411/compiler-lib)
+(require cpsc411/compiler-lib
+         cpsc411/langs/v2)
 
 (provide flatten-begins)
 

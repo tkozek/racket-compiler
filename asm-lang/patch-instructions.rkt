@@ -1,6 +1,7 @@
 #lang racket
 
-(require cpsc411/compiler-lib)
+(require cpsc411/compiler-lib
+         cpsc411/langs/v2)
 
 (provide patch-instructions)
 ;; para-asm-lang-v2
@@ -33,13 +34,13 @@
 ;; Patches instructions in p that have no x64 analogue
 (define (patch-instructions p)
   (define aux-reg (current-patch-instructions-registers))
-  (define first-reg (first (aux-reg)))
+  (define first-reg (first aux-reg))
 
   (define (patch-effect-reg effect)
     (match effect
       [`(set! ,reg1 (,binop ,reg1 ,triv))
-       #:when (integer? triv)
-       (not (int32? triv))
+       #:when (and (integer? triv) (not (int32? triv)))
+
        `((set! ,first-reg ,triv) (set! ,reg1 (,binop ,reg1 ,first-reg)))]
       [`(set! ,fvar1 ,triv)
        #:when (and (fvar? fvar1) (or (fvar? triv) (and (integer? triv) (not (int32? triv)))))
@@ -62,7 +63,7 @@
       [`(set! ,loc ,rest)
        #:when (register? loc)
        (patch-effect-reg loc)]
-      [`(set! ,loc ,rest) (patch-effect-fvar loc)]))
+      [_ (patch-effect-fvar effect)]))
 
   (define (patch-p p)
     (match p

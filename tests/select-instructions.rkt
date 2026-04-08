@@ -1,6 +1,7 @@
 #lang racket
 (require rackunit
          cpsc411/langs/v2
+         cpsc411/langs/v3
          (only-in "../imp-lang/select-instructions.rkt" select-instructions))
 
 (define (check-imp-cmf-lang-v3 p)

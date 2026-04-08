@@ -1,6 +1,6 @@
 #lang racket
-
-(require cpsc411/compiler-lib)
+ (require cpsc411/compiler-lib)
+(require cpsc411/langs/v2)
 
 (provide implement-fvars)
 
@@ -48,10 +48,10 @@
       [`(set! ,(? fvar? fvar) ,rest) `(set! ,(implement-fvar fvar) ,rest)]
       [`(set! ,reg1 (,binop ,reg1 ,(? fvar? fvar)))
        `(set! ,reg1 (,binop ,reg1 ,(implement-fvar fvar)))]
-      [`(set! ,reg (? fvar? fvar)) `(set! ,reg ,(implement-fvar fvar))]
+      [`(set! ,reg ,(? fvar? fvar)) `(set! ,reg ,(implement-fvar fvar))]
       [_ s]))
 
-  (define (implement-p)
+  (define (implement-p p)
     (match p
       [`(begin
           ,s ...)

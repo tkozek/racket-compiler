@@ -1,6 +1,7 @@
 #lang racket
 
 (require cpsc411/compiler-lib
+         cpsc411/langs/v2
          "../util.rkt")
 
 (provide select-instructions)
@@ -15,35 +16,32 @@
   (define (assign-tmp v)
     (define tmp (fresh))
     (match v
-      [`(,op ,triv1 ,triv2)
-       (if (and (binop? op) (triv? triv1) (triv? triv2))
-           (values (list `(set! ,tmp ,triv1) `(set! ,tmp (,op ,tmp ,triv2)))
-                   tmp) ;; values returns all its args
-           (error
-            (format "Expected op and two trivial values, got: ~a, ~a and ~a" op triv1 triv2)))]))
+      [`(,binop ,triv1 ,triv2)
+       (values (list `(set! ,tmp ,triv1) `(set! ,tmp (,binop ,tmp ,triv2)))
+               tmp) ;; values returns all its args
+       ]))
 
   (define (select-tail e)
     (match e
-      [(? triv?) `(halt ,e)]
-      [`(,op ,triv1 ,triv2)
-       (define-values (insts tmp) (select-value e))
-       `(begin
-          ,@insts
-          (halt ,tmp))]
       [`(begin
           ,effects
           ,body)
        `(begin
           ,@(map select-effect effects)
-          ,(select-tail body))]))
+          ,(select-tail body))]
+      [`(,binop ,triv1 ,triv2)
+       (define-values (insts tmp) (select-value e))
+       `(begin
+          ,@insts
+          (halt ,tmp))]
+      [_ `(halt ,e)]))
 
   (define (select-value e)
     (match e
-      [(? triv?) (values '() e)]
-      [`(,op ,triv1 ,triv2)
-       (if (and (binop? op) (triv? triv1) (triv? triv2))
-           (assign-tmp e)
-           (error (format "Expected binop and two trivs, got: ~a, ~a, ~a" op triv1 triv2)))]))
+      [`(,binop ,triv1 ,triv2)
+       #:when (and (binop? binop) (triv? triv1) (triv? triv2))
+       (assign-tmp e)]
+      [_ (values '() e)]))
 
   (define (select-effect e)
     (match e
@@ -53,11 +51,9 @@
           ,@insts
           (set! ,aloc ,tmp))]
       [`(begin
-          ,rest ...
-          ,last)
+          ,effects ...)
        `(begin
-          ,@(map select-effect rest)
-          ,(select-effect last))]))
+          ,@(map select-effect effects))]))
 
   (match p
     [`(module ,tail)

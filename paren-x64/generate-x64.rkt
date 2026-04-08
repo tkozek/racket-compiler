@@ -1,6 +1,8 @@
 #lang racket
 
-(require cpsc411/compiler-lib)
+(require cpsc411/compiler-lib
+         cpsc411/2c-run-time
+         cpsc411/langs/v2)
 
 (provide generate-x64
          interp-paren-x64)
@@ -57,7 +59,9 @@
   ;; returns displacement offset for a given address.
   (define (addr->dispoffset addr)
     (match addr
-      [`[,(current-frame-base-pointer-register) - dispoffset] dispoffset]))
+      [`(,fbp - ,dispoffset)
+       #:when (eq? (current-frame-base-pointer-register) fbp)
+       dispoffset]))
 
   ;; (paren-x64-v2 dispoffset) -> (x64 displacement mode operand)
   ;; Takes an offset and produces: QWORD [fbp - offset]
@@ -181,34 +185,34 @@
    "mov rdx, 2\nmov rsi, 3\nmov r11, 4\nimul rsi, rdx\nadd r11, -1\nadd r12, r11\nmov rax, r12\n")
 
   ;; END OF MILESTONE-1 generate-x64 TESTS
-  (check-equal (generate-x64 '(begin
-                                (set! (rbp - 0) 0)
-                                (set! (rbp - 8) 42)
-                                (set! rax (rbp - 0))
-                                (set! rax (+ rax (rbp - 8)))))
-               (~a "mov QWORD [rbp - 0], 0"
-                   "mov QWORD [rbp - 8], 42"
-                   "mov rax, QWORD [rbp - 0]"
-                   "add rax, QWORD [rbp - 8]"
-                   #:separator "\n"))
-  (check-equal (generate-x64 '(begin
-                                (set! (rbp - 0) -1)
-                                (set! (rbp - 8) 42)
-                                (set! rax (rbp - 0))
-                                (set! rax (* rax (rbp - 8)))))
-               (~a "mov QWORD [rbp - 0], -1"
-                   "mov QWORD [rbp - 8], 42"
-                   "mov rax, QWORD [rbp - 0]"
-                   "imul rax, QWORD [rbp - 8]"
-                   #:separator "\n"))
+  (check-equal? (generate-x64 '(begin
+                                 (set! (rbp - 0) 0)
+                                 (set! (rbp - 8) 42)
+                                 (set! rax (rbp - 0))
+                                 (set! rax (+ rax (rbp - 8)))))
+                (~a "mov QWORD [rbp - 0], 0"
+                    "mov QWORD [rbp - 8], 42"
+                    "mov rax, QWORD [rbp - 0]"
+                    "add rax, QWORD [rbp - 8]"
+                    #:separator "\n"))
+  (check-equal? (generate-x64 '(begin
+                                 (set! (rbp - 0) -1)
+                                 (set! (rbp - 8) 42)
+                                 (set! rax (rbp - 0))
+                                 (set! rax (* rax (rbp - 8)))))
+                (~a "mov QWORD [rbp - 0], -1"
+                    "mov QWORD [rbp - 8], 42"
+                    "mov rax, QWORD [rbp - 0]"
+                    "imul rax, QWORD [rbp - 8]"
+                    #:separator "\n"))
 
-  (check-equal (generate-x64 '(begin
-                                (set! (rbp - 8) ,(max-int 32))
-                                (set! (rbp - 0) ,(min-int 32))
-                                (set! rax (rbp - 0))
-                                (set! rax (+ rax (rbp - 8)))))
-               (~a "mov QWORD [rbp - 8], 2147483647\n"
-                   "mov QWORD [rbp - 0], -2147483648\n"
-                   "mov rax, QWORD [rbp - 0]"
-                   "add rax, QWORD [rbp - 8]"
-                   #:separator "\n")))
+  (check-equal? (generate-x64 '(begin
+                                 (set! (rbp - 8) ,(max-int 32))
+                                 (set! (rbp - 0) ,(min-int 32))
+                                 (set! rax (rbp - 0))
+                                 (set! rax (+ rax (rbp - 8)))))
+                (~a "mov QWORD [rbp - 8], 2147483647\n"
+                    "mov QWORD [rbp - 0], -2147483648\n"
+                    "mov rax, QWORD [rbp - 0]"
+                    "add rax, QWORD [rbp - 8]"
+                    #:separator "\n")))

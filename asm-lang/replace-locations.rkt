@@ -1,6 +1,7 @@
 #lang racket
 
 (require cpsc411/compiler-lib
+         cpsc411/langs/v2
          "../util.rkt")
 
 (provide replace-locations)
@@ -27,20 +28,19 @@
     (match aloc
       [(? int64?) aloc]
       [(? aloc?)
-       (when (and (aloc? aloc) (hash-ref assignments aloc #f))
-         (hash-ref assignments aloc))]))
+       #:when (and (aloc? aloc) (hash-ref assignments aloc #f))
+       (hash-ref assignments aloc)]))
 
   (define (replace-effect effect)
     (match effect
       [`(set! ,aloc1 (,binop ,aloc1 ,triv))
+       #:when (binop? binop)
        `(set! ,(replace-aloc aloc1) (,binop ,(replace-aloc aloc1) ,(replace-aloc triv)))]
       [`(set! ,aloc ,triv) `(set! ,(replace-aloc aloc) ,(replace-aloc triv))]
       [`(begin
-          ,first
-          ,rest ...)
+            ,effects ...)
        `(begin
-          ,(replace-effect first)
-          ,@(map replace-effect rest))]))
+          ,@(map replace-effect effects))]))
 
   (define (replace-tail tail)
     (match tail

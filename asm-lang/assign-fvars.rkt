@@ -1,6 +1,7 @@
 #lang racket
 
 (require cpsc411/compiler-lib
+         cpsc411/langs/v2
          "../util.rkt")
 
 (provide assign-fvars)
@@ -18,27 +19,30 @@
   (define (assign-effect effect)
     (match effect
       [`(set! ,aloc1 (,binop ,aloc1 ,triv))
-       (assign-aloc aloc1)
-       (assign-aloc triv)]
+       #:when (binop? binop)
+       (begin
+         (assign-aloc aloc1)
+         (assign-aloc triv))]
       [`(set! ,aloc ,triv)
-       (assign-aloc aloc)
-       (assign-aloc triv)]
+       (begin
+         (assign-aloc aloc)
+         (assign-aloc triv))]
       [`(begin
           ,first
           ,rest)
-       (assign-effect first)
-       (for-each assign-effect rest)]))
+       (begin
+         (assign-effect first)
+         (for-each assign-effect rest))]))
 
   (define (assign-tail tail)
     (match tail
-      [`(halt ,triv)
-       #:when (triv? triv)
-       (assign-aloc triv)]
+      [`(halt ,triv) (assign-aloc triv)]
       [`(begin
           ,effects ...
           ,tail)
-       (for-each assign-effect effects)
-       (assign-tail tail)]))
+       (begin
+         (for-each assign-effect effects)
+         (assign-tail tail))]))
 
   (define (assign-p p)
     (match p

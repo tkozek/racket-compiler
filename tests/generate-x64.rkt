@@ -1,6 +1,7 @@
 #lang racket
 (require rackunit
          cpsc411/langs/v2
+         cpsc411/compiler-lib
          (only-in "../paren-x64/generate-x64.rkt" generate-x64))
 
 (define (check-paren-x64-v2 p)

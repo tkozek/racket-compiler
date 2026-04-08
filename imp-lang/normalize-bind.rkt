@@ -13,14 +13,16 @@
   ;; (Imp-mf-lang-v3 effect) -> (Imp-cmf-lang-v3 effect)
   (define (normalize-effect effect)
     (match effect
-      [`(set! ,aloc
-              (begin
-                ,effects ...
-                ,value))
-       `(begin
-          ,@(map normalize-effect effects)
-          (set! ,aloc ,(normalize-value value)))]
-      [`(set! ,aloc ,value) `(set! ,aloc ,(normalize-value value))]
+      [`(set! ,aloc ,value)
+       (let ([normalized-val (normalize-value value)])
+         (match normalized-val
+           [`(begin
+               ,effects ...
+               ,body)
+            `(begin
+               ,@effects
+               (set! ,aloc ,body))]
+           [_ `(set! ,aloc ,normalized-val)]))]
       [`(begin
           ,effects ...)
        `(begin
