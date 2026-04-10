@@ -29,7 +29,7 @@
 (require "normalize-bind.rkt")
 (require "select-instructions.rkt")
 (require "target-nested-asm-lang-v2/all-exports.rkt")
-(require "flatten-begins.rkt")
+
 (require "patch-instructions.rkt")
 (require "expose-basic-blocks.rkt")
 (require "assign-frame-variables.rkt")
