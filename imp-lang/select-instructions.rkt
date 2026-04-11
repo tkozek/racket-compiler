@@ -54,9 +54,4 @@
           )]))
   (select-p p))
 
-(module+ test
-  (require rackunit
-           cpsc411/langs/v2
-           cpsc411/langs/v3)
-  (define-syntax-rule (check-by-interp p)
-    (check-equal? (interp-imp-cmf-lang-v3 p) (interp-asm-lang-v2 (select-instructions p)))))
+

@@ -5,7 +5,8 @@
          cpsc411/langs/v2)
 
 (provide generate-x64
-         interp-paren-x64)
+         interp-paren-x64
+         check-paren-x64)
 ; p	 	::=	 	(begin s ...)
 
 ;   s	 	::=	 	(set! addr int32)

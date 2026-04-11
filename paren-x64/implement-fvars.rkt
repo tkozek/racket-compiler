@@ -58,10 +58,3 @@
        `(begin
           ,@(map implement-s s))]))
   (implement-p p))
-
-(module+ test
-  (require rackunit
-           cpsc411/langs/v2
-           cpsc411/langs/v3)
-  (define-syntax-rule (check-by-interp p)
-    (check-equal? (interp-paren-x64-fvars-v2 p) (interp-paren-x64-v2 (implement-fvars p)))))

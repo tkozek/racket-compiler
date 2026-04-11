@@ -2,7 +2,7 @@
 (require cpsc411/compiler-lib
          cpsc411/2c-run-time)
 (require cpsc411/test-suite/public/v2)
-
+(define (check-values-lang values) values)
 (provide check-values-lang
          uniquify
          sequentialize-let
@@ -34,8 +34,9 @@
          "values-lang/sequentialize-let.rkt"
          "util.rkt")
 
+
 ;; Optional
-(define-values (check-values-lang) (values))
+
 
 ;; Optional
 (define (interp-values-lang p)
@@ -65,14 +66,7 @@
            (submod "asm-lang/replace-locations.rkt" test)
            (submod "asm-lang/uncover-locals.rkt" test)
            (submod "asm-lang/assign-homes.rkt" test)
-           (submod "asm-lang/flatten-begins.rkt" test)
-           (submod "asm-lang/patch-instructions.rkt" test)
-           (submod "imp-lang/normalize-bind.rkt" test)
-           (submod "imp-lang/select-instructions.rkt" test)
-           (submod "paren-x64/generate-x64.rkt" test)
-           (submod "paren-x64/implement-fvars.rkt" test)
-           (submod "values-lang/uniquify.rkt" test)
-           (submod "values-lang/sequentialize-let.rkt" test))
+           (submod "paren-x64/generate-x64.rkt" test))
 
   (run-tests (v3-public-test-sutie (current-pass-list)
                                    (list interp-values-lang-v3

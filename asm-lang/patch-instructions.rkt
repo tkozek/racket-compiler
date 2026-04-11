@@ -78,10 +78,3 @@
           (set! ,(current-return-value-register) ,triv))]))
 
   (patch-p p))
-
-(module+ test
-  (require rackunit
-           cpsc411/langs/v2
-           cpsc411/langs/v3)
-  (define-syntax-rule (check-by-interp p)
-    (check-equal? (interp-para-asm-lang-v2 p) (interp-paren-x64-fvars-v2 (patch-instructions p)))))
