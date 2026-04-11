@@ -27,7 +27,7 @@
          "asm-lang/flatten-begins.rkt"
          "asm-lang/patch-instructions.rkt"
          "imp-lang/normalize-bind.rkt"
-         "imp-=lang/select-instructions.rkt"
+         "imp-lang/select-instructions.rkt"
          "paren-x64/implement-fvars.rkt"
          "paren-x64/generate-x64.rkt"
          "values-lang/uniquify.rkt"
