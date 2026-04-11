@@ -14,6 +14,30 @@
   (check-equal? (interp-asm-lang-v2 (check-asm-lang-v2 (select-instructions p)))
                 (interp-imp-cmf-lang-v3 (check-imp-cmf-lang-v3 p))))
 
+(check-by-interp '(module (begin
+                            (set! x.1 2)
+                            (set! x.1 (+ x.1 x.1))
+                            (set! x.2 5)
+                            (set! x.2 (+ x.1 x.2))
+                            (+ x.2 x.2))))
+(check-by-interp '(module (begin
+                            (set! x.1 2)
+                            (set! x.1 (+ x.1 x.1))
+                            (set! x.2 5)
+                            (set! x.2 (+ x.1 x.2))
+                            (* x.2 x.1))))
+(check-by-interp '(module (begin
+                            (set! x.1 2)
+                            (set! x.1 (+ x.1 x.1))
+                            (set! x.2 5)
+                            (set! x.2 (+ x.1 x.2))
+                            (+ x.2 5))))
+(check-by-interp '(module (begin
+                            (set! x.1 2)
+                            (set! x.1 (+ x.1 x.1))
+                            (set! x.2 5)
+                            (set! x.2 (+ x.1 x.2))
+                            (+ 52 x.2))))
 ;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module (begin

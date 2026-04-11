@@ -9,56 +9,50 @@
 ;; (imp-cmf-lang-v3) -> (asm-lang-v2)
 ;; Selects appropriate sequences of abstract assembly instructions to implement ops of src lang
 (define (select-instructions p)
-  ; (Imp-cmf-lang-v3 value) -> (List-of (Asm-lang-v2 effect)) and (Asm-lang-v2 aloc)
+
+  ; (imp-cmf-lang-v3 value) -> (values '(asm-lang-v2 effect) (asm-lang-v2 aloc))
   ; Assigns the value v to a fresh temporary, returning two values: the list of
-  ; statements the implement the assignment in Loc-lang, and the aloc that the
+  ; statements that implement the assignment in asm-lang, and the aloc that the
   ; value is stored in.
   (define (assign-tmp v)
     (define tmp (fresh))
     (match v
       [`(,binop ,triv1 ,triv2)
-       (values (list `(set! ,tmp ,triv1) `(set! ,tmp (,binop ,tmp ,triv2)))
-               tmp) ;; values returns all its args
-       ]))
+       (values (list `(set! ,tmp ,triv1) `(set! ,tmp (,binop ,tmp ,triv2))) tmp)]))
 
   (define (select-tail e)
     (match e
       [`(begin
-          ,effects
-          ,body)
+          ,effects ...
+          ,tail)
        `(begin
-          ,@(map select-effect effects)
-          ,(select-tail body))]
+          ,@(append-map select-effect effects)
+          ,(select-tail tail))]
       [`(,binop ,triv1 ,triv2)
-       (define-values (insts tmp) (select-value e))
+       (define-values (insts tmp) (assign-tmp e))
        `(begin
           ,@insts
           (halt ,tmp))]
       [_ `(halt ,e)]))
 
-  (define (select-value e)
-    (match e
-      [`(,binop ,triv1 ,triv2)
-       #:when (and (binop? binop) (triv? triv1) (triv? triv2))
-       (assign-tmp e)]
-      [_ (values '() e)]))
-
   (define (select-effect e)
     (match e
-      [`(set! ,aloc ,v)
-       (define-values (insts tmp) (select-value v))
-       `(begin
-          ,@insts
-          (set! ,aloc ,tmp))]
+      [`(set! ,aloc (,binop ,aloc ,triv)) (list e)]
+      [`(set! ,aloc (,binop ,triv1 ,triv2))
+       (define-values (insts tmp) (assign-tmp `(,binop ,triv1 ,triv2)))
+       (append insts (list `(set! ,aloc ,tmp)))]
+      [`(set! ,aloc ,triv) (list e)]
       [`(begin
           ,effects ...)
-       `(begin
-          ,@(map select-effect effects))]))
+       (list `(begin
+                ,@(append-map select-effect effects)))]))
 
-  (match p
-    [`(module ,tail)
-     `(module () ,(select-tail tail)
-        )]))
+  (define (select-p p)
+    (match p
+      [`(module ,tail)
+       `(module () ,(select-tail tail)
+          )]))
+  (select-p p))
 
 (module+ test
   (require rackunit
