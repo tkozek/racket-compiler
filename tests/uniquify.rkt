@@ -1,5 +1,6 @@
 #lang racket
 (require rackunit
+         cpsc411/compiler-lib
          cpsc411/langs/v2
          cpsc411/langs/v3
          (only-in "../values-lang/uniquify.rkt" uniquify))
@@ -14,6 +15,9 @@
   (check-equal? (interp-values-unique-lang-v3 (check-values-unique-lang-v3 (uniquify p)))
                 (interp-values-lang-v3 (check-values-lang-v3 p))))
 
+(check-match (uniquify '(module (let ([x 2]) (let ([x 3]) x))))
+             `(module (let ([,x.1 2]) (let ([,x.2 3]) ,x.2)))
+             (and (aloc? x.1) (aloc? x.2) (not (equal? x.1 x.2))))
 ;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module (let ()

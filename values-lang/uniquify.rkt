@@ -24,7 +24,7 @@
   ;; along with the updated environment
   ;; ('(name) '(value) '(name : aloc)) -> ((values '((aloc value)) '(name : aloc)))
   (define (uniquify-pairs xs vals env)
-    (define alocs (map (lambda (x) (dict-ref env x (fresh x))) xs))
+    (define alocs (map (lambda (x) (fresh x)) xs))
     ;; n lists input to foldl, requires n + 1 args in lambda, last arg is an accumulator
     ;; (the environment in this case). accumulator must be passed before the n lists
     (define new-env (foldl (lambda (x aloc e) (dict-set e x aloc)) env xs alocs))
