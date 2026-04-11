@@ -12,7 +12,68 @@
 (define-syntax-rule (check-by-interp p)
   (check-equal? (interp-para-asm-lang-v2 (check-para-asm-lang-v2 (flatten-begins p)))
                 (interp-nested-asm-lang-v2 (check-nested-asm-lang-v2 p))))
+(check-equal? (flatten-begins '(halt 1))
+              '(begin
+                 (halt 1)))
+(check-by-interp '(begin
+                    (set! fv0 1)
+                    (begin
+                      (set! rbx 5)
+                      (set! rbx (+ rbx 2))
+                      (begin
+                        (set! rcx rbx)))
+                    (begin
+                      (set! rcx 2))
+                    (set! fv1 -1)
+                    (halt 0)))
+(check-equal? '(begin
+                 (set! fv0 1)
+                 (set! rbx 5)
+                 (set! rbx (+ rbx 2))
+                 (set! rcx rbx)
+                 (set! rcx 2)
+                 (set! fv1 -1)
+                 (halt 0))
+              (flatten-begins '(begin
+                                 (set! fv0 1)
+                                 (begin
+                                   (set! rbx 5)
+                                   (set! rbx (+ rbx 2))
+                                   (begin
+                                     (set! rcx rbx)))
+                                 (begin
+                                   (set! rcx 2))
+                                 (set! fv1 -1)
+                                 (halt 0))))
 
+(check-by-interp '(begin
+                    (set! fv0 1)
+                    (set! fv1 0)
+                    (begin
+                      (begin
+                        (begin
+                          (begin
+                            (begin
+                              (begin
+                                (set! fv0 fv1)))))))
+                    (halt fv0)))
+
+(check-equal? '(begin
+                 (set! fv0 1)
+                 (set! fv1 0)
+                 (set! fv0 fv1)
+                 (halt fv0))
+              (flatten-begins '(begin
+                                 (set! fv0 1)
+                                 (set! fv1 0)
+                                 (begin
+                                   (begin
+                                     (begin
+                                       (begin
+                                         (begin
+                                           (begin
+                                             (set! fv0 fv1)))))))
+                                 (halt fv0))))
 ;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(begin

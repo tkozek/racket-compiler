@@ -11,31 +11,23 @@
 
   (define (flatten-effect effect)
     (match effect
-      [`(set! ,loc1 (,binop ,loc1 ,triv)) effect]
-      [`(set! ,loc ,triv) effect]
       [`(begin
-          ,first
-          ,rest ...)
-       (append (flatten-effect first) (map flatten-effect rest))]))
+          ,effects ...
+          ,last)
+       (append (append-map flatten-effect effects) (flatten-effect last))]
+      [_ (list effect)]))
 
   (define (flatten-tail tail)
     (match tail
-      [`(halt ,triv) tail]
       [`(begin
           ,effects ...
           ,tail)
-       (append (map flatten-effect effects) (flatten-tail tail))]))
+       (append (append-map flatten-effect effects) (flatten-tail tail))]
+      [_ (list tail)]))
 
   (define (flatten-p p)
-    (match p
-      [`(begin
-          ,effects ...
-          tail)
-       `(begin
-          ,@(flatten-tail p))]
-      [`(halt ,triv)
-       `(begin
-          ,p)]))
+    `(begin
+       ,@(flatten-tail p)))
 
   (flatten-p p))
 
