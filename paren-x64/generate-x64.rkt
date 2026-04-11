@@ -78,9 +78,6 @@
       ['+ "add"]
       ['* "imul"]))
 
-  ;   (define (loc->x64 loc)
-  ;     (TODO "generate-x64"))
-
   ; (paren-x64-v2 s) -> x64-instruction-sequence
   (define (statement->x64 s)
     (match s
@@ -106,37 +103,18 @@
   (program->x64 p))
 
 ;; stub
+(define (check-paren-x64 p)
+  p)
+;; stub
 (define (interp-paren-x64 p)
-  ;   ; Environment (List-of (paren-x64-v2 Statements)) -> Integer
-  ;   (define (eval-instruction-sequence env sls)
-  ;     (if (empty? sls)
-  ;         (dict-ref env 'rax)
-  ;         (TODO "Implement the fold over a sequence of Paren-x64-v2 /s/.")))
-
-  ;   ; Environment Statement -> Environment
-  ;   (define (eval-statement env s)
-  ;     (TODO "Implement the transition function evaluating a Paren-x64-v2 /s/."))
-
-  ;   ; (Paren-x64-v2 binop) -> procedure?
-  ;   (define (eval-binop b)
-  ;     (TODO "Implement the interpreter for Paren-x64-v2 /binop/."))
-
-  ;   ; Environment (Paren-x64-v2 triv) -> Integer
-  ;   (define (eval-triv regfile t)
-  ;     (TODO "Implement the interpreter for Paren-x64-v2 /triv/."))
-
-  ;   (TODO "Implement the interpreter for Paren-x64-v2 /p/.")
-
   0)
+(current-pass-list (list check-paren-x64 generate-x64 wrap-x64-run-time wrap-x64-boilerplate))
 
 (module+ test
   (require rackunit
            cpsc411/2c-run-time
            cpsc411/langs/v2
            cpsc411/langs/v3)
-
-  (define-syntax-rule (check-by-interp p)
-    (check-equal? (interp-paren-x64-v2 p) (execute (wrap-x64-boilerplate (generate-x64 p)))))
 
   ;; START OF MILESTONE-1 generate-x64 TESTS
   (check-equal? (generate-x64 `(begin
@@ -193,7 +171,7 @@
                 (~a "mov QWORD [rbp - 0], 0"
                     "mov QWORD [rbp - 8], 42"
                     "mov rax, QWORD [rbp - 0]"
-                    "add rax, QWORD [rbp - 8]"
+                    "add rax, QWORD [rbp - 8]\n"
                     #:separator "\n"))
   (check-equal? (generate-x64 '(begin
                                  (set! (rbp - 0) -1)
@@ -203,16 +181,16 @@
                 (~a "mov QWORD [rbp - 0], -1"
                     "mov QWORD [rbp - 8], 42"
                     "mov rax, QWORD [rbp - 0]"
-                    "imul rax, QWORD [rbp - 8]"
+                    "imul rax, QWORD [rbp - 8]\n"
                     #:separator "\n"))
 
-  (check-equal? (generate-x64 '(begin
+  (check-equal? (generate-x64 `(begin
                                  (set! (rbp - 8) ,(max-int 32))
                                  (set! (rbp - 0) ,(min-int 32))
                                  (set! rax (rbp - 0))
                                  (set! rax (+ rax (rbp - 8)))))
-                (~a "mov QWORD [rbp - 8], 2147483647\n"
-                    "mov QWORD [rbp - 0], -2147483648\n"
+                (~a "mov QWORD [rbp - 8], 2147483647"
+                    "mov QWORD [rbp - 0], -2147483648"
                     "mov rax, QWORD [rbp - 0]"
-                    "add rax, QWORD [rbp - 8]"
+                    "add rax, QWORD [rbp - 8]\n"
                     #:separator "\n")))

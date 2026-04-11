@@ -2,13 +2,14 @@
 (require rackunit
          cpsc411/langs/v2
          cpsc411/compiler-lib
+         cpsc411/2c-run-time
          (only-in "../paren-x64/generate-x64.rkt" generate-x64))
 
 (define (check-paren-x64-v2 p)
   (if (paren-x64-v2? p) p #f))
 
 (define-syntax-rule (check-by-interp p)
-  (check-equal? (execute (generate-x64 p)) (interp-paren-x64-v2 (check-paren-x64-v2 p))))
+  (check-equal? (execute p) (interp-paren-x64-v2 (check-paren-x64-v2 p))))
 
 ;;; Added by Trevor on 2026-03-18
 

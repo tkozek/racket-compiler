@@ -35,8 +35,7 @@
          "util.rkt")
 
 ;; Optional
-(define (check-paren-x64 p)
-  p)
+(define-values (check-values-lang) (values))
 
 ;; Optional
 (define (interp-values-lang p)
