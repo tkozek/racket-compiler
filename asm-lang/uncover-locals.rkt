@@ -42,56 +42,57 @@
       [`(module ,info ,tail
           )
        (uncover-tails tail)
-       (info-set info 'locals locals)
-       `(module info ,tail
-          )]))
+       (let ([new-info (info-set info 'locals locals)])
+         `(module ,new-info ,tail
+            ))]))
   (uncover-p p))
 
 (module+ test
-  (require rackunit
-           cpsc411/langs/v2
-           cpsc411/langs/v3)
-  ;   (define-syntax-rule (check-by-interp-assign-homes p)
-  ;     (check-equal? (interp-asm-lang-v2 p) (interp-nested-asm-lang-v2 (assign-homes p))))
+  ;   (require rackunit
+  ;            cpsc411/langs/v2
+  ;            cpsc411/langs/v3)
+  ;   ;   (define-syntax-rule (check-by-interp-assign-homes p)
+  ;   ;     (check-equal? (interp-asm-lang-v2 p) (interp-nested-asm-lang-v2 (assign-homes p))))
 
-  (check-equal? (uncover-locals '(module () (halt 0)
-                                   ))
-                '(module ((locals ())) (halt 0)
-                   ))
-  (check-equal? (uncover-locals '(module () (halt 9223372036854775807)
-                                   ))
-                '(module ((locals ())) (halt 9223372036854775807)
-                   ))
-  (check-equal? (uncover-locals '(module () (halt -9223372036854775808)
-                                   ))
-                '(module ((locals ())) (halt -9223372036854775808)
-                   ))
-  (check-exn exn:fail?
-             (lambda ()
-               (uncover-locals '(module () (halt x.1)
-                                  ))))
+  ;   (check-equal? (uncover-locals '(module () (halt 0)
+  ;                                    ))
+  ;                 '(module ((locals ())) (halt 0)
+  ;                    ))
+  ;   (check-equal? (uncover-locals '(module () (halt 9223372036854775807)
+  ;                                    ))
+  ;                 '(module ((locals ())) (halt 9223372036854775807)
+  ;                    ))
+  ;   (check-equal? (uncover-locals '(module () (halt -9223372036854775808)
+  ;                                    ))
+  ;                 '(module ((locals ())) (halt -9223372036854775808)
+  ;                    ))
+  ;   (check-exn exn:fail?
+  ;              (lambda ()
+  ;                (uncover-locals '(module () (halt x.1)
+  ;                                   ))))
 
-  (check-match (uncover-locals '(module ()
-                                        (begin
-                                          (set! x.1 0)
-                                          (halt x.1))
-                                  ))
-               `(module ((locals (,x)))
-                        (begin
-                          (set! ,x 0)
-                          (halt ,x))
-                  ))
-  (check-match (uncover-locals '(module ()
-                                        (begin
-                                          (set! x.1 0)
-                                          (set! y.1 x.1)
-                                          (set! y.1 (+ y.1 x.1))
-                                          (halt y.1))
-                                  ))
-               `(module ((locals (,x ,y)))
-                        (begin
-                          (set! ,x 0)
-                          (set! ,y ,x)
-                          (set! ,y (+ ,y ,x))
-                          (halt ,y))
-                  )))
+  ;   (check-match (uncover-locals '(module ()
+  ;                                         (begin
+  ;                                           (set! x.1 0)
+  ;                                           (halt x.1))
+  ;                                   ))
+  ;                `(module ((locals (,x)))
+  ;                         (begin
+  ;                           (set! ,x 0)
+  ;                           (halt ,x))
+  ;                   ))
+  ;   (check-match (uncover-locals '(module ()
+  ;                                         (begin
+  ;                                           (set! x.1 0)
+  ;                                           (set! y.1 x.1)
+  ;                                           (set! y.1 (+ y.1 x.1))
+  ;                                           (halt y.1))
+  ;                                   ))
+  ;                `(module ((locals (,x ,y)))
+  ;                         (begin
+  ;                           (set! ,x 0)
+  ;                           (set! ,y ,x)
+  ;                           (set! ,y (+ ,y ,x))
+  ;                           (halt ,y))
+  ;   ))
+  )

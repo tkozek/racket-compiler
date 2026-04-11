@@ -9,48 +9,20 @@
 ;; (asm-lang-v2/locals) -> (asm-lang-v2/assignments)
 ;; Assigns each aloc from the locals info field to a fresh frame variable
 (define (assign-fvars p)
-  (define fvar-counter 0)
-  (define assignments (make-hash))
-  (define (assign-aloc aloc)
-    (when (and (aloc? aloc) (not (hash-has-key? assignments aloc)))
-      (hash-set! assignments aloc (make-fvar fvar-counter))
-      (set! fvar-counter (add1 fvar-counter))))
 
-  (define (assign-effect effect)
-    (match effect
-      [`(set! ,aloc1 (,binop ,aloc1 ,triv))
-       #:when (binop? binop)
-       (begin
-         (assign-aloc aloc1)
-         (assign-aloc triv))]
-      [`(set! ,aloc ,triv)
-       (begin
-         (assign-aloc aloc)
-         (assign-aloc triv))]
-      [`(begin
-          ,first
-          ,rest)
-       (begin
-         (assign-effect first)
-         (for-each assign-effect rest))]))
-
-  (define (assign-tail tail)
-    (match tail
-      [`(halt ,triv) (assign-aloc triv)]
-      [`(begin
-          ,effects ...
-          ,tail)
-       (begin
-         (for-each assign-effect effects)
-         (assign-tail tail))]))
+  ;; '(aloc) -> '((aloc . fvar))
+  ;; assigns each aloc in locals to an fvar
+  (define (make-assignment locals)
+    (for/list ([aloc locals]
+               [i (range (length locals))])
+      `(,aloc ,(make-fvar i))))
 
   (define (assign-p p)
     (match p
       [`(module ,info ,tail
           )
-       (assign-tail tail) ; (list (k v)) for k, v in assignments
-       (info-set info 'assignment (hash->list assignments))
-       `(module info tail
+       (define locals (info-ref info 'locals))
+       `(module ,(info-set info 'assignment (make-assignment locals)) ,tail
           )]))
   (assign-p p))
 
@@ -58,8 +30,6 @@
   (require rackunit
            cpsc411/langs/v2
            cpsc411/langs/v3)
-  (define-syntax-rule (check-by-interp-assign-homes p)
-    (check-equal? (interp-asm-lang-v2 p) (interp-nested-asm-lang-v2 (assign-homes p))))
 
   (check-match (assign-fvars '(module ((locals (x.1)))
                                       (begin

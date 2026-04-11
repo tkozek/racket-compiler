@@ -12,7 +12,16 @@
 (define-syntax-rule (check-by-interp p)
   (check-equal? (interp-nested-asm-lang-v2 (check-nested-asm-lang-v2 (assign-homes p)))
                 (interp-asm-lang-v2 (check-asm-lang-v2 p))))
-
+(check-by-interp '(module () (halt 3)
+                    ))
+(check-by-interp '(module ()
+                          (begin
+                            (set! x.1 1)
+                            (begin
+                              (set! x.1 (+ x.1 1))
+                              (set! y.1 x.1))
+                            (halt y.1))
+                    ))
 ;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(module ()

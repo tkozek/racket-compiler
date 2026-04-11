@@ -9,55 +9,40 @@
 ;; (asm-lang-v2/assignments) -> (nested-asm-lang-v2)
 ;; Replaces each aloc with its assigned physical location from the assignment info field
 (define (replace-locations p)
-  (define assignments (make-hash))
 
-  ;; for every assignment pair in info, add an entry to assignments that maps
-  ;; the aloc to the fvar
-  (define (init-assignments info)
-    (for-each (lambda (pair)
-                (let ([aloc (first pair)]
-                      [fvar (second pair)])
-                  (hash-set! assignments aloc fvar)))
-              (info-ref info 'assignment)))
+  (define (replace-triv triv assignment)
+    (match triv
+      [(? int64?) triv]
+      [(? aloc?) (replace-aloc triv assignment)]))
 
-  ; (define (replace-aloc aloc)
-  ;     (when (and (aloc? aloc)
-  ;                 (hash-ref assignments aloc #f))
-  ;             (hash-ref assignments aloc)))
-  (define (replace-aloc aloc)
-    (match aloc
-      [(? int64?) aloc]
-      [(? aloc?)
-       #:when (and (aloc? aloc) (hash-ref assignments aloc #f))
-       (hash-ref assignments aloc)]))
+  (define (replace-aloc aloc assignment)
+    (info-ref assignment aloc))
 
-  (define (replace-effect effect)
+  (define (replace-effect effect assignment)
     (match effect
       [`(set! ,aloc1 (,binop ,aloc1 ,triv))
-       #:when (binop? binop)
-       `(set! ,(replace-aloc aloc1) (,binop ,(replace-aloc aloc1) ,(replace-aloc triv)))]
-      [`(set! ,aloc ,triv) `(set! ,(replace-aloc aloc) ,(replace-aloc triv))]
+       (define loc (replace-aloc aloc1 assignment))
+       `(set! ,loc (,binop ,loc ,(replace-triv triv assignment)))]
+      [`(set! ,aloc ,triv) `(set! ,(replace-aloc aloc assignment) ,(replace-triv triv assignment))]
       [`(begin
-            ,effects ...)
+          ,effects ...)
        `(begin
-          ,@(map replace-effect effects))]))
+          ,@(map (λ (e) (replace-effect e assignment)) effects))]))
 
-  (define (replace-tail tail)
+  (define (replace-tail tail assignment)
     (match tail
-      [`(halt ,triv) `(halt ,(replace-aloc triv))]
+      [`(halt ,triv) `(halt ,(replace-triv triv assignment))]
       [`(begin
           ,effects ...
           ,tail)
        `(begin
-          ,@(map replace-effect effects)
-          ,(replace-tail tail))]))
-
+          ,@(map (λ (e) (replace-effect e assignment)) effects)
+          ,(replace-tail tail assignment))]))
   (define (replace-p p)
     (match p
       [`(module ,info ,tail
           )
-       (init-assignments info)
-       (replace-tail tail)]))
+       (replace-tail tail (info-ref info 'assignment))]))
 
   (replace-p p))
 
