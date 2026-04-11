@@ -13,6 +13,22 @@
   (check-equal? (interp-paren-x64-fvars-v2 (check-paren-x64-fvars-v2 (patch-instructions p)))
                 (interp-para-asm-lang-v2 (check-para-asm-lang-v2 p))))
 
+(check-by-interp '(begin
+                    (set! rbx 9223372036854775807)
+                    (set! rcx -9223372036854775808)
+                    (set! rdi 0)
+                    (set! rcx rdi)
+                    (set! rbx (+ rbx rcx))
+                    (set! rcx (+ rcx 9223372036854775807))
+                    (halt rcx)))
+(check-by-interp '(begin
+                    (set! rbx 854775)
+                    (set! rcx -9)
+                    (set! rdi 2)
+                    (set! rcx rdi)
+                    (set! rbx (* rbx rcx))
+                    (set! rcx (* rcx 922337203685477580))
+                    (halt rcx)))
 ;;; Added by Trevor on 2026-03-18
 
 (check-by-interp '(begin
