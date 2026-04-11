@@ -18,7 +18,7 @@
   (define (uniquify-triv triv env)
     (match triv
       [(? int64?) triv]
-      [_ (dict-ref env triv (fresh triv))]))
+      [_ (dict-ref env triv (λ () (fresh triv)))]))
 
   ;; maps names to abstract locations, updates environment with these new bindings and returns them
   ;; along with the updated environment

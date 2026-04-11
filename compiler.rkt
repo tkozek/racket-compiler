@@ -2,7 +2,7 @@
 (require cpsc411/compiler-lib
          cpsc411/2c-run-time)
 (require cpsc411/test-suite/public/v2)
-(define (check-values-lang values) values)
+
 (provide check-values-lang
          uniquify
          sequentialize-let
@@ -19,6 +19,10 @@
          generate-x64
          interp-values-lang
          interp-paren-x64)
+         
+;; Optional
+(define (check-values-lang values)
+  values)
 
 (require "asm-lang/assign-fvars.rkt"
          "asm-lang/replace-locations.rkt"
@@ -33,9 +37,6 @@
          "values-lang/uniquify.rkt"
          "values-lang/sequentialize-let.rkt"
          "util.rkt")
-
-
-;; Optional
 
 
 ;; Optional
