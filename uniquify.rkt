@@ -5,7 +5,9 @@
 
 (provide uniquify)
 
-; exprs-lang-v9 -> exprs-unique-lang-v9
+;; (Exprs-lang-v9 p)-> (Exprs-unique-lang-v9 p)
+;; Compiles Exprs-lang-v9 to Exprs-unique-lang-v9 by
+;; resolving lexical identifiers into unique abstract locations.
 (define (uniquify p)
   ;; env is an immutable association list that maps x to aloc or prim-f
   (define DEFAULT-ENV (map cons prim-f prim-f))

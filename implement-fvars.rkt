@@ -3,7 +3,7 @@
          "common.rkt")
 (provide implement-fvars)
 
-; nested-asm-lang-fvars-v6 -> nested-asm-lang-v6
+;; (Nested-asm-lang-fvars-v8 p) -> (Nested-asm-lang-v8 p)
 ;; Reifies fvars into displacement mode operands
 (define (implement-fvars p)
   (define loc? (or/c register? fvar?))

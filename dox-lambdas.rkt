@@ -5,7 +5,7 @@
 
 (provide dox-lambdas)
 
-;; just-exprs-lang-v9 p -> lam-opticon-lang-v9 p
+;; (Just-exprs-lang-v9 p) -> (Lam-opticon-lang-v9 p)
 ;; Explicitly binds all procedures to abstract locations.
 (define (dox-lambdas p)
 

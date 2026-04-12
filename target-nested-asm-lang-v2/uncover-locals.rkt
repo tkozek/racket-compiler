@@ -4,7 +4,7 @@
          "../common.rkt")
 (provide uncover-locals)
 
-;; asm-pred-lang-v8 p -> asm-pred-lang-v8/locals p
+;; (Asm-pred-lang-v8 p) -> (Asm-pred-lang-v8/locals p)
 ;; Compiles Asm-pred-lang v8 to Asm-pred-lang v8/locals,
 ;; analysing which abstract locations are used in each block,
 ;; and updating each block and the module with the set of variables

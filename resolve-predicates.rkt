@@ -3,8 +3,8 @@
 (require cpsc411/compiler-lib)
 (provide resolve-predicates)
 
-;; block-pred-lang-v6 ->  block-asm-lang-v6
-;; Compile the Block-pred-lang v6 to Block-asm-lang v6 by manipulating the branches of
+;; (Block-pred-lang-v8 p) ->  (Block-asm-lang-v8 p)
+;; Compile the Block-pred-lang v8 to Block-asm-lang v8 by manipulating the branches of
 ;; if statements to resolve branches.
 (define (resolve-predicates p)
   (match p

@@ -4,6 +4,11 @@
          "common.rkt")
 
 (provide normalize-bind)
+
+;; (Imp-mf-lang v8 p) -> (Proc-imp-cmf-lang v8 p)
+;; Compiles Imp-mf-lang v4 to Imp-cmf-lang v4, pushing set!
+;; under begin and if so that the right-hand-side of each set!
+;;is a simple value-producing operation.
 (define (normalize-bind mf)
   (define (join-begin fx* tail)
     (match tail

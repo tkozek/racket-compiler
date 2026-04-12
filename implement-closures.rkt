@@ -5,7 +5,7 @@
 
 (provide implement-closures)
 
-;; (hoisted-lang-v9 p) -> (proc-exposed-lang-v9 p)
+;; (Hoisted-lang-v9 p) -> (Proc-exposed-lang-v9 p)
 ;; Implements closures in terms of the procedure data structure.
 (define (implement-closures p)
 

@@ -16,7 +16,7 @@
 (define (make-if pred tcase fcase)
   `(if ,pred ,tcase ,fcase))
 
-;; exprs-unsafe-data-lang-v9 -> exprs-unsafe-lang-v9
+;; (Exprs-unsafe-data-lang-v9 p) -> (Exprs-unsafe-lang-v9 p)
 ;; Implement call as an unsafe procedure call with dynamic checks.
 (define (implement-safe-call p)
 

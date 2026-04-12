@@ -70,8 +70,8 @@
 ;   label	 	::=	 	label?
 ;   rloc	 	::=	 	register? |	 	fvar?
 
-;; (asm-pred-lang-v6/spilled p) → (asm-pred-lang-v6/assignments p)
-;; Compiles Asm-pred-lang-v6/spilled to Asm-pred-lang-v6/assignments
+;; (asm-pred-lang-v8/spilled p) → (asm-pred-lang-v8/assignments p)
+;; Compiles Asm-pred-lang-v8/spilled to Asm-pred-lang-v8/assignments
 ;; by allocating all abstract locations in the locals set to free frame variables.
 (define (assign-frame-variables p)
   ; (pretty-display p)

@@ -7,7 +7,7 @@
 (provide specify-representation)
 ;; NB: only unsafe-vector-set! can appear in effect context
 
-;; (proc-exposed-lang-v9 p) -> (exprs-bits-lang-v8 p)
+;; (Proc-exposed-lang-v9 p) -> (Exprs-bits-lang-v8 p)
 ;; Compiles immediate data and primitive operations into their implementations as
 ;; ptrs and primitive bitwise operations on ptrs.
 (define (specify-representation p)

@@ -4,7 +4,7 @@
 
 (provide optimize-direct-calls)
 
-;; just-exprs-lang-v9 -> just-exprs-lang-v9
+;; (Just-exprs-lang-v9 p)-> (Just-exprs-lang-v9 p)
 ;; Inline all direct calls to first-class procedures.
 (define (optimize-direct-calls p)
   ;   triv	 	::=	 	aloc

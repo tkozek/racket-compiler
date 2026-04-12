@@ -11,6 +11,9 @@
 (define (make-fx aloc value)
   `(set! ,aloc ,value))
 
+;; (Values-bits-lang v8 p) -> (Imp-mf-lang v8 p)
+;; Compiles Values-unique-lang v8 to Imp-mf-lang v8 by picking a particular
+;; order to implement let expressions using set!.
 (define (sequentialize-let p)
   (define (make-fx+ aloc value)
     (make-fx aloc (seq-let-value value)))

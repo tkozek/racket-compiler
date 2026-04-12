@@ -6,8 +6,8 @@
 
 (provide allocate-frames)
 
-;; (asm-pred-lang-v6/pre-framed p)-> (asm-pred-lang-v6/framed p)
-;; Compiles Asm-pred-lang-v6/pre-framed to Asm-pred-lang-v6/framed by allocating frames for each
+;; (Asm-pred-lang-v8/pre-framed p)-> (Asm-pred-lang-v8/framed p)
+;; Compiles Asm-pred-lang-v8/pre-framed to Asm-pred-lang-v8/framed by allocating frames for each
 ;;  non-tail call, and assigning all new-frame variables to frame variables in the new frame.
 (define (allocate-frames p)
 

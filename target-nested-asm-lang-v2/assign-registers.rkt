@@ -25,9 +25,9 @@
 (define (remove-from-loy pair val)
   (list (car pair) (remove val (cadr pair))))
 
-;; (asm-pred-lang-v6/framed p) -> (asm-pred-lang-v6/spilled p)
-;; Performs graph-colouring register allocation, compiling Asm-pred-lang v6/framed
-;; to Asm-pred-lang v6/spilled by decorating programs with their register assignments.
+;; (Asm-pred-lang-v8/framed p) -> (Asm-pred-lang-v8/spilled p)
+;; Performs graph-colouring register allocation, compiling Asm-pred-lang v8/framed
+;; to Asm-pred-lang v8/spilled by decorating programs with their register assignments.
 (define (assign-registers p)
   (define spilled '())
 

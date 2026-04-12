@@ -5,7 +5,7 @@
 
 (provide hoist-lambdas)
 
-; (closure-lang-v9 p) -> (hoisted-lang-v9 p)
+; (Closure-lang-v9 p) -> (Hoisted-lang-v9 p)
 ; Hoists code to the top-level definitions.
 (define (hoist-lambdas p)
 

@@ -124,6 +124,11 @@
 ;; interp. it is a dict that maps the prim-f to its corresponding primop or label
 ;;            alongside the label's needed definitions, if it exists
 (define DEF-ENV (filter cdr (map cons (map car prim-f-specs) (map gen-defs prim-f-specs))))
+
+;; (Exprs-unique-lang v9 p) -> (Exprs-unsafe-data-lang v9 p)
+;; Implement safe primitive operations by inserting procedure
+;; definitions for each primitive operation which perform dynamic tag checking,
+;; to ensure type and memory safety.
 (define (implement-safe-primops p)
 
   ; usage is a a set of all prim-f referenced in this program p

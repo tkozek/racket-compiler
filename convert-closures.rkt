@@ -5,9 +5,7 @@
 
 (provide convert-closures)
 
-;; (lam-free-lang-v9 p) → (closure-lang-v9 p)
-;; Performs closure conversion, converting all procedures into explicit closures.
-;; lam-free-lang-v9 p -> closure-lang-v9 p
+;; (Lam-free-lang-v9 p) -> (Closure-lang-v9 p)
 ;; Make closures explicit using free variable info
 (define (convert-closures p)
 

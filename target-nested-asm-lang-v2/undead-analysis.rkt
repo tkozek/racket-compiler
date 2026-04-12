@@ -5,7 +5,7 @@
 
 (provide undead-analysis)
 
-;; (asm-pred-lang-v8/locals p) -> (asm-pred-lang-v8/undead p)
+;; (Asm-pred-lang-v8/locals p) -> (Asm-pred-lang-v8/undead p)
 ;; Performs undeadness analysis, decorating the program with undead-set tree.
 ;; Only the info field of the program is modified.
 (define (undead-analysis p)

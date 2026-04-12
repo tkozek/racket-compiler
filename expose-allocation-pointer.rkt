@@ -12,6 +12,7 @@
 ;;   (set! ,(current-heap-base-pointer-register) (+ ,(current-heap-base-pointer-register) ,index))
 ;;;  )
 
+;; (Asm-alloc-lang v8 p) -> (Asm-pred-lang v8 p)
 ;; Implements the allocation primitive in terms of pointer arithmetic on the
 ;;  current-heap-base-pointer-register
 (define (expose-allocation-pointer p)

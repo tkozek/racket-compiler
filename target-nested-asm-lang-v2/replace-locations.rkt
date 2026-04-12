@@ -4,7 +4,7 @@
          "../common.rkt")
 (provide replace-locations)
 
-; asm-pred-lang-v8/assignments -> nested-asm-lang-fvars-v8
+;; (Asm-pred-lang-v8/assignments p) -> (Nested-asm-lang-fvars-v8 p)
 ;; Replaces all abstract locations with physical locations, and removes register-allocation metadata
 ;; Precondition: all abstract locations have a corresponding physical location in the info metadata
 (define (replace-locations al2a)

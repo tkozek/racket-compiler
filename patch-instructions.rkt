@@ -5,7 +5,7 @@
 
 (provide patch-instructions)
 
-;; para-asm-lang-v8 -> paren-x64-mops-v8
+;; (Para-asm-lang-v8 p)-> (Paren-x64-mops-v8 p)
 ;; Compiles para-asm-lang-v8 to paren-x64-mops-v8 by patching each instruction that has no x64
 ;; analogue into a sequence of instructions using auxiliary
 ;; registers from current-patch-instruction-registers

@@ -5,7 +5,7 @@
 
 (provide uncover-free)
 
-;; lam-opticon-lang-v9 p -> lam-free-lang-v9 p
+;; (Lam-opticon-lang-v9 p) -> (Lam-free-lang-v9 p)
 ;; Explicitly annotate procedures with their free variable sets.
 (define (uncover-free p)
 

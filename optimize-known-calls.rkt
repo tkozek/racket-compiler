@@ -5,7 +5,7 @@
 
 (provide optimize-known-calls)
 
-; (closure-lang-v9 p) -> (closure-lang-v9 p)
+; (Closure-lang-v9 p) -> (Closure-lang-v9 p)
 ; Optimizes calls to known closures.
 (define (optimize-known-calls p)
 
