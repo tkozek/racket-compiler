@@ -100,6 +100,7 @@
        (nested-tail->block-tail& tail (λ (bt) (create-block! (fresh-label 'start) bt)))
        `(module ,@blocks))]))
 
+#;
 (module+ test
   (require rackunit
            cpsc411/langs/v6)

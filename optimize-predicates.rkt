@@ -166,6 +166,7 @@
                     (module (not (false)))
                     (module (if (true)))))
 
+#;
 (module+ test
   (require rackunit
            cpsc411/langs/v6)

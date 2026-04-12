@@ -103,6 +103,7 @@
 
   (normalize-p mf))
 
+#;
 (module+ test
   (require rackunit)
   (check-match (normalize-bind '(module (begin

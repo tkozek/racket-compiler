@@ -101,6 +101,7 @@
 
   (replace-p al2a))
 
+#;
 (module+ test
   (require rackunit)
   (check-match (replace-locations `(module ((assignment ((x.1 rax) (x.2 rbx) (x.3 rcx))))

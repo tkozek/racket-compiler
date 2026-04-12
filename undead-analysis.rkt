@@ -165,7 +165,8 @@
               ,@(map analyze-definitions definitions)
         ,tail)]))
 
-#;(module+ test
+#;
+(module+ test
     (require rackunit)
     (check-match (undead-analysis '(module ((new-frames ()) (locals (x.1 x.2 x.3)))
                                            (begin

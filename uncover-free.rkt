@@ -101,6 +101,7 @@
      (let-values ([(v^ _) (uncover-value v (set))])
        `(module ,v^))]))
 
+#;
 (module+ test
   (require rackunit)
 

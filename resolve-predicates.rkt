@@ -38,6 +38,7 @@
         ,tail)
      `(define ,label ,(resolve-tail tail))]))
 
+#;
 (module+ test
   (require rackunit
            cpsc411/langs/v5

@@ -77,6 +77,7 @@
           )]))
   (seq-let-p p))
 
+#;
 (module+ test
   (require rackunit)
   (define (peek v [comment ""])

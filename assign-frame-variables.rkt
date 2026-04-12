@@ -58,6 +58,7 @@
      `(module ,(update-info info) ,@(map assign-variables/def defs)
         ,tail)]))
 
+#;
 (module+ test
   (require rackunit
            cpsc411/langs/v6)

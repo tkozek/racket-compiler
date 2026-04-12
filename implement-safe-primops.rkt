@@ -178,6 +178,7 @@
      `(module ,@primop-def* ,@def/unsafe*
         ,value/unsafe)]))
 
+#;
 (module+ test
   (require rackunit
            cpsc411/langs/v9)

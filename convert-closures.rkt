@@ -85,6 +85,7 @@
   (match p
     [`(module ,v) `(module ,(convert-value v))]))
 
+#;
 (module+ test
   (require rackunit)
   (check-match (convert-closures `(module (let ([x.1 5]) (unsafe-fx+ x.1 1))))

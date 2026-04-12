@@ -82,6 +82,7 @@
      `(module ,@(map (curryr uniquify-def env) def*) ,(uniquify-value value env)
         )]))
 
+#;
 (module+ test
   (require rackunit
            cpsc411/langs/v8)

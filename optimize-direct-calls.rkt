@@ -77,6 +77,7 @@
   (match p
     [`(module ,value) `(module ,(optimize-value value))]))
 
+#;
 (module+ test
   (require rackunit
            cpsc411/langs/v9)

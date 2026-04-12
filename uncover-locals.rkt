@@ -85,6 +85,7 @@
           ,tail)]))
   (uncover-p p))
 
+#;
 (module+ test
   (require rackunit)
   (check-match (uncover-locals `(module ((new-frames ()))

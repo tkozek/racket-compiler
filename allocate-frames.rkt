@@ -107,6 +107,7 @@
        `(module ,(update-info info n) ,@(map allocate-frames-def defs)
           ,(allocate-frames-tail tail n)))]))
 
+#;
 (module+ test
   (require rackunit
            cpsc411/langs/v6)

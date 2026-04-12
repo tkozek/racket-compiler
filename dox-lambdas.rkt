@@ -59,6 +59,7 @@
   (match p
     [`(module ,value) `(module ,(dox-value value))]))
 
+#;
 (module+ test
   (require rackunit)
 

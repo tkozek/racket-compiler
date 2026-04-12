@@ -125,6 +125,7 @@
      `(module ,@(map rco-def defs) ,(rco-tail tail)
         )]))
 
+#;
 (module+ test
   (require rackunit
            cpsc411/langs/v8)

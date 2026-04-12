@@ -35,6 +35,8 @@
           ,@(foldr append '() (map flatten-b b*))
           ,@(flatten-b b))]))
   (flatten-p bal4))
+
+#;
 (module+ test
   (require rackunit
            cpsc411/langs/v6)

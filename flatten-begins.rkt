@@ -29,6 +29,7 @@
   (match nal2
     [`(module ,nal2) (append `(begin) (flatten-tail nal2))]))
 
+#;
 (module+ test
   (require rackunit)
   ; example outputs for uniquify

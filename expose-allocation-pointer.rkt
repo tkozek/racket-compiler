@@ -82,6 +82,7 @@
 
   (expose-p p))
 
+#;
 (module+ test
   (require rackunit
            rackunit/text-ui

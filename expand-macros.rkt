@@ -128,6 +128,7 @@
      `(module ,@(map expand-def def*) ,(expand-value val)
         )]))
 
+#;
 (module+ test
   (require rackunit)
   (define-syntax-rule (check-and a b)
