@@ -12,6 +12,7 @@
 ;;   (set! ,(current-heap-base-pointer-register) (+ ,(current-heap-base-pointer-register) ,index))
 ;;;  )
 
+;; (Asm-alloc-lang v8 p) -> (Asm-pred-lang v8 p)
 ;; Implements the allocation primitive in terms of pointer arithmetic on the
 ;;  current-heap-base-pointer-register
 (define (expose-allocation-pointer p)
@@ -90,10 +91,9 @@
            cpsc411/compiler-lib)
   (define-syntax-rule (check-by-interp p)
     (check-equal? p p))
-  #;
-  (check-match (expose-allocation-pointer '(module (cons 5 6)))
-               `(module (let ([,tmp (+ (alloc 16) 1)])
-                          (begin
-                            (mset! ,tmp -1 40)
-                            (mset! ,tmp 7 48)
-                            ,tmp)))))
+  #;(check-match (expose-allocation-pointer '(module (cons 5 6)))
+                 `(module (let ([,tmp (+ (alloc 16) 1)])
+                            (begin
+                              (mset! ,tmp -1 40)
+                              (mset! ,tmp 7 48)
+                              ,tmp)))))

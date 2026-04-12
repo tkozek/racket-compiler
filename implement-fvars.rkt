@@ -3,7 +3,7 @@
          "common.rkt")
 (provide implement-fvars)
 
-; nested-asm-lang-fvars-v6 -> nested-asm-lang-v6
+;; (Nested-asm-lang-fvars-v8 p) -> (Nested-asm-lang-v8 p)
 ;; Reifies fvars into displacement mode operands
 (define (implement-fvars p)
   (define loc? (or/c register? fvar?))
@@ -74,10 +74,10 @@
   (define (implement-effect! fx)
     (match fx
       ;; opand and index are same
-      [`(mset! ,loc ,index ,triv) 
-        `(set! ,(implement-loc loc) ,(implement-opand index) ,(implement-triv triv))]
-      [`(set! ,loc1 (mref ,loc2 ,index)) 
-        `(set! ,(implement-loc loc1) (mref ,(implement-loc loc2) ,(implement-opand index)))]
+      [`(mset! ,loc ,index ,triv)
+       `(set! ,(implement-loc loc) ,(implement-opand index) ,(implement-triv triv))]
+      [`(set! ,loc1 (mref ,loc2 ,index))
+       `(set! ,(implement-loc loc1) (mref ,(implement-loc loc2) ,(implement-opand index)))]
       [`(set! ,loc ,(? triv? triv)) `(set! ,(implement-loc loc) ,(implement-triv triv))]
       [`(set! ,loc (,binop ,loc ,opand))
        (define trg-loc (implement-loc loc))

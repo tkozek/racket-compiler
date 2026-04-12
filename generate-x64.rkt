@@ -6,7 +6,7 @@
 
 (provide generate-x64)
 
-;; paren-x64-v8 -> x64-instruction-sequence
+;; (Paren-x64-v8 p)-> x64-instruction-sequence
 ;; Compiles a Paren-x64 v8 program into a x64 instruction sequence represented as a string.
 (define (generate-x64 p)
 

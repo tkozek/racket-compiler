@@ -7,10 +7,10 @@
 (define (make-nfv i)
   (fresh (string->symbol (string-join (list "nfv" (number->string i)) "_"))))
 
-;; proc-imp-cmf-lang-v6 -> imp-cmf-lang-v6
+;; (Proc-imp-cmf-lang-v8 p) -> (Imp-cmf-lang-v8 p)
 ;; Compiles Proc-imp-cmf-lang v6 to Imp-cmf-lang v6
-;;     by imposing calling conventions on all calls and procedure definitions.
-;;     The parameter registers are defined by the list current-parameter-registers.
+;; by imposing calling conventions on all calls and procedure definitions.
+;; The parameter registers are defined by the list current-parameter-registers.
 (define (impose-calling-conventions picl5)
   (define rbp (current-frame-base-pointer-register))
   (define ra (current-return-address-register))

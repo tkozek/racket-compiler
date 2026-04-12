@@ -6,7 +6,7 @@
 (provide specify-representation)
 ;; NB: only unsafe-vector-set! can appear in effect context
 
-;; (exprs-unsafe-data-lang-v8 p) -> (exprs-bits-lang-v8 p)
+;; (Exprs-unsafe-data-lang v8 p) -> (Exprs-bits-lang-v8 p)
 ;; Compiles immediate data and primitive operations into their implementations as
 ;; ptrs and primitive bitwise operations on ptrs.
 (define (specify-representation p)
@@ -57,7 +57,8 @@
             ,base))]
       [`unsafe-vector-ref
        `(mref ,(specify-value value1)
-              ,(- (+ (specify-value value2) (current-vector-base-displacement)) (current-vector-tag)))]
+              ,(- (+ (specify-value value2) (current-vector-base-displacement))
+                  (current-vector-tag)))]
       [_
        `(if (,(unsafe-binop->relop binop) ,(specify-value value1) ,(specify-value value2))
             ,(current-true-ptr)
@@ -90,7 +91,8 @@
       [`unsafe-cdr `(mref ,(specify-value value) ,(cdr-offset))]
       [`unsafe-make-vector
        (define base (gensym))
-       (define total-size (+ (current-vector-base-displacement) (arithmetic-shift value (current-vector-shift))))
+       (define total-size
+         (+ (current-vector-base-displacement) (arithmetic-shift value (current-vector-shift))))
        `(let ([,base (+ (alloc ,total-size) ,(current-vector-tag))])
           (begin
             (mset! ,base
@@ -98,12 +100,12 @@
                    ,(- total-size (current-vector-base-displacement)))
             ,base))]
       [`unsafe-vector-length
-       `(mref ,(specify-value value) ,(+ (* -1 (current-vector-tag)) (current-vector-length-displacement)))]))
+       `(mref ,(specify-value value)
+              ,(+ (* -1 (current-vector-tag)) (current-vector-length-displacement)))]))
 
   (define (specify-primop primop values)
     (match primop
-      [(? binop/unsafe?) 
-            (specify-binop primop (first values) (second values))]
+      [(? binop/unsafe?) (specify-binop primop (first values) (second values))]
       [(? unop?) (specify-unop primop (first values))]))
 
   (define (specify-effect effect)
@@ -189,6 +191,5 @@
                                 (begin
                                   (mset! ,tmp -3 32)
                                   ,tmp))
-                            ;   ,(- (current-vector-length-displacement) (current-vector-tag))
-                              -3
-                              ))))
+                              ;   ,(- (current-vector-length-displacement) (current-vector-tag))
+                              -3))))

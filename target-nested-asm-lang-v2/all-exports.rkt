@@ -29,7 +29,7 @@
   (require rackunit)
   (require (submod "replace-locations.rkt" test)
            (submod "uncover-locals.rkt" test)
-          ;  (submod "undead-analysis.rkt" test)
+           ;  (submod "undead-analysis.rkt" test)
            (submod "conflict-analysis.rkt" test)
            (submod "assign-registers.rkt" test)
            (submod "assign-call-undead-variables.rkt" test)

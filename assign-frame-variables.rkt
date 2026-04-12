@@ -6,72 +6,8 @@
 
 (provide assign-frame-variables)
 
-; asm-pred-lang-v6/spilled : grammar?
-;   p	 	::=	 	(module info (define label info tail) ... tail)
-;   info	 	::=	 	(#:from-contract (info/c (locals (aloc ...))
-; (conflicts ((loc (loc ...)) ...)) (assignment ((aloc rloc) ...))))
-;   pred	 	::=	 	(relop loc opand)
-;  	 	|	 	(true)
-;  	 	|	 	(false)
-;  	 	|	 	(not pred)
-;  	 	|	 	(begin effect ... pred)
-;  	 	|	 	(if pred pred pred)
-;   tail	 	::=	 	(jump trg loc ...)
-;  	 	|	 	(begin effect ... tail)
-;  	 	|	 	(if pred tail tail)
-;   effect	 	::=	 	(set! loc triv)
-;  	 	|	 	(set! loc_1 (binop loc_1 opand))
-;  	 	|	 	(begin effect ... effect)
-;  	 	|	 	(if pred effect effect)
-;  	 	|	 	(return-point label tail)
-;   opand	 	::=	 	int64
-;  	 	|	 	loc
-;   triv	 	::=	 	opand |	 label
-;   loc	 	::=	 	rloc |	 aloc
-;   trg	 	::=	 	label | loc
-;   binop	 	::=	 	* |	 + | -
-;   relop	 	::=	 	<
-;  	 	|	 	<=
-;  	 	|	 	=
-;  	 	|	 	>=
-;  	 	|	 	>
-;  	 	|	 	!=
-;   int64	 	::=	 	int64?
-;   aloc	 	::=	 	aloc?
-;   label	 	::=	 	label?
-;   rloc	 	::=	 	register? |	 	fvar?
-;; -------------
-; asm-pred-lang-v6/assignments : grammar?
-;   p	 	::=	 	(module info (define label info tail) ... tail)
-;   info	 	::=	 	(#:from-contract (info/c (assignment ((aloc rloc) ...))))
-;   frame	 	::=	 	(aloc ...)
-;   pred	 	::=	 	(relop loc opand)
-;  	 	|	 	(true)
-;  	 	|	 	(false)
-;  	 	|	 	(not pred)
-;  	 	|	 	(begin effect ... pred)
-;  	 	|	 	(if pred pred pred)
-;   tail	 	::=	 	(jump trg loc ...)
-;  	 	|	 	(begin effect ... tail)
-;  	 	|	 	(if pred tail tail)
-;   effect	 	::=	 	(set! loc triv)
-;  	 	|	 	(set! loc_1 (binop loc_1 opand))
-;  	 	|	 	(begin effect ... effect)
-;  	 	|	 	(if pred effect effect)
-;  	 	|	 	(return-point label tail)
-;   opand	 	::=	 	int64 |	 	loc
-;   triv	 	::=	 	opand |	 	label
-;   loc	 	::=	 	rloc |	 	aloc
-;   trg	 	::=	 	label |	 	loc
-;   binop	 	::=	 	* |	 	+ |	 	-
-;   relop	 	::=	 	< |	 	<= | = | >= | > | !=
-;   int64	 	::=	 	int64?
-;   aloc	 	::=	 	aloc?
-;   label	 	::=	 	label?
-;   rloc	 	::=	 	register? |	 	fvar?
-
-;; (asm-pred-lang-v6/spilled p) → (asm-pred-lang-v6/assignments p)
-;; Compiles Asm-pred-lang-v6/spilled to Asm-pred-lang-v6/assignments
+;; (asm-pred-lang-v8/spilled p) → (asm-pred-lang-v8/assignments p)
+;; Compiles Asm-pred-lang-v8/spilled to Asm-pred-lang-v8/assignments
 ;; by allocating all abstract locations in the locals set to free frame variables.
 (define (assign-frame-variables p)
   ; (pretty-display p)

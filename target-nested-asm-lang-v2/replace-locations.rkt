@@ -4,7 +4,7 @@
          "../common.rkt")
 (provide replace-locations)
 
-; asm-pred-lang-v8/assignments -> nested-asm-lang-fvars-v8
+;; (Asm-pred-lang-v8/assignments p) -> (Nested-asm-lang-fvars-v8 p)
 ;; Replaces all abstract locations with physical locations, and removes register-allocation metadata
 ;; Precondition: all abstract locations have a corresponding physical location in the info metadata
 (define (replace-locations al2a)
@@ -43,15 +43,15 @@
   (define (replace-effect fx assignments)
     (match fx
       [`(mset! ,loc ,index ,triv)
-        (let* ([loc^ (replace-loc loc assignments)]
-               [index^ (replace-triv index assignments)]
-               [triv^ (replace-triv triv assignments)])
-          `(mset! ,loc^ ,index^ ,triv^))]
+       (let* ([loc^ (replace-loc loc assignments)]
+              [index^ (replace-triv index assignments)]
+              [triv^ (replace-triv triv assignments)])
+         `(mset! ,loc^ ,index^ ,triv^))]
       [`(set! ,loc1 (mref ,loc2 ,index))
-        (let* ([loc1^ (replace-loc loc1 assignments)]
-               [index^ (replace-triv index assignments)]
-               [loc2^ (replace-loc loc2 assignments)])
-          `(set! ,loc1^ (mref ,loc2^ ,index^)))]
+       (let* ([loc1^ (replace-loc loc1 assignments)]
+              [index^ (replace-triv index assignments)]
+              [loc2^ (replace-loc loc2 assignments)])
+         `(set! ,loc1^ (mref ,loc2^ ,index^)))]
       [`(set! ,loc (,binop ,loc ,triv))
        (define rloc (replace-loc loc assignments))
        `(set! ,rloc (,binop ,rloc ,(replace-triv triv assignments)))]
@@ -103,21 +103,17 @@
 
 (module+ test
   (require rackunit)
-  (check-match (replace-locations `(module
-  ((assignment ((x.1 rax) (x.2 rbx) (x.3 rcx))))
-  
-  (begin
-    (set! x.1 10)
-    (set! x.2 20)
-    (mset! x.1 4 x.2)
-    (set! x.3 (mref x.1 4))
-    (jump L.done.1 x.3))))
-`(module
-  (begin
-    (set! rax 10)
-    (set! rbx 20)
-    (mset! rax 4 rbx)
-    (set! rcx (mref rax 4))
-    (jump L.done.1))))
-)
-           
+  (check-match (replace-locations `(module ((assignment ((x.1 rax) (x.2 rbx) (x.3 rcx))))
+                                           (begin
+                                             (set! x.1 10)
+                                             (set! x.2 20)
+                                             (mset! x.1 4 x.2)
+                                             (set! x.3 (mref x.1 4))
+                                             (jump L.done.1 x.3))
+                                     ))
+               `(module (begin
+                          (set! rax 10)
+                          (set! rbx 20)
+                          (mset! rax 4 rbx)
+                          (set! rcx (mref rax 4))
+                          (jump L.done.1)))))

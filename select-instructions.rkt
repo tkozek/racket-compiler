@@ -4,7 +4,7 @@
 
 (provide select-instructions)
 
-;; (imp-cmf-lang-v8 p) -> (asm-alloc-lang-v8 p)
+;; (Imp-cmf-lang-v8 p) -> (Asm-alloc-lang-v8 p)
 ;; Selects appropriate sequences of abstract assembly instructions to implement
 ;; the operations of the source language.
 (define (select-instructions p)
@@ -127,11 +127,11 @@
     (check-equal? p p))
   (v8-public-test-suite '(select-instructions) '(interp-imp-cmf-lang-v8))
 
-;   (check-match (select-instructions '(module ((new-frames ())) 
-;                         (begin (set! ))
-;                 ))
-;                 `(module ((new-frames ()))
-;                     )
+  ;   (check-match (select-instructions '(module ((new-frames ()))
+  ;                         (begin (set! ))
+  ;                 ))
+  ;                 `(module ((new-frames ()))
+  ;                     )
 
-;   )
-)
+  ;   )
+  )

@@ -107,8 +107,7 @@
 (define primop `(,@binop/unsafe ,@unop))
 (define primop? (compose not false? (curryr memq primop)))
 
-(define imperative-primop?
-  (curryr memq `(unsafe-vector-set!)))
+(define imperative-primop? (curryr memq `(unsafe-vector-set!)))
 (module+ test
   (require rackunit)
   (check-true (binop? '+))
