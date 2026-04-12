@@ -1,6 +1,6 @@
 #lang racket
 (require cpsc411/compiler-lib
-         "common.rkt")
+         "ourcommon.rkt")
 
 (provide specify-representation)
 ;; NB: only unsafe-vector-set! can appear in effect context

@@ -2,7 +2,7 @@
 
 (require cpsc411/compiler-lib
          cpsc411/ptr-run-time
-         "common.rkt")
+         "ourcommon.rkt")
 
 (provide generate-x64)
 

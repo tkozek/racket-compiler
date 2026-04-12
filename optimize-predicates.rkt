@@ -1,7 +1,7 @@
 #lang racket
 
 (require cpsc411/compiler-lib
-         "common.rkt")
+         "ourcommon.rkt")
 
 (provide optimize-predicates
          nested-asm-lang-progs)

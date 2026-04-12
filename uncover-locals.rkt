@@ -1,7 +1,7 @@
 #lang racket
 
 (require cpsc411/compiler-lib
-         "common.rkt")
+         "ourcommon.rkt")
 (provide uncover-locals)
 
 ;; (Asm-pred-lang-v8 p) -> (Asm-pred-lang-v8/locals p)

@@ -2,7 +2,7 @@
 
 (require cpsc411/compiler-lib
          cpsc411/graph-lib
-         "common.rkt")
+         "ourcommon.rkt")
 
 (provide conflict-analysis)
 
