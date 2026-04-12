@@ -81,6 +81,7 @@
 
 
 ;; Stubs; remove or replace with your definitions.
+#;
 (define-values (;expand-macros
                 ;implement-safe-primops
                 ;implement-safe-call
@@ -93,11 +94,11 @@
                 ;hoist-lambdas
                 ;implement-closures
                 specify-representation
-                remove-complex-opera*
+                ;remove-complex-opera*
                 ;implement-mops
                 )
   (values
-  values
+  ;values
    values
    ;values
    ;values

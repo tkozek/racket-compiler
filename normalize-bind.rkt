@@ -6,10 +6,14 @@
 (provide normalize-bind)
 
 ;; (Imp-mf-lang v8 p) -> (Proc-imp-cmf-lang v8 p)
-;; Compiles Imp-mf-lang v4 to Imp-cmf-lang v4, pushing set!
+;; Compiles Imp-mf-lang v8 to Imp-cmf-lang v8, pushing set!
 ;; under begin and if so that the right-hand-side of each set!
 ;;is a simple value-producing operation.
 (define (normalize-bind mf)
+  ;; let nvalue represent value in Proc-imp-cmf-lang-v8
+  ;; join-begin so that the effects take place after the given tail's effect
+  ;; this is necessary due to the use of continuations
+  ;; (listof effect) tail -> tail
   (define (join-begin fx* tail)
     (match tail
       [`(begin
@@ -42,7 +46,6 @@
       [`(mref ,aloc ,opand) (k `(mref ,aloc ,opand))]
       [`(alloc ,opand) (k `(alloc ,opand))]
       [`(,binop ,triv1 ,triv2)
-       #:when (binop/ptr? binop)
        (k `(,binop ,(normalize-triv triv1) ,(normalize-triv triv2)))]
       [triv (k (normalize-triv triv))]))
   (define (normalize-pred pred)
@@ -103,7 +106,6 @@
 
   (normalize-p mf))
 
-#;
 (module+ test
   (require rackunit)
   (check-match (normalize-bind '(module (begin

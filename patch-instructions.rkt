@@ -1,6 +1,5 @@
 #lang racket
 (require cpsc411/compiler-lib
-         cpsc411/langs/v8
          "ourcommon.rkt")
 
 (provide patch-instructions)
@@ -35,65 +34,19 @@
        `((set! ,first-reg ,triv) (set! ,addr1 ,first-reg))]
       [_ `(,s)]))
 
-  ;; (set! loc1 (mref loc2 index))
-  ;; if loc1 is an addr, we need to patch that to a register
-  ;; if loc1 is an addr and loc2 is an addr, we need to patch both to registers
-  ;; if
-
-  ; (define (patch-mref s)
-  ;   (match s
-  ;     []))
-
-  ;; mset! loc1 index triv
-  ;; loc1 must be a register, else it needs to be patched
-  ;; if index is an addr, or an int64 and not an int32, then it must be patched
-  ;; triv can be int32, reg, label. cannot be int64 and not int32, cannot be addr
-  ; (define (patch-mset s)
-  ;   (match s
-  ;     ;; may add one more instruction than necessary, but collapses cases
-  ;     [`(mset! ,loc ,index ,triv)
-  ;      #:when (register? loc)
-  ;      `((set! ,first-reg ,index) (set! ,second-reg ,triv) (mset! ,loc ,first-reg ,second-reg))]
-  ;     [`(mset! ,addr ,index ,triv)
-  ;      (match addr
-  ;        [`((,? ?frame-base-pointer-register? fbp) - ,offset) ((set! ,first-reg))])
-  ;      `((set! ,second-reg ,addr) (set! ,first-reg ,index) (mset!))]))
-  ; s	 	::=	 	(set! loc triv)
-  ;  	 	|	 	(set! loc_1 (binop loc_1 opand))
-  ;  	 	|	 	(set! loc_1 (mref loc_2 index))
-  ;  	 	|	 	(mset! loc_1 index triv)
-  ;  	 	|	 	(with-label label s)
-  ;  	 	|	 	(jump trg)
-  ;  	 	|	 	(compare loc opand)
-  ;  	 	|	 	(jump-if relop trg)
-  ;   loc	 	::=	 	reg
-  ; |	 	addr
-  ; triv	 	::=	 	opand
-  ;  	|	 	label
-  ; opand	 	::=	 	int64
-  ;  	|	 	reg
-  ; -----------------------------
-  ; s	 	::=	 	(set! addr int32)
-  ;  	|	 	(set! addr trg)
-  ;  	|	 	(set! reg loc)
-  ;  	|	 	(set! reg triv)
-  ;  	|	 	(set! reg_1 (binop reg_1 int32))
-  ;  	|	 	(set! reg_1 (binop reg_1 loc))
-  ;  	|	 	(set! reg_1 (mref reg_2 index))
-  ;  	|	 	(mset! reg_1 index int32)
-  ;  	|	 	(mset! reg_1 index trg)
-  ;  	|	 	(with-label label s)
-  ;  	|	 	(jump trg)
-  ;  	|	 	(compare reg opand)
-  ;  	|	 	(jump-if relop label)
-  ;  triv	 	::=	 	trg
-  ;  	|	 	int64
-  ; trg	 	::=	 	reg
-  ; |	 	label
+  ;; let src-X be X non-terminal in the source language
+  ;; let trg-X be X non-terminal in the target language
   ;; by observation: src-triv === trg-triv
+  ;; however: src-triv != (trg-trg or int32) 
   (define (patch-s s)
     (match s
-      [`(mset! ,loc1 ,index ,triv) `((set! ,first-reg ,loc1) (mset! ,first-reg ,index ,triv))]
+      [`(mset! ,loc1 ,index ,triv) 
+      ; could optimize this if index is not int64 or triv is not int64
+        `((set! ,first-reg ,loc1)
+          (set! ,second-reg ,index)
+          (set! ,first-reg (+ ,first-reg ,second-reg))
+          (set! ,second-reg ,triv)
+          (mset! ,first-reg 0 ,second-reg))]
       [`(set! ,loc1 (mref ,loc2 ,index))
        `((set! ,second-reg ,loc2) (set! ,second-reg (mref ,second-reg ,index))
                                   (set! ,loc1 ,second-reg))]

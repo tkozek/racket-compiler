@@ -9,17 +9,22 @@
 ;; Explicitly annotate procedures with their free variable sets.
 (define (uncover-free p)
 
+  (define (safe-set-union myset)
+    (if (empty? myset)
+        (set)
+        (apply set-union myset)))
+
   ;; value -> (values value (setof aloc))
   (define (uncover-value value bound)
     (match value
       [`(,primop ,myvalues ...)
        #:when (primop? primop)
        (let-values ([(values^ frees) (map2 (λ (value) (uncover-value value bound)) myvalues)])
-         (values `(,primop ,@values^) (apply set-union frees)))]
+         (values `(,primop ,@values^) (safe-set-union frees)))]
 
       [`(unsafe-procedure-call ,myvalues ...)
        (let-values ([(values^ frees) (map2 (λ (value) (uncover-value value bound)) myvalues)])
-         (values `(unsafe-procedure-call ,@values^) (apply set-union frees)))]
+         (values `(unsafe-procedure-call ,@values^) (safe-set-union frees)))]
 
       [`(let ([,alocs ,myvalues] ...) ,value-body)
        (let-values
@@ -30,7 +35,7 @@
                                         [value values^])
                                `(,aloc ,value))])
            (values `(let ,expr-updated ,value-body^)
-                   (set-subtract (set-union (apply set-union values-free) body-free)
+                   (set-subtract (set-union (safe-set-union values-free) body-free)
                                  (apply set alocs)))))]
 
       [`(letrec ([,rec-alocs (lambda (,params ...) ,bodies)] ...)
@@ -54,7 +59,7 @@
                                `(,rec-aloc ,lam-updated))])
            (values `(letrec ,expr-updated
                       ,value-body^)
-                   (set-subtract (set-union (apply set-union lam-frees) body-free)
+                   (set-subtract (set-union (safe-set-union lam-frees) body-free)
                                  (apply set rec-alocs)))))]
       [`(if ,value1 ,value2 ,value3)
        (let-values ([(value1^ free1) (uncover-value value1 bound)]
@@ -70,7 +75,7 @@
          (values `(begin
                     ,@effects^
                     ,value^)
-                 (set-union (apply set-union frees1) frees2)))]
+                 (set-union (safe-set-union frees1) frees2)))]
       [triv (uf-triv triv bound)]))
 
   ;; effect -> (values effect (setof aloc))
@@ -79,13 +84,13 @@
       [`(,primop ,myvalues ...)
        #:when (primop? primop)
        (let-values ([(values^ frees) (map2 (λ (v) (uncover-value v bound)) myvalues)])
-         (values `(,primop ,@values^) (apply set-union frees)))]
+         (values `(,primop ,@values^) (safe-set-union frees)))]
       [`(begin
           ,effects ...)
        (let-values ([(effects^ frees) (map2 (λ (effect) (uncover-effect effect bound)) effects)])
          (values `(begin
                     ,@effects^)
-                 (apply set-union frees)))]))
+                 (safe-set-union frees)))]))
 
   ;; triv -> (values triv (setof aloc))
   (define (uf-triv triv bound)
@@ -101,9 +106,12 @@
      (let-values ([(v^ _) (uncover-value v (set))])
        `(module ,v^))]))
 
-#;
 (module+ test
   (require rackunit)
+
+  (check-match (uncover-free '(module (letrec () empty)))
+                `(module (letrec () empty)))
+
 
   (check-match (uncover-free '(module (letrec ([f.1 (lambda () (unsafe-procedure-call x.1))])
                                         f.1)))

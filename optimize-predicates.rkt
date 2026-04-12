@@ -74,17 +74,17 @@
   (define (optimize-pred pred env)
     (match pred
       [`(if (not ,pred) ,pred2 ,pred3) (optimize-pred `(if ,pred ,pred3 ,pred2) env)]
-      [`(if ,cond ,then ,else)
-       (define optimized-cond (optimize-pred cond env))
+      [`(if ,pred-cond ,then-pred ,else-pred)
+       (define optimized-cond (optimize-pred pred-cond env))
        (define env-then (hash-copy env))
        (define env-else (hash-copy env))
        (cond
-         [(equal? optimized-cond '(true)) (optimize-pred then env-then)]
-         [(equal? optimized-cond '(false)) (optimize-pred else env-else)]
+         [(equal? optimized-cond '(true)) (optimize-pred then-pred env-then)]
+         [(equal? optimized-cond '(false)) (optimize-pred else-pred env-else)]
          [else
           `(if ,optimized-cond
-               ,(optimize-pred then env-then)
-               ,(optimize-pred else env-else))])]
+               ,(optimize-pred then-pred env-then)
+               ,(optimize-pred else-pred env-else))])]
       [`(begin
           ,effects ...
           ,pred)
@@ -106,18 +106,19 @@
        `(begin
           ,@(for/list ([effect effects])
               (optimize-effect effect env)))]
-      [`(if (not ,cond) ,then ,else) (optimize-effect `(if ,cond ,else ,then) env)]
-      [`(if ,cond ,then ,else)
-       (define optimized-cond (optimize-pred cond env))
+      [`(if (not ,cond-pred) ,then-pred ,else-pred)
+       (optimize-effect `(if ,cond-pred ,else-pred ,then-pred) env)]
+      [`(if ,cond-pred ,then-pred ,else-pred)
+       (define optimized-cond (optimize-pred cond-pred env))
        (define env-then (hash-copy env))
        (define env-else (hash-copy env))
        (cond
-         [(equal? optimized-cond '(true)) (optimize-effect then env-then)]
-         [(equal? optimized-cond '(false)) (optimize-effect else env-else)]
+         [(equal? optimized-cond '(true)) (optimize-effect then-pred env-then)]
+         [(equal? optimized-cond '(false)) (optimize-effect else-pred env-else)]
          [else
           `(if ,optimized-cond
-               ,(optimize-effect then env-then)
-               ,(optimize-effect else env-else))])]
+               ,(optimize-effect then-pred env-then)
+               ,(optimize-effect else-pred env-else))])]
       ;; not really extending m8
       [_ effect]))
 
@@ -125,7 +126,7 @@
     (match tail
       [`(begin
           ,effects ...
-          tail)
+          ,tail)
        `(begin
           ,@(for/list ([effect effects])
               (optimize-effect effect env))
@@ -166,7 +167,6 @@
                     (module (not (false)))
                     (module (if (true)))))
 
-#;
 (module+ test
   (require rackunit
            cpsc411/langs/v6)
