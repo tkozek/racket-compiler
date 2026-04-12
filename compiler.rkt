@@ -93,8 +93,8 @@
                 ;hoist-lambdas
                 ;implement-closures
                 ;specify-representation
-                remove-complex-opera*
-                ;implement-mops
+                ;remove-complex-opera*
+                implement-mops
                 )
   (values
   values
