@@ -92,9 +92,9 @@
                 ;optimize-known-calls
                 ;hoist-lambdas
                 ;implement-closures
-                ;specify-representation
+                specify-representation
                 ;remove-complex-opera*
-                implement-mops
+                ;implement-mops
                 )
   (values
   values
