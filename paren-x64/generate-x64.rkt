@@ -52,7 +52,7 @@
 
 ;   dispoffset	 	::=	 	dispoffset?
 
-;; (paren-x64-v2 p) -> x64-instruction-sequence
+;; (paren-x64-v2 p) -> (x64-instruction-sequence)
 ;; Compiles a Paren-x64 v2 program into x64 instruction sequence, represented as a string
 (define (generate-x64 p)
 
@@ -65,7 +65,7 @@
        dispoffset]))
 
   ;; (paren-x64-v2 dispoffset) -> (x64 displacement mode operand)
-  ;; Takes an offset and produces: QWORD [fbp - offset]
+  ;; Takes an offset and produces: QWORD [fbp - offset], where fbp is the frame base pointer register
   (define (dispoffset->dmo offset)
     (format "QWORD [~a - ~a]" (current-frame-base-pointer-register) offset))
 
@@ -74,12 +74,14 @@
   (define (addr->dmo addr)
     (dispoffset->dmo (addr->dispoffset addr)))
 
+  ;; (paren-x64-v2 binop) -> string
+  ;; converts a binop to its x64 instruction name
   (define (binop->ins op)
     (match op
       ['+ "add"]
       ['* "imul"]))
 
-  ; (paren-x64-v2 s) -> x64-instruction-sequence
+  ; (paren-x64-v2 s) -> x64-instruction
   (define (statement->x64 s)
     (match s
       [`(set! ,reg1 (,op ,reg1 ,val))

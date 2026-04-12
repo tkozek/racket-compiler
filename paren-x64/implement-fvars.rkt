@@ -1,5 +1,5 @@
 #lang racket
- (require cpsc411/compiler-lib)
+(require cpsc411/compiler-lib)
 (require cpsc411/langs/v2)
 
 (provide implement-fvars)

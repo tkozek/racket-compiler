@@ -6,7 +6,7 @@
 
 (provide replace-locations)
 
-;; (asm-lang-v2/assignments) -> (nested-asm-lang-v2)
+;; (asm-lang-v2/assignments p) -> (nested-asm-lang-v2 p)
 ;; Replaces each aloc with its assigned physical location from the assignment info field
 (define (replace-locations p)
 
@@ -38,6 +38,7 @@
        `(begin
           ,@(map (λ (e) (replace-effect e assignment)) effects)
           ,(replace-tail tail assignment))]))
+
   (define (replace-p p)
     (match p
       [`(module ,info ,tail
