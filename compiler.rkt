@@ -81,31 +81,23 @@
 
 
 ;; Stubs; remove or replace with your definitions.
-(define-values (expand-macros
-                implement-safe-primops
-                implement-safe-call
-                define->letrec
-                optimize-direct-calls
-                dox-lambdas
-                uncover-free
-                convert-closures
+(define-values (;expand-macros
+                ;implement-safe-primops
+                ;implement-safe-call
+                ;define->letrec
+                ;optimize-direct-calls
+                ;dox-lambdas
+                ;uncover-free
+                ;convert-closures
                 ;optimize-known-calls
                 ;hoist-lambdas
                 ;implement-closures
                 ;specify-representation
-                ;remove-complex-opera*
-                ;implement-mops)
+                remove-complex-opera*
+                ;implement-mops
+                )
   (values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   ;values
-   ;values
+  values
    ;values
    ;values
    ;values
