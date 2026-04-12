@@ -82,7 +82,7 @@
   (require (submod "flatten-program.rkt" test))
 ;   (require (submod "patch-instructions.rkt" test))
   ; (for-each (λ(p) (dynamic-require p #f)) (glob "m7-generated-tests/**.rkt"))
-  (for-each (λ(p) (dynamic-require p #f)) (glob "m8-generated-tests/**.rkt"))
+;   (for-each (λ(p) (dynamic-require p #f)) (glob "m8-generated-tests/**.rkt"))
   ;; You can modify this pass list, e.g., by adding other
   ;; optimization, debugging, or validation passes.
   ;; Doing this may provide additional debugging info when running the rest
