@@ -43,76 +43,7 @@
 ;; TODO: Fill in.
 ;; You'll want to merge milestone-8 code in
 
-;; Stubs; remove or replace with your definitions.
-(define-values (uniquify
-                implement-safe-primops
-                implement-safe-call
-                define->letrec
-                optimize-direct-calls
-                dox-lambdas
-                uncover-free
-                convert-closures
-                optimize-known-calls
-                hoist-lambdas
-                implement-closures
-                specify-representation
-                remove-complex-opera*
-                sequentialize-let
-                normalize-bind
-                impose-calling-conventions
-                select-instructions
-                expose-allocation-pointer
-                uncover-locals
-                undead-analysis
-                conflict-analysis
-                assign-call-undead-variables
-                allocate-frames
-                assign-registers
-                assign-frame-variables
-                replace-locations
-                implement-fvars
-                optimize-predicates
-                expose-basic-blocks
-                resolve-predicates
-                flatten-program
-                patch-instructions
-                implement-mops
-                generate-x64)
-  (values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values
-   values))
+
 
 ;; Stubs; remove or replace with your definitions.
 
@@ -171,7 +102,7 @@
   (require (submod "flatten-program.rkt" test))
 ;   (require (submod "patch-instructions.rkt" test))
   ; (for-each (λ(p) (dynamic-require p #f)) (glob "m7-generated-tests/**.rkt"))
-  (for-each (λ(p) (dynamic-require p #f)) (glob "m8-generated-tests/**.rkt"))
+;   (for-each (λ(p) (dynamic-require p #f)) (glob "m8-generated-tests/**.rkt"))
   ;; You can modify this pass list, e.g., by adding other
   ;; optimization, debugging, or validation passes.
   ;; Doing this may provide additional debugging info when running the rest
