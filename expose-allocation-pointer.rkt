@@ -90,10 +90,9 @@
            cpsc411/compiler-lib)
   (define-syntax-rule (check-by-interp p)
     (check-equal? p p))
-  #;
-  (check-match (expose-allocation-pointer '(module (cons 5 6)))
-               `(module (let ([,tmp (+ (alloc 16) 1)])
-                          (begin
-                            (mset! ,tmp -1 40)
-                            (mset! ,tmp 7 48)
-                            ,tmp)))))
+  #;(check-match (expose-allocation-pointer '(module (cons 5 6)))
+                 `(module (let ([,tmp (+ (alloc 16) 1)])
+                            (begin
+                              (mset! ,tmp -1 40)
+                              (mset! ,tmp 7 48)
+                              ,tmp)))))

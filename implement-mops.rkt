@@ -32,7 +32,4 @@
            cpsc411/compiler-lib)
   (define-syntax-rule (check-by-interp p)
     (check-equal? p p))
-  (v8-public-test-suite '(implement-mops) '(interp-paren-x64-mops-v8))
-
-
-  )
+  (v8-public-test-suite '(implement-mops) '(interp-paren-x64-mops-v8)))

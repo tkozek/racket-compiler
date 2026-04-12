@@ -42,8 +42,7 @@
                unsafe-fx>=
                cons
                unsafe-vector-ref
-               unsafe-procedure-ref
-               ))
+               unsafe-procedure-ref))
 (define binop/unsafe? (compose not false? (curryr memq binop/unsafe)))
 
 (define binop/ptr '(+ - * bitwise-and bitwise-ior bitwise-xor arithmetic-shift-right))
@@ -118,8 +117,8 @@
 (define (pair/tagged? fn)
   (and (int64? fn) (eq? (bitwise-and (current-pair-mask) fn) (current-pair-tag))))
 
-(define primop `(
-    fixnum? boolean?
+(define primop
+  `(fixnum? boolean?
             empty?
             void?
             ascii-char?
@@ -134,30 +133,25 @@
             procedure?
             unsafe-procedure-arity
             unsafe-procedure-label
-            unsafe-fx+ unsafe-fx-
-               unsafe-fx*
-               eq?
-               unsafe-fx<
-               unsafe-fx<=
-               unsafe-fx>
-               unsafe-fx>=
-               cons
-               unsafe-vector-ref
-               unsafe-procedure-ref
-               unsafe-vector-set!
-               unsafe-procedure-set!
-               make-procedure
-               
-
-
-))
+            unsafe-fx+
+            unsafe-fx-
+            unsafe-fx*
+            eq?
+            unsafe-fx<
+            unsafe-fx<=
+            unsafe-fx>
+            unsafe-fx>=
+            cons
+            unsafe-vector-ref
+            unsafe-procedure-ref
+            unsafe-vector-set!
+            unsafe-procedure-set!
+            make-procedure))
 (define primop? (compose not false? (curryr memq primop)))
 
-(define imperative-primop
-  '(unsafe-vector-set! unsafe-procedure-set!))
+(define imperative-primop '(unsafe-vector-set! unsafe-procedure-set!))
 
-(define imperative-primop?
-  (compose not false? (curryr memq imperative-primop)))
+(define imperative-primop? (compose not false? (curryr memq imperative-primop)))
 
 (module+ test
   (require rackunit)
@@ -204,18 +198,16 @@
   (check-true (primop? 'unsafe-fx>))
   (check-true (primop? 'unsafe-fx>=))
   (check-true (primop? 'unsafe-car))
-                    (check-true (primop? 'unsafe-cdr))
-    (check-true (primop? 'cons))
-      (check-true (primop? 'unsafe-vector-ref))
-        (check-true (primop? 'unsafe-procedure-ref))
-          (check-true (primop? 'unsafe-vector-set!))
-            (check-true (primop? 'make-procedure))
-              (check-true (primop? 'unsafe-procedure-set!))
-              (check-true (primop? 'unsafe-procedure-label))
-              (check-true (primop? 'unsafe-procedure-ref))
-                (check-true (primop? 'procedure?))
-                  (check-true (primop? 'unsafe-make-vector))
-                  (check-true (primop? 'unsafe-vector-length))
-                  (check-true (primop? 'unsafe-procedure-arity))
-  
-  )
+  (check-true (primop? 'unsafe-cdr))
+  (check-true (primop? 'cons))
+  (check-true (primop? 'unsafe-vector-ref))
+  (check-true (primop? 'unsafe-procedure-ref))
+  (check-true (primop? 'unsafe-vector-set!))
+  (check-true (primop? 'make-procedure))
+  (check-true (primop? 'unsafe-procedure-set!))
+  (check-true (primop? 'unsafe-procedure-label))
+  (check-true (primop? 'unsafe-procedure-ref))
+  (check-true (primop? 'procedure?))
+  (check-true (primop? 'unsafe-make-vector))
+  (check-true (primop? 'unsafe-vector-length))
+  (check-true (primop? 'unsafe-procedure-arity)))

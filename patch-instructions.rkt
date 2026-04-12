@@ -58,47 +58,45 @@
   ;      (match addr
   ;        [`((,? ?frame-base-pointer-register? fbp) - ,offset) ((set! ,first-reg))])
   ;      `((set! ,second-reg ,addr) (set! ,first-reg ,index) (mset!))]))
-; s	 	::=	 	(set! loc triv)
-;  	 	|	 	(set! loc_1 (binop loc_1 opand))
-;  	 	|	 	(set! loc_1 (mref loc_2 index))
-;  	 	|	 	(mset! loc_1 index triv)
-;  	 	|	 	(with-label label s)
-;  	 	|	 	(jump trg)
-;  	 	|	 	(compare loc opand)
-;  	 	|	 	(jump-if relop trg)
-;   loc	 	::=	 	reg
- 	 	; |	 	addr
-; triv	 	::=	 	opand
-;  	|	 	label
-; opand	 	::=	 	int64
-;  	|	 	reg
-; -----------------------------
-; s	 	::=	 	(set! addr int32)
-;  	|	 	(set! addr trg)
-;  	|	 	(set! reg loc)
-;  	|	 	(set! reg triv)
-;  	|	 	(set! reg_1 (binop reg_1 int32))
-;  	|	 	(set! reg_1 (binop reg_1 loc))
-;  	|	 	(set! reg_1 (mref reg_2 index))
-;  	|	 	(mset! reg_1 index int32)
-;  	|	 	(mset! reg_1 index trg)
-;  	|	 	(with-label label s)
-;  	|	 	(jump trg)
-;  	|	 	(compare reg opand)
-;  	|	 	(jump-if relop label)
-;  triv	 	::=	 	trg
-;  	|	 	int64
-; trg	 	::=	 	reg
-; |	 	label
-;; by observation: src-triv === trg-triv 
+  ; s	 	::=	 	(set! loc triv)
+  ;  	 	|	 	(set! loc_1 (binop loc_1 opand))
+  ;  	 	|	 	(set! loc_1 (mref loc_2 index))
+  ;  	 	|	 	(mset! loc_1 index triv)
+  ;  	 	|	 	(with-label label s)
+  ;  	 	|	 	(jump trg)
+  ;  	 	|	 	(compare loc opand)
+  ;  	 	|	 	(jump-if relop trg)
+  ;   loc	 	::=	 	reg
+  ; |	 	addr
+  ; triv	 	::=	 	opand
+  ;  	|	 	label
+  ; opand	 	::=	 	int64
+  ;  	|	 	reg
+  ; -----------------------------
+  ; s	 	::=	 	(set! addr int32)
+  ;  	|	 	(set! addr trg)
+  ;  	|	 	(set! reg loc)
+  ;  	|	 	(set! reg triv)
+  ;  	|	 	(set! reg_1 (binop reg_1 int32))
+  ;  	|	 	(set! reg_1 (binop reg_1 loc))
+  ;  	|	 	(set! reg_1 (mref reg_2 index))
+  ;  	|	 	(mset! reg_1 index int32)
+  ;  	|	 	(mset! reg_1 index trg)
+  ;  	|	 	(with-label label s)
+  ;  	|	 	(jump trg)
+  ;  	|	 	(compare reg opand)
+  ;  	|	 	(jump-if relop label)
+  ;  triv	 	::=	 	trg
+  ;  	|	 	int64
+  ; trg	 	::=	 	reg
+  ; |	 	label
+  ;; by observation: src-triv === trg-triv
   (define (patch-s s)
     (match s
-      [`(mset! ,loc1 ,index ,triv) 
-        `((set! ,first-reg ,loc1) (mset! ,first-reg ,index ,triv))]
-      [`(set! ,loc1 (mref ,loc2 ,index)) 
-          `((set! ,second-reg ,loc2)
-            (set! ,second-reg (mref ,second-reg ,index))
-            (set! ,loc1 ,second-reg))]
+      [`(mset! ,loc1 ,index ,triv) `((set! ,first-reg ,loc1) (mset! ,first-reg ,index ,triv))]
+      [`(set! ,loc1 (mref ,loc2 ,index))
+       `((set! ,second-reg ,loc2) (set! ,second-reg (mref ,second-reg ,index))
+                                  (set! ,loc1 ,second-reg))]
       [`(set! ,loc ,rest)
        #:when (register? loc)
        (patch-set-reg s)]

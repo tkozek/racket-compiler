@@ -154,11 +154,10 @@
                   [ust ust])
          (analyze-tree-effect ust effect graph))]
       [(`(set! ,loc1 (mref ,loc2 ,index)) _)
-        (let ([ust^ (set-remove-triv ust index)])
-          (update-graph graph-init loc1 (set-remove ust^ loc1)))]
+       (let ([ust^ (set-remove-triv ust index)])
+         (update-graph graph-init loc1 (set-remove ust^ loc1)))]
       ;; not actually assigning variable loc
-      [(`(mset! ,loc ,index ,triv) _)
-          graph-init]
+      [(`(mset! ,loc ,index ,triv) _) graph-init]
       [(`(set! ,aloc (,binop ,aloc ,triv)) _) (update-graph graph-init aloc ust)]
       [(`(set! ,aloc ,triv) _) (update-graph graph-init aloc (set-remove-triv ust triv))]
       [(`(if ,pred ,effect1 ,effect2) `(,ust1 ,ust2 ,ust3))
@@ -219,39 +218,41 @@
 
 (module+ test
   (require rackunit)
-  (check-match (conflict-analysis `(module
-  ((new-frames ())
-   (locals (x.1 x.2 x.3))
-   (call-undead ())
-   (undead-out ((r15 x.1) (x.1) (x.1))))
-  (begin (set! x.1 (mref x.2 x.3)) (mset! x.1 3 r15) (jump L.test.1 x.1))))
-  `(module
-  ((new-frames ())
-   (locals (x.1 x.2 x.3))
-   (call-undead ())
-   (conflicts ((x.3 ()) (x.2 ()) (x.1 (r15)) (r15 (x.1)))))
-  (begin (set! x.1 (mref x.2 x.3)) (mset! x.1 3 r15) (jump L.test.1 x.1))))
+  (check-match (conflict-analysis `(module ((new-frames ()) (locals (x.1 x.2 x.3))
+                                                            (call-undead ())
+                                                            (undead-out ((r15 x.1) (x.1) (x.1))))
+                                           (begin
+                                             (set! x.1 (mref x.2 x.3))
+                                             (mset! x.1 3 r15)
+                                             (jump L.test.1 x.1))
+                                     ))
+               `(module ((new-frames ()) (locals (x.1 x.2 x.3))
+                                         (call-undead ())
+                                         (conflicts ((x.3 ()) (x.2 ()) (x.1 (r15)) (r15 (x.1)))))
+                        (begin
+                          (set! x.1 (mref x.2 x.3))
+                          (mset! x.1 3 r15)
+                          (jump L.test.1 x.1))
+                  ))
 
-  (check-match (conflict-analysis `(module
-  ((new-frames ())
-   (locals (x.1 x.2 x.3 y.7))
-   (call-undead ())
-   (undead-out ((x.3 x.2 r15 y.7) (r15 y.7 x.1) (x.1) (x.1))))
-  (begin
-    (set! x.1 5)
-    (set! x.1 (mref x.2 x.3))
-    (mset! x.1 y.7 r15)
-    (jump L.test.1 x.1))))
-  `(module
-  ((new-frames ())
-   (locals (x.1 x.2 x.3 y.7))
-   (call-undead ())
-   (conflicts
-    ((y.7 (x.1)) (x.3 (x.1)) (x.2 (x.1)) (x.1 (y.7 r15 x.2 x.3)) (r15 (x.1)))))
-  (begin
-    (set! x.1 5)
-    (set! x.1 (mref x.2 x.3))
-    (mset! x.1 y.7 r15)
-    (jump L.test.1 x.1))))
-
-)
+  (check-match
+   (conflict-analysis
+    `(module ((new-frames ()) (locals (x.1 x.2 x.3 y.7))
+                              (call-undead ())
+                              (undead-out ((x.3 x.2 r15 y.7) (r15 y.7 x.1) (x.1) (x.1))))
+             (begin
+               (set! x.1 5)
+               (set! x.1 (mref x.2 x.3))
+               (mset! x.1 y.7 r15)
+               (jump L.test.1 x.1))
+       ))
+   `(module ((new-frames ())
+             (locals (x.1 x.2 x.3 y.7))
+             (call-undead ())
+             (conflicts ((y.7 (x.1)) (x.3 (x.1)) (x.2 (x.1)) (x.1 (y.7 r15 x.2 x.3)) (r15 (x.1)))))
+            (begin
+              (set! x.1 5)
+              (set! x.1 (mref x.2 x.3))
+              (mset! x.1 y.7 r15)
+              (jump L.test.1 x.1))
+      )))

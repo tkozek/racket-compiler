@@ -34,13 +34,11 @@
                                              `(if ,(normalize-pred pred)
                                                   ,(k nvalue1)
                                                   ,(k nvalue2))))))]
-    [`(mref ,aloc ,opand)
-      (k `(mref ,aloc ,opand))]
-    [`(alloc ,opand)
-      (k `(alloc ,opand))]
-    [`(,binop ,triv1 ,triv2)
-        #:when (binop/ptr? binop)
-     (k `(,binop ,(normalize-triv triv1) ,(normalize-triv triv2)))]
+      [`(mref ,aloc ,opand) (k `(mref ,aloc ,opand))]
+      [`(alloc ,opand) (k `(alloc ,opand))]
+      [`(,binop ,triv1 ,triv2)
+       #:when (binop/ptr? binop)
+       (k `(,binop ,(normalize-triv triv1) ,(normalize-triv triv2)))]
       [triv (k (normalize-triv triv))]))
   (define (normalize-pred pred)
     (match pred
@@ -67,9 +65,7 @@
           ,@(map normalize-effect effects)
           ,(normalize-effect effect2))]
       [`(mset! ,aloc ,opand ,value)
-        (normalize-value value
-          (λ (nvalue)
-            `(mset! ,aloc ,opand ,nvalue)))]
+       (normalize-value value (λ (nvalue) `(mset! ,aloc ,opand ,nvalue)))]
       [`(if ,pred ,effect1 ,effect2)
        `(if ,(normalize-pred pred)
             ,(normalize-effect effect1)
@@ -83,18 +79,16 @@
        `(begin
           ,@(map normalize-effect effects)
           ,(normalize-tail tail))]
-        [`(if ,pred ,tail1 ,tail2)
+      [`(if ,pred ,tail1 ,tail2)
        `(if ,(normalize-pred pred)
             ,(normalize-tail tail1)
             ,(normalize-tail tail2))]
       ;; nothing special happens
       [`(call ,_ ,_ ...) tail]
-      [`(,binop ,triv1 ,triv2) 
-      #:when (binop/ptr? binop)
-      `(,binop ,(normalize-triv triv1) ,(normalize-triv triv2))]
-      [triv (normalize-triv triv)]
-      
-      ))
+      [`(,binop ,triv1 ,triv2)
+       #:when (binop/ptr? binop)
+       `(,binop ,(normalize-triv triv1) ,(normalize-triv triv2))]
+      [triv (normalize-triv triv)]))
   (define (normalize-p p)
     (match p
       [`(module ,definitions ...
@@ -106,63 +100,67 @@
 
 (module+ test
   (require rackunit)
-  (check-match (normalize-bind
-    '(module
-      (begin
-        (mset! x.1 y.1
-                (begin
-                  (set! a.1 1)
-                  (set! b.1 2)
-                  42))
-        0)))
-  `(module (begin (begin (set! a.1 1) (set! b.1 2) (mset! x.1 y.1 42)) 0)))
-  
-  (check-match (normalize-bind
-    '(module
-      (begin
-        (mset! x.1 y.1
-                (if (true)
-                    1
-                    2))
-        0)))
-  `(module (begin (if (true) (mset! x.1 y.1 1) (mset! x.1 y.1 2)) 0)))
-  
+  (check-match (normalize-bind '(module (begin
+                                          (mset! x.1
+                                                 y.1
+                                                 (begin
+                                                   (set! a.1 1)
+                                                   (set! b.1 2)
+                                                   42))
+                                          0)))
+               `(module (begin
+                          (begin
+                            (set! a.1 1)
+                            (set! b.1 2)
+                            (mset! x.1 y.1 42))
+                          0)))
+
+  (check-match (normalize-bind '(module (begin
+                                          (mset! x.1 y.1 (if (true) 1 2))
+                                          0)))
+               `(module (begin
+                          (if (true)
+                              (mset! x.1 y.1 1)
+                              (mset! x.1 y.1 2))
+                          0)))
+
   ;; interpretation is correct, but were duplicating code.
-  #;
-  (check-match (normalize-bind
-    '(module
-      (begin
-        (mset! x.1 y.1
-                (begin
-                  (set! a.1 1)
-                  (if (false)
-                      10
-                      20)))
-        0)))
-  ;; interrogator response, pulling the set! out
-  `(module
-  (begin
-    (begin (set! a.1 1) (if (false) (mset! x.1 y.1 10) (mset! x.1 y.1 20)))
-    0)))
+  #;(check-match (normalize-bind '(module (begin
+                                            (mset! x.1
+                                                   y.1
+                                                   (begin
+                                                     (set! a.1 1)
+                                                     (if (false) 10 20)))
+                                            0)))
+                 ;; interrogator response, pulling the set! out
+                 `(module (begin
+                            (begin
+                              (set! a.1 1)
+                              (if (false)
+                                  (mset! x.1 y.1 10)
+                                  (mset! x.1 y.1 20)))
+                            0)))
 
-  (check-match (normalize-bind
-  '(module
-     (begin
-       (set! x.1
-             (begin
-               (set! a.1 1)
-               (alloc y.1)))
-       0)))
- `(module (begin (begin (set! a.1 1) (set! x.1 (alloc y.1))) 0)))
-  
-  (check-match (normalize-bind
-  '(module
-     (begin
-       (set! x.1
-             (begin
-               (set! a.1 1)
-               (mref y.1 z.1)))
-       0)))
- `(module (begin (begin (set! a.1 1) (set! x.1 (mref y.1 z.1))) 0)))
+  (check-match (normalize-bind '(module (begin
+                                          (set! x.1
+                                                (begin
+                                                  (set! a.1 1)
+                                                  (alloc y.1)))
+                                          0)))
+               `(module (begin
+                          (begin
+                            (set! a.1 1)
+                            (set! x.1 (alloc y.1)))
+                          0)))
 
-)
+  (check-match (normalize-bind '(module (begin
+                                          (set! x.1
+                                                (begin
+                                                  (set! a.1 1)
+                                                  (mref y.1 z.1)))
+                                          0)))
+               `(module (begin
+                          (begin
+                            (set! a.1 1)
+                            (set! x.1 (mref y.1 z.1)))
+                          0))))

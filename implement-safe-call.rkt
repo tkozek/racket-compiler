@@ -14,9 +14,7 @@
 (define BAD-ARITY-ERROR '(error 69))
 (define BAD-PROC-ERROR '(error 67))
 (define (make-if pred tcase fcase)
-  `(if ,pred
-       ,tcase
-       ,fcase))
+  `(if ,pred ,tcase ,fcase))
 
 ;; exprs-unsafe-data-lang-v9 -> exprs-unsafe-lang-v9
 ;; Implement call as an unsafe procedure call with dynamic checks.
@@ -42,7 +40,9 @@
   (define (implement-effect fx)
     (match fx
       [`(,(? primop? pop) ,val* ...) `(,pop ,@(map implement-value val*))]
-      [`(begin ,fx* ...) (make-begin-effect (map implement-effect fx*))]))
+      [`(begin
+          ,fx* ...)
+       (make-begin-effect (map implement-effect fx*))]))
   ;   value	 	::=	 	triv
   ;  	 	|	 	(primop value ...)
   ;  	 	|	 	(call value value ...)
@@ -51,14 +51,14 @@
   ;  	 	|	 	(begin effect ... value)
   (define (implement-value value)
     (match value
-      [`(begin ,fx* ... ,value) (make-begin (map implement-effect fx*)
-                                            (implement-value value))]
-      [`(if ,val0 ,val1 ,val2) (make-if (implement-value val0)
-                                        (implement-value val1)
-                                        (implement-value val2))]
+      [`(begin
+          ,fx* ...
+          ,value)
+       (make-begin (map implement-effect fx*) (implement-value value))]
+      [`(if ,val0 ,val1 ,val2)
+       (make-if (implement-value val0) (implement-value val1) (implement-value val2))]
       [`(let ([,aloc* ,value*] ...) ,val)
-       `(let ,(map list aloc* (map implement-value value*))
-          ,(implement-value val))]
+       `(let ,(map list aloc* (map implement-value value*)) ,(implement-value val))]
       [`(call ,val ,value* ...)
        ;  use let binding to avoid incurring extra work
        (let ([val/updated (implement-value val)]
@@ -69,16 +69,15 @@
                       (make-if `(eq? (unsafe-procedure-arity ,fun/aloc) ,(length value*))
                                `(unsafe-procedure-call ,fun/aloc ,@value*/updated)
                                BAD-ARITY-ERROR)
-                      BAD-PROC-ERROR)))
-       ]
+                      BAD-PROC-ERROR)))]
       [`(,(? primop? pop) ,val* ...) `(,pop ,@(map implement-value val*))]
-      [_ (implement-triv value)])
-    )
+      [_ (implement-triv value)]))
   ;  p	 	::=	 	(module (define aloc (lambda (aloc ...) value)) ... value)
   (define (implement-def def)
     (match def
-      [`(define ,aloc* ,value)
-       `(define ,aloc* ,(implement-value value))]))
+      [`(define ,aloc* ,value) `(define ,aloc* ,(implement-value value))]))
   (match p
-    [`(module ,def* ... ,value) `(module ,@(map implement-def def*)
-                                   ,(implement-value value))]))
+    [`(module ,def* ...
+        ,value)
+     `(module ,@(map implement-def def*) ,(implement-value value)
+        )]))

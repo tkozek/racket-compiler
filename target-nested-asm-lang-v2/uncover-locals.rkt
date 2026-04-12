@@ -46,13 +46,13 @@
 
   (define (uncover-effect effect)
     (match effect
-      [`(set! ,loc (,binop ,loc ,triv)) 
-        #:when (binop/ptr? binop)
-      (set-union (uncover-loc loc) (uncover-triv triv))]
+      [`(set! ,loc (,binop ,loc ,triv))
+       #:when (binop/ptr? binop)
+       (set-union (uncover-loc loc) (uncover-triv triv))]
       [`(set! ,loc1 (mref ,loc2 ,triv))
-        (set-union (uncover-loc loc1) (uncover-loc loc2) (uncover-loc triv))]
+       (set-union (uncover-loc loc1) (uncover-loc loc2) (uncover-loc triv))]
       [`(mset! ,loc ,index ,triv)
-        (set-union (uncover-loc loc) (uncover-loc index) (uncover-triv triv))]
+       (set-union (uncover-loc loc) (uncover-loc index) (uncover-triv triv))]
       [`(set! ,loc ,triv) (set-union (uncover-loc loc) (uncover-triv triv))]
       [`(begin
           ,fxs ...
@@ -87,15 +87,17 @@
 
 (module+ test
   (require rackunit)
-  (check-match (uncover-locals `(module ((new-frames ())) (begin (set! x.1 (mref x.2 x.3))
-(mset! x.6 x.7 x.8)
-(mset! x.6 x.7 x.8)
-(jump L.test.1 r15))))
-`(module
-  ((new-frames ()) (locals (x.1 x.2 x.3 x.6 x.7 x.8)))
-  (begin
-    (set! x.1 (mref x.2 x.3))
-    (mset! x.6 x.7 x.8)
-    (mset! x.6 x.7 x.8)
-    (jump L.test.1 r15)))))
-
+  (check-match (uncover-locals `(module ((new-frames ()))
+                                        (begin
+                                          (set! x.1 (mref x.2 x.3))
+                                          (mset! x.6 x.7 x.8)
+                                          (mset! x.6 x.7 x.8)
+                                          (jump L.test.1 r15))
+                                  ))
+               `(module ((new-frames ()) (locals (x.1 x.2 x.3 x.6 x.7 x.8)))
+                        (begin
+                          (set! x.1 (mref x.2 x.3))
+                          (mset! x.6 x.7 x.8)
+                          (mset! x.6 x.7 x.8)
+                          (jump L.test.1 r15))
+                  )))

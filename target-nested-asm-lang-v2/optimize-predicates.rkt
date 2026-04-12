@@ -7,7 +7,6 @@
 (provide optimize-predicates
          nested-asm-lang-progs)
 
-
 ;; (nested-asm-lang-fvars-v6 p) -> (nested-asm-lang-fvars-v6 p)
 ;; Optimizes Nested-asm-lang-v4 programs by analyzing and simplifying predicates
 (define (optimize-predicates p)

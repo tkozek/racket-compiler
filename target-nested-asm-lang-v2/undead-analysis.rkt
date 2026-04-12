@@ -56,21 +56,11 @@
            ;(values pre-wrap-undead-out `(,pre-wrap-updated-ust))
            (values pre-wrap-undead-out pre-wrap-updated-ust)))]
       [`(set! ,loc1 (mref ,loc2 ,index))
-        (let ([undead-in
-                (set-add-triv
-                  (set-add
-                    (set-remove undead-out loc1)
-                    loc2)
-                  index)])
-          (values undead-in undead-out))]
+       (let ([undead-in (set-add-triv (set-add (set-remove undead-out loc1) loc2) index)])
+         (values undead-in undead-out))]
       [`(mset! ,loc ,index ,triv)
-        (let ([undead-in
-                (set-add-triv
-                  (set-add-triv
-                    (set-add undead-out loc)
-                    index)
-                  triv)])
-          (values undead-in undead-out))]
+       (let ([undead-in (set-add-triv (set-add-triv (set-add undead-out loc) index) triv)])
+         (values undead-in undead-out))]
       [`(set! ,aloc_1 (,binop ,aloc_1 ,triv))
        (let ([undead-in (set-add (set-add-triv undead-out triv) aloc_1)])
          (values undead-in undead-out))]
@@ -175,39 +165,36 @@
               ,@(map analyze-definitions definitions)
         ,tail)]))
 
-#;
-(module+ test
-  (require rackunit)
-  (check-match (undead-analysis
-  '(module
-     ((new-frames ()) (locals (x.1 x.2 x.3)))
-     (begin
-       (set! x.1 (mref x.2 x.3))
-       (mset! x.1 3 r15)
-       (jump L.test.1 x.1))))
-  `(module
-  ((new-frames ())
-   (locals (x.1 x.2 x.3))
-   (call-undead ())
-   (undead-out ((r15 x.1) (x.1) (x.1))))
-  (begin (set! x.1 (mref x.2 x.3)) (mset! x.1 3 r15) (jump L.test.1 x.1))))
+#;(module+ test
+    (require rackunit)
+    (check-match (undead-analysis '(module ((new-frames ()) (locals (x.1 x.2 x.3)))
+                                           (begin
+                                             (set! x.1 (mref x.2 x.3))
+                                             (mset! x.1 3 r15)
+                                             (jump L.test.1 x.1))
+                                     ))
+                 `(module ((new-frames ()) (locals (x.1 x.2 x.3))
+                                           (call-undead ())
+                                           (undead-out ((r15 x.1) (x.1) (x.1))))
+                          (begin
+                            (set! x.1 (mref x.2 x.3))
+                            (mset! x.1 3 r15)
+                            (jump L.test.1 x.1))
+                    ))
 
-  (check-match (undead-analysis
-  '(module
-     ((new-frames ()) (locals (x.1 x.2 x.3 y.7)))
-     (begin
-       (set! x.1 5)
-       (set! x.1 (mref x.2 x.3))
-       (mset! x.1 y.7 r15)
-       (jump L.test.1 x.1))))
-  `(module
-  ((new-frames ())
-   (locals (x.1 x.2 x.3 y.7))
-   (call-undead ())
-   (undead-out ((x.3 x.2 r15 y.7) (r15 y.7 x.1) (x.1) (x.1))))
-  (begin
-    (set! x.1 5)
-    (set! x.1 (mref x.2 x.3))
-    (mset! x.1 y.7 r15)
-    (jump L.test.1 x.1)))))
-
+    (check-match (undead-analysis '(module ((new-frames ()) (locals (x.1 x.2 x.3 y.7)))
+                                           (begin
+                                             (set! x.1 5)
+                                             (set! x.1 (mref x.2 x.3))
+                                             (mset! x.1 y.7 r15)
+                                             (jump L.test.1 x.1))
+                                     ))
+                 `(module ((new-frames ()) (locals (x.1 x.2 x.3 y.7))
+                                           (call-undead ())
+                                           (undead-out ((x.3 x.2 r15 y.7) (r15 y.7 x.1) (x.1) (x.1))))
+                          (begin
+                            (set! x.1 5)
+                            (set! x.1 (mref x.2 x.3))
+                            (mset! x.1 y.7 r15)
+                            (jump L.test.1 x.1))
+                    )))
