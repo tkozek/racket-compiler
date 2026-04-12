@@ -7,6 +7,42 @@
  cpsc411/langs/v9
  cpsc411/langs/v11)
 
+(require "uniquify.rkt"
+         "implement-safe-primops.rkt"
+         "implement-safe-call.rkt"
+         "define-letrec.rkt"
+         "optimize-direct-calls.rkt"
+         "dox-lambdas.rkt"
+         "uncover-free.rkt"
+         "convert-closures.rkt"
+         "optimize-known-calls.rkt"
+         "hoist-lambdas.rkt"
+         "implement-closures.rkt"
+         "specify-representation.rkt"
+         "remove-complex-opera.rkt"
+         "sequentialize-let.rkt"
+         "impose-calling-conventions.rkt"
+         "normalize-bind.rkt"
+         "select-instructions.rkt"
+         "expose-allocation-pointer.rkt"
+         "uncover-locals.rkt"
+         "undead-analysis.rkt"
+         "conflict-analysis.rkt"
+         "assign-call-undead-variables.rkt"
+         "allocate-frames.rkt"
+         "assign-registers.rkt"
+         "assign-frame-variables.rkt"
+         "replace-locations.rkt"
+         "optimize-predicates.rkt"
+         "implement-fvars.rkt"
+         "expose-basic-blocks.rkt"
+         "resolve-predicates.rkt"
+         "flatten-program.rkt"
+         "patch-instructions.rkt"
+         "implement-mops.rkt"
+         "generate-x64.rkt"
+         "expand-macros.rkt")
+
 (provide expand-macros
          uniquify
          implement-safe-primops
@@ -43,44 +79,80 @@
          implement-mops
          generate-x64)
 
-;; TODO: Fill in.
-;; You'll want to merge milestone-9 code in
 
-(require "uniquify.rkt"
-         "implement-safe-primops.rkt"
-         "implement-safe-call.rkt"
-         "define-letrec.rkt"
-         "optimize-direct-calls.rkt"
-         "dox-lambdas.rkt"
-         "uncover-free.rkt"
-         "convert-closures.rkt"
-         "optimize-known-calls.rkt"
-         "hoist-lambdas.rkt"
-         "implement-closures.rkt"
-         "specify-representation.rkt"
-         "remove-complex-opera.rkt"
-         "sequentialize-let.rkt"
-         "impose-calling-conventions.rkt"
-         "normalize-bind.rkt"
-         "select-instructions.rkt"
-         "expose-allocation-pointer.rkt"
-         "uncover-locals.rkt"
-         "undead-analysis.rkt"
-         "conflict-analysis.rkt"
-         "assign-call-undead-variables.rkt"
-         "allocate-frames.rkt"
-         "assign-registers.rkt"
-         "assign-frame-variables.rkt"
-         "replace-locations.rkt"
-         "optimize-predicates.rkt"
-         "implement-fvars.rkt"
-         "expose-basic-blocks.rkt"
-         "resolve-predicates.rkt"
-         "flatten-program.rkt"
-         "patch-instructions.rkt"
-         "implement-mops.rkt"
-         "generate-x64.rkt"
-         "expand-macros.rkt")
+;; Stubs; remove or replace with your definitions.
+(define-values (uniquify
+                expand-macros
+                implement-safe-primops
+                implement-safe-call
+                define->letrec
+                optimize-direct-calls
+                dox-lambdas
+                uncover-free
+                convert-closures
+                optimize-known-calls
+                hoist-lambdas
+                implement-closures
+                specify-representation
+                remove-complex-opera*
+                sequentialize-let
+                normalize-bind
+                impose-calling-conventions
+                select-instructions
+                expose-allocation-pointer
+                uncover-locals
+                undead-analysis
+                conflict-analysis
+                assign-call-undead-variables
+                allocate-frames
+                assign-registers
+                assign-frame-variables
+                replace-locations
+                implement-fvars
+                optimize-predicates
+                expose-basic-blocks
+                resolve-predicates
+                flatten-program
+                patch-instructions
+                implement-mops
+                generate-x64)
+  (values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values
+   values))
+
 
 ;; You can modify this pass list, e.g., by adding other
 ;; optimization, debugging, or validation passes.
