@@ -89,12 +89,12 @@
                 dox-lambdas
                 uncover-free
                 convert-closures
-                optimize-known-calls
-                hoist-lambdas
-                implement-closures
-                specify-representation
-                remove-complex-opera*
-                implement-mops)
+                ;optimize-known-calls
+                ;hoist-lambdas
+                ;implement-closures
+                ;specify-representation
+                ;remove-complex-opera*
+                ;implement-mops)
   (values
    values
    values
@@ -104,12 +104,13 @@
    values
    values
    values
-   values
-   values
-   values
-   values
-   values
-   values))
+   ;values
+   ;values
+   ;values
+   ;values
+   ;values
+   ;values
+   ))
 
 
 ;; You can modify this pass list, e.g., by adding other
