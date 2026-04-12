@@ -56,7 +56,7 @@
 (require "implement-safe-primops.rkt")
 (require "sequentialize-let.rkt")
 (require "normalize-bind.rkt")
-(require "uncover-free")
+(require "uncover-free.rkt")
 (require "convert-closures.rkt")
 (require "select-instructions.rkt")
 (require "target-nested-asm-lang-v2/all-exports.rkt")
