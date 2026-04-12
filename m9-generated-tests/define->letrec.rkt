@@ -3,7 +3,7 @@
          cpsc411/compiler-lib
          cpsc411/ptr-run-time
          cpsc411/langs/v9
-         (file "../define->letrec.rkt"))
+         (file "../define-letrec.rkt"))
 (define (fail-if-invalid p)
   (when (not (just-exprs-lang-v9? p))
     (error
@@ -17,7 +17,7 @@
  (check-by-interp p)
  (check-equal?
   (interp-exprs-unsafe-lang-v9 p)
-  (interp-just-exprs-lang-v9 (fail-if-invalid (define->letrec p)))))
+  (interp-just-exprs-lang-v9 (fail-if-invalid (define-letrec p)))))
 
 (check-by-interp
  '(module

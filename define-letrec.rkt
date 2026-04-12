@@ -1,7 +1,7 @@
 #lang racket
-(provide define->letrec)
+(provide define-letrec)
 
-(define (define->letrec p)
+(define (define-letrec p)
   (define (make-entry fun/aloc param/aloc* val)
     `[,fun/aloc (lambda ,param/aloc* ,val)])
   ;   p	 	::=	 	(module (define aloc (lambda (aloc ...) value)) ... value)

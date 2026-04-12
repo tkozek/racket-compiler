@@ -8,7 +8,7 @@
  uniquify
  implement-safe-primops
  implement-safe-call
- define->letrec
+ define-letrec
  optimize-direct-calls
  dox-lambdas
  uncover-free
@@ -51,6 +51,10 @@
 ; (define expose-allocation-pointer values)
 
 (require "dox-lambdas.rkt")
+(require "define-letrec.rkt")
+(require "hoist-lambdas.rkt")
+(require "optimize-known-calls.rkt")
+(require "implement-closures.rkt")
 (require "uniquify.rkt")
 (require "optimize-direct-calls.rkt")
 (require "implement-safe-primops.rkt")
@@ -69,7 +73,7 @@
 (require "generate-x64.rkt")
 (require "expose-allocation-pointer.rkt")
 (require "implement-mops.rkt")
-
+(require "implement-safe-call.rkt")
 (require "specify-representation.rkt")
 (require "remove-complex-opera.rkt")
 (require "flatten-program.rkt")
@@ -94,6 +98,7 @@
   (require (submod "impose-calling-conventions.rkt" test))
   (require (submod "select-instructions.rkt" test))
   (require (submod "dox-lambdas.rkt" test))
+  
   ; (require (submod "target-nested-asm-lang-v2/all-exports.rkt" test))
   (require (submod "implement-fvars.rkt" test))
   (require (submod "expose-basic-blocks.rkt" test))
@@ -113,7 +118,7 @@
      (cons uniquify interp-exprs-lang-v9)
      (cons implement-safe-primops interp-exprs-unique-lang-v9)
      (cons implement-safe-call interp-exprs-unsafe-data-lang-v9)
-     (cons define->letrec interp-exprs-unsafe-lang-v9)
+     (cons define-letrec interp-exprs-unsafe-lang-v9)
      (cons optimize-direct-calls interp-just-exprs-lang-v9)
      (cons dox-lambdas interp-just-exprs-lang-v9)
      (cons uncover-free interp-lam-opticon-lang-v9)
