@@ -8,7 +8,7 @@
  uniquify
  implement-safe-primops
  implement-safe-call
- define-letrec
+ define->letrec
  optimize-direct-calls
  dox-lambdas
  uncover-free
@@ -118,7 +118,7 @@
      (cons uniquify interp-exprs-lang-v9)
      (cons implement-safe-primops interp-exprs-unique-lang-v9)
      (cons implement-safe-call interp-exprs-unsafe-data-lang-v9)
-     (cons define-letrec interp-exprs-unsafe-lang-v9)
+     (cons define->letrec interp-exprs-unsafe-lang-v9)
      (cons optimize-direct-calls interp-just-exprs-lang-v9)
      (cons dox-lambdas interp-just-exprs-lang-v9)
      (cons uncover-free interp-lam-opticon-lang-v9)
