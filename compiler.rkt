@@ -93,7 +93,7 @@
                 ;hoist-lambdas
                 ;implement-closures
                 ; specify-representation
-                allocate-frames
+                ; allocate-frames
                 ;remove-complex-opera*
                 ;implement-mops
                 )
