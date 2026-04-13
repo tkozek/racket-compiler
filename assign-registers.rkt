@@ -92,3 +92,47 @@
      ; Replaces the locals set with just the alocs that spilled
      `(module ,(update-info info) ,@(map assign-definition defs)
         ,tail)]))
+
+#;
+(module+ test
+  (require rackunit)
+  (check-match (assign-registers 
+    `(module ((locals (tmp-ra.1603 tmp.835 tmp.836 begin-tmp.110.173)) 
+      (conflicts ((begin-tmp.110.173 (tmp.835 rbp tmp-ra.1603)) (tmp.836 ()) 
+      (tmp.835 (rbp tmp-ra.1603 begin-tmp.110.173)) 
+      (tmp-ra.1603 (rax tmp.835 begin-tmp.110.173 rbp)) 
+      (rbp (rax tmp.835 begin-tmp.110.173 tmp-ra.1603)) 
+      (rax (rbp tmp-ra.1603)))) 
+      (assignment ())) (begin (set! tmp-ra.1603 r15) (set! begin-tmp.110.173 8) 
+      (if (begin (if (begin (set! tmp.836 begin-tmp.110.173) 
+      (set! tmp.836 (bitwise-and tmp.836 255)) (= tmp.836 62)) (set! tmp.835 14) (set! tmp.835 6)) 
+      (!= tmp.835 6)) (begin (set! rax begin-tmp.110.173) 
+      (jump tmp-ra.1603 rbp rax)) (begin (set! rax 16) (jump tmp-ra.1603 rbp rax))))))
+  
+  `(module
+  ((locals ())
+   (conflicts
+    ((begin-tmp.110.173 (tmp.835 rbp tmp-ra.1603))
+     (tmp.836 ())
+     (tmp.835 (rbp tmp-ra.1603 begin-tmp.110.173))
+     (tmp-ra.1603 (rax tmp.835 begin-tmp.110.173 rbp))
+     (rbp (rax tmp.835 begin-tmp.110.173 tmp-ra.1603))
+     (rax (rbp tmp-ra.1603))))
+   (assignment
+    ((tmp.836 rsp) (tmp.835 rcx) (begin-tmp.110.173 rbx) (tmp-ra.1603 rsp))))
+  (begin
+    (set! tmp-ra.1603 r15)
+    (set! begin-tmp.110.173 8)
+    (if (begin
+          (if (begin
+                (set! tmp.836 begin-tmp.110.173)
+                (set! tmp.836 (bitwise-and tmp.836 255))
+                (= tmp.836 62))
+            (set! tmp.835 14)
+            (set! tmp.835 6))
+          (!= tmp.835 6))
+      (begin (set! rax begin-tmp.110.173) (jump tmp-ra.1603 rbp rax))
+      (begin (set! rax 16) (jump tmp-ra.1603 rbp rax)))))
+      
+      )
+)
