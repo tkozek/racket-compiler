@@ -31,18 +31,20 @@
   ;  	 	|	 	(lambda (aloc ...) value)
   (define (implement-triv triv)
     (match triv
-      [(? (or/c aloc? fixnum? #t #f 'empty ascii-char-literal?)) triv]
-      ['(void) triv]
-      [`(error ,(? uint8?)) triv]
-      [`(lambda ,aloc* ,val) `(lambda ,aloc* ,(implement-value val))]))
+      [`(lambda ,aloc* ,val) `(lambda ,aloc* ,(implement-value val))]
+      [_ triv]
+      ;   [(? (or/c aloc? fixnum? #t #f 'empty ascii-char-literal?)) triv]
+      ;   ['(void) triv]
+      ;   [`(error ,(? uint8?)) triv]
+      ))
   ;   effect	 	::=	 	(primop value ...)
   ;  	 	|	 	(begin effect ... effect)
   (define (implement-effect fx)
     (match fx
-      [`(,(? primop? pop) ,val* ...) `(,pop ,@(map implement-value val*))]
       [`(begin
           ,fx* ...)
-       (make-begin-effect (map implement-effect fx*))]))
+       (make-begin-effect (map implement-effect fx*))]
+      [`(,(? primop? pop) ,val* ...) `(,pop ,@(map implement-value val*))]))
   ;   value	 	::=	 	triv
   ;  	 	|	 	(primop value ...)
   ;  	 	|	 	(call value value ...)
