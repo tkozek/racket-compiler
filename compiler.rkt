@@ -81,6 +81,33 @@
          "generate-x64.rkt"
          "expand-macros.rkt")
 
+
+;; Stubs; remove or replace with your definitions.
+(define-values (;expand-macros
+                ;implement-safe-primops
+                ;implement-safe-call
+                ;define->letrec
+                ;optimize-direct-calls
+                ;dox-lambdas
+                ;uncover-free
+                allocate-frames
+                ;convert-closures
+                ;optimize-known-calls
+                ;hoist-lambdas
+                ;implement-closures
+                ;specify-representation
+                ;remove-complex-opera*
+                ;implement-mops
+
+                )
+  (values
+;   values
+   ;values
+   ;values
+   ;values
+   ;values
+   ))
+
 ;; You can modify this pass list, e.g., by adding other
 ;; optimization, debugging, or validation passes.
 ;; Doing this may provide additional debugging info when running the rest
@@ -134,39 +161,41 @@
            cpsc411/test-suite/public/v10
            file/glob)
 
-  (require (submod "uniquify.rkt" test))
-  (require (submod "optimize-direct-calls.rkt" test))
-  (require (submod "implement-safe-primops.rkt" test))
-  (require (submod "sequentialize-let.rkt" test))
-  (require (submod "normalize-bind.rkt" test))
-  (require (submod "uncover-free.rkt" test))
-  (require (submod "convert-closures.rkt" test))
-  (require (submod "impose-calling-conventions.rkt" test))
-  (require (submod "select-instructions.rkt" test))
-  (require (submod "dox-lambdas.rkt" test))
-  (require (submod "implement-fvars.rkt" test))
-  (require (submod "expose-basic-blocks.rkt" test))
-  (require (submod "resolve-predicates.rkt" test))
-  (require (submod "flatten-program.rkt" test))
-  (require (submod "expand-macros.rkt" test))
+;   (require (submod "uniquify.rkt" test))
+;   (require (submod "optimize-direct-calls.rkt" test))
+;   (require (submod "implement-safe-primops.rkt" test))
+;   (require (submod "sequentialize-let.rkt" test))
+;   (require (submod "normalize-bind.rkt" test))
+;   (require (submod "uncover-free.rkt" test))
+;   (require (submod "convert-closures.rkt" test))
+;   (require (submod "impose-calling-conventions.rkt" test))
+;   (require (submod "select-instructions.rkt" test))
+;   (require (submod "dox-lambdas.rkt" test))
+;   (require (submod "implement-fvars.rkt" test))
+;   (require (submod "expose-basic-blocks.rkt" test))
+;   (require (submod "resolve-predicates.rkt" test))
+;   (require (submod "flatten-program.rkt" test))
+;   (require (submod "expand-macros.rkt" test))
   ;   (require (submod "patch-instructions.rkt" test))
   ; (for-each (λ(p) (dynamic-require p #f)) (glob "m7-generated-tests/**.rkt"))
   ;   (for-each (λ(p) (dynamic-require p #f)) (glob "m8-generated-tests/**.rkt"))
   ;   (for-each (λ(p) (dynamic-require p #f)) (glob "m9-generated-tests/**.rkt"))
   ;   (for-each (λ(p) (dynamic-require p #f)) (glob "m10-generated-tests/**.rkt"))
 
-  (run-tests (v10-public-test-suite (current-pass-list) (map cdr pass-map))))
+;   (run-tests (v10-public-test-suite (current-pass-list) (map cdr pass-map))))
 
-;; A main module for running the compiler on the command line.
-;; Use like: racket -t compiler.rkt input.411 output.exe
-(module+ main
-  (define-values (input output)
-    (command-line #:program "411 Compiler"
-                  ;#:once-each
-                  ;["--O3" "Optimize Harder" (current-pass-list -O3-pass-list)]
-                  #:args (input-file output-file)
-                  (values input-file output-file)))
+; ;; A main module for running the compiler on the command line.
+; ;; Use like: racket -t compiler.rkt input.411 output.exe
+; (module+ main
+;   (define-values (input output)
+;     (command-line #:program "411 Compiler"
+;                   ;#:once-each
+;                   ;["--O3" "Optimize Harder" (current-pass-list -O3-pass-list)]
+;                   #:args (input-file output-file)
+;                   (values input-file output-file)))
 
-  (with-input-from-file input
-                        (thunk ((nasm-run/observe (curryr copy-directory/files output))
-                                (compile (read))))))
+;   (with-input-from-file input
+;                         (thunk ((nasm-run/observe (curryr copy-directory/files output))
+;                                 (compile (read)))))
+
+)
