@@ -18,7 +18,7 @@
  (check-by-interp p)
  (check-equal?
   (interp-exprs-bits-lang-v8 p)
-  (interp-values-bits-lang-v8 (fail-if-invalid (remove-complex-opera* p)))))
+  (interp-values-bits-lang-v8 (fail-if-invalid (remove-complex-opera p)))))
 
 (check-by-interp
  '(module
