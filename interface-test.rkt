@@ -7,7 +7,7 @@
                      #;check-exprs-lang
                      '(uniquify implement-safe-primops
                                 implement-safe-call
-                                define->letrec
+                                define-letrec
                                 optimize-direct-calls
                                 dox-lambdas
                                 uncover-free
