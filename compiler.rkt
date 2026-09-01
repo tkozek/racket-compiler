@@ -19,7 +19,7 @@
          hoist-lambdas
          implement-closures
          specify-representation
-         remove-complex-opera*
+         remove-complex-opera
          sequentialize-let
          normalize-bind
          impose-calling-conventions
@@ -41,9 +41,6 @@
          patch-instructions
          implement-mops
          generate-x64)
-
-;; TODO: Fill in.
-;; You'll want to merge milestone-9 code in
 
 (require "uniquify.rkt"
          "implement-safe-primops.rkt"
@@ -81,10 +78,11 @@
          "generate-x64.rkt"
          "expand-macros.rkt")
 
-;; You can modify this pass list, e.g., by adding other
+;; Can modify this pass list, e.g., by adding other
 ;; optimization, debugging, or validation passes.
 ;; Doing this may provide additional debugging info when running the rest
 ;; suite.
+
 (define pass-map
   (list (cons expand-macros interp-racketish-surface)
         (cons uniquify interp-exprs-lang-v9)
@@ -99,7 +97,7 @@
          (cons hoist-lambdas interp-closure-lang-v9)
          (cons implement-closures interp-hoisted-lang-v9)
          (cons specify-representation interp-proc-exposed-lang-v9)
-         (cons remove-complex-opera* interp-exprs-bits-lang-v8)
+         (cons remove-complex-opera interp-exprs-bits-lang-v8)
          (cons sequentialize-let interp-values-bits-lang-v8)
          (cons normalize-bind interp-imp-mf-lang-v8)
          (cons impose-calling-conventions interp-proc-imp-cmf-lang-v8)
@@ -133,28 +131,24 @@
            cpsc411/langs/v10
            cpsc411/test-suite/public/v10
            file/glob)
-;  we commented out tests because the autograder keeps timing out
-; please see the documented files for tests
-
-;   (require (submod "uniquify.rkt" test))
-;   (require (submod "optimize-direct-calls.rkt" test))
-;   (require (submod "implement-safe-primops.rkt" test))
-;   (require (submod "sequentialize-let.rkt" test))
-;   (require (submod "normalize-bind.rkt" test))
-;   (require (submod "uncover-free.rkt" test))
-;   (require (submod "convert-closures.rkt" test))
-;   (require (submod "impose-calling-conventions.rkt" test))
-;   (require (submod "select-instructions.rkt" test))
-;   (require (submod "dox-lambdas.rkt" test))
-;   (require (submod "implement-fvars.rkt" test))
-;   (require (submod "expose-basic-blocks.rkt" test))
-;   (require (submod "resolve-predicates.rkt" test))
-;   (require (submod "flatten-program.rkt" test))
-;   (require (submod "expand-macros.rkt" test))
-;   ;   (require (submod "patch-instructions.rkt" test))
-;   ;   (for-each (λ(p) (dynamic-require p #f)) (glob "m8-generated-tests/**.rkt"))
-;   ;   (for-each (λ(p) (dynamic-require p #f)) (glob "m9-generated-tests/**.rkt"))
-;   ;   (for-each (λ(p) (dynamic-require p #f)) (glob "m10-generated-tests/**.rkt"))
+           
+  (require (submod "uniquify.rkt" test))
+  (require (submod "optimize-direct-calls.rkt" test))
+  (require (submod "implement-safe-primops.rkt" test))
+  (require (submod "sequentialize-let.rkt" test))
+  (require (submod "normalize-bind.rkt" test))
+  (require (submod "uncover-free.rkt" test))
+  (require (submod "convert-closures.rkt" test))
+  (require (submod "impose-calling-conventions.rkt" test))
+  (require (submod "select-instructions.rkt" test))
+  (require (submod "dox-lambdas.rkt" test))
+  (require (submod "implement-fvars.rkt" test))
+  (require (submod "expose-basic-blocks.rkt" test))
+  (require (submod "resolve-predicates.rkt" test))
+  (require (submod "flatten-program.rkt" test))
+  (require (submod "expand-macros.rkt" test))
+    (require (submod "patch-instructions.rkt" test))
+    (for-each (λ(p) (dynamic-require p #f)) (glob "m10-generated-tests/**.rkt"))
 
   (run-tests (v10-public-test-suite (current-pass-list) (map cdr pass-map))))
 

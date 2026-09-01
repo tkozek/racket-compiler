@@ -3,20 +3,11 @@
 (require cpsc411/compiler-lib
          cpsc411/graph-lib
          cpsc411/info-lib)
-; Asm-pred-lang-v6/framed
-; p	 	::=	 	(module info (define label info tail) ... tail)
-;   info	 ::=	 (#:from-contract (info/c (locals (aloc ...)) (conflicts ((loc (loc ...)) ...)) (assignment ((aloc fvar) ...))))
-;----------------
-;  Asm-pred-lang-v6/spilled
-; p		 	::=	 	(module info (define label info tail) ... tail)
-;   info	 ::=	 	(#:from-contract (info/c (locals (aloc ...)) (conflicts ((loc (loc ...)) ...)) (assignment ((aloc rloc) ...))))
-
 (provide assign-registers)
 
 ;; (list X (listof Y)) -> Number
 ;; returns the number of Y in the given pair
 (define (num-values pair)
-  ; list traversal in Racket moment
   (length (cadr pair)))
 
 ;; (list X (listof Y)) Y -> (list X (listof Y))
@@ -39,7 +30,6 @@
                [incompatible-registers (get-incompatible-registers cur-aloc assigned-rest conflicts)]
                [available (filter (lambda (rloc) (not (set-member? incompatible-registers rloc)))
                                   (current-assignable-registers))])
-          ;(displayln available)
           (if (empty? available)
               ;; spill if nothing is available
               (begin
@@ -52,7 +42,7 @@
            [incompatible-registers (mutable-set (filter register? directly-conflicting))])
       (for ([assignment assignments]
             ;; when the assigned aloc is conflicting with the unassigned aloc, we add
-            ;; the assigned aloc's register to the list of incompitable registers
+            ;; the assigned aloc's register to the list of incompatible registers
             #:when (memq (first assignment) directly-conflicting))
         (set-add! incompatible-registers (second assignment)))
       incompatible-registers))

@@ -33,8 +33,6 @@
        (let-values ([(value-body^) (convert-value value-body)]
                     [(labels^ clet-bindings)
                      (map2 (λ (info params body rec-aloc)
-                             ;; completely forgot about info-ref...
-                             ;; too lazy to replace
                              (match info
                                [`((free (,frees ...)))
                                 (let* ([label (fresh-label rec-aloc)]

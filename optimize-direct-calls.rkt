@@ -47,7 +47,6 @@
         [`(begin
             ,fx* ...
             ,val)
-         ; effects would causes value to change regardless of whether we inline
          (make-begin (map optimize-effect fx*) (loop val k))]
         [`(if ,val0 ,val1 ,val2)
          `(if ,(loop val0 identity)
@@ -81,7 +80,6 @@
   (require rackunit
            cpsc411/langs/v9)
   (define (fail-if-invalid p)
-    ; (pretty-write p)
     (when (not (just-exprs-lang-v9? p))
       (error
        (~a (pretty-format p) "\n is not a semantically valid just-exprs-lang-v9 program")))

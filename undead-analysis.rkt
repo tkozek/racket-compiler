@@ -17,7 +17,6 @@
      call-undead-box
      (set-subtract (set-union (unbox call-undead-box) s)
                    `(,(current-frame-base-pointer-register) ,(current-return-value-register)))
-     ;(set-union (unbox call-undead-box) s)
      ))
 
   (define (analyze-definitions def)
@@ -52,8 +51,6 @@
                                   (let-values ([(undead-in new-ust) (analyze-program-effect undead-out
                                                                                             effect)])
                                     (values undead-in (cons new-ust ust))))])
-
-           ;(values pre-wrap-undead-out `(,pre-wrap-updated-ust))
            (values pre-wrap-undead-out pre-wrap-updated-ust)))]
       [`(set! ,loc1 (mref ,loc2 ,index))
        (let ([undead-in (set-add-triv (set-add (set-remove undead-out loc1) loc2) index)])
@@ -100,8 +97,6 @@
                                   (let-values ([(undead-in new-ust) (analyze-program-effect undead-out
                                                                                             effect)])
                                     (values undead-in (cons new-ust ust))))])
-
-           ;(values pre-wrap-undead-out `(,pre-wrap-updated-ust))
            (values pre-wrap-undead-out pre-wrap-updated-ust)))]
       [`(if ,pred1 ,pred2 ,pred3)
        (let*-values ([(undead-out-pred3 ust-pred3) (analyze-program-pred undead-out pred3)]
@@ -136,7 +131,6 @@
                                     (values undead-in (cons new-ust ust))))])
 
            (values pre-wrap-undead-out `(,pre-wrap-updated-ust))
-           ;(values pre-wrap-undead-out pre-wrap-updated-ust)
             ))]
       [`(halt ,triv)
        (let ([undead-in (set-add-triv undead-out triv)]) (values undead-in (cons undead-out '())))]

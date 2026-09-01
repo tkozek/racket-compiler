@@ -4,7 +4,6 @@
   (require cpsc411/test-suite/utils)
 
   (check-import-list "compiler.rkt"
-                     #;check-exprs-lang
                      '(uniquify implement-safe-primops
                                 implement-safe-call
                                 define-letrec
@@ -16,7 +15,7 @@
                                 hoist-lambdas
                                 implement-closures
                                 specify-representation
-                                remove-complex-opera*
+                                remove-complex-opera
                                 sequentialize-let
                                 impose-calling-conventions
                                 normalize-bind

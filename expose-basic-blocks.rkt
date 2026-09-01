@@ -73,7 +73,6 @@
   ;; nested-tail (block-tail -> X) -> X
   (define (nested-tail->block-tail& tail [k identity])
     (match tail
-      ; [`(halt ,_) (k tail)] ;; removed in v6
       [`(jump ,_) (k tail)]
       [`(begin
           ,fx* ...
@@ -105,6 +104,4 @@
            cpsc411/langs/v6)
   (define-syntax-rule (check-by-interp p)
     (check-equal? (interp-nested-asm-lang-v6 p) (interp-block-pred-lang-v6 (expose-basic-blocks p))))
-
-  ; see generated_tests folder to see the generated tests.
   )

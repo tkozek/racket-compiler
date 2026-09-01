@@ -126,12 +126,4 @@
   (define-syntax-rule (check-by-interp p)
     (check-equal? p p))
   (v8-public-test-suite '(select-instructions) '(interp-imp-cmf-lang-v8))
-
-  ;   (check-match (select-instructions '(module ((new-frames ()))
-  ;                         (begin (set! ))
-  ;                 ))
-  ;                 `(module ((new-frames ()))
-  ;                     )
-
-  ;   )
   )

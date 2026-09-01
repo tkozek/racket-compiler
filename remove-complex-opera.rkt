@@ -4,13 +4,13 @@
          cpsc411/langs/v8
          "common.rkt")
 
-(provide remove-complex-opera*)
+(provide remove-complex-opera)
 
 ;; (Exprs-bits-lang-v8 p) -> (Values-bits-lang-v8 p)
 ;; Performs the monadic form transformation,
 ;; unnesting all non-trivial operators and operands to binops,
-;; calls, and relopss, making data flow explicit and simple to implement imperatively.
-(define (remove-complex-opera* p)
+;; calls, and relops, making data flow explicit and simple to implement imperatively.
+(define (remove-complex-opera p)
 
   (define (rco-def def)
     (match def
@@ -133,13 +133,13 @@
 (module+ test
   (require rackunit
            cpsc411/langs/v8)
-  (check-match (remove-complex-opera* '(module (mref (+ 1 2) (+ 3 4))))
+  (check-match (remove-complex-opera '(module (mref (+ 1 2) (+ 3 4))))
                `(module (let ([,t1 (+ 1 2)]) (let ([,t2 (+ 3 4)]) (mref ,t1 ,t2)))))
 
-  (check-match (remove-complex-opera* '(module (alloc (+ 1 2))))
+  (check-match (remove-complex-opera '(module (alloc (+ 1 2))))
                `(module (let ([,t1 (+ 1 2)]) (alloc ,t1))))
 
-  (check-match (remove-complex-opera* '(module (begin
+  (check-match (remove-complex-opera '(module (begin
                                                  (mset! (+ 1 2) (+ 3 4) (+ 5 6))
                                                  0)))
                `(module (begin
@@ -147,14 +147,12 @@
                             (let ([,tmp.2 (+ 3 4)]) (mset! ,tmp.1 ,tmp.2 (+ 5 6))))
                           0)))
 
-  (check-match (remove-complex-opera* '(module (begin
+  (check-match (remove-complex-opera '(module (begin
                                                  (mset! 1 2 3)
                                                  (+ 4 5))))
                `(module (begin
                           (mset! 1 2 3)
                           (+ 4 5))))
-
-  ;; interrogator the goat
-  (check-match (remove-complex-opera* '(module (mref (alloc (+ 1 2)) (+ 3 4))))
+  (check-match (remove-complex-opera '(module (mref (alloc (+ 1 2)) (+ 3 4))))
                `(module (let ([,tmp.1 (let ([,tmp.2 (+ 1 2)]) (alloc ,tmp.2))])
                           (let ([,tmp.3 (+ 3 4)]) (mref ,tmp.1 ,tmp.3))))))

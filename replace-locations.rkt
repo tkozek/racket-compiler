@@ -9,7 +9,7 @@
 ;; Precondition: all abstract locations have a corresponding physical location in the info metadata
 (define (replace-locations al2a)
 
-  ;; (asm-pred-lang-v6/assignments loc) -> (asm-pred-lang-v6/assignments rloc)
+  ;; (Asm-pred-lang v8/assignments loc) -> (Asm-pred-lang v8/assignments rloc)
   ;; Iff loc is abstract, replaces it with its corresponding physical location
   (define (replace-loc loc assignments)
 
@@ -80,7 +80,7 @@
             ,(replace-tail tail1 assignments)
             ,(replace-tail tail2 assignments))]))
 
-  ;; (asm-pred-lang-v6/assignments definition) -> (nested-asm-lang-fvars-v6 definition)
+  ;; (Asm-pred-lang v8/assignments definition) -> (nested-asm-lang-fvars-v8 definition)
   ;; replaces abstract locations with physical locations within an top level procedure definition
   (define (replace-def def)
     (match def

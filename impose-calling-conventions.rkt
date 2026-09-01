@@ -8,7 +8,7 @@
   (fresh (string->symbol (string-join (list "nfv" (number->string i)) "_"))))
 
 ;; (Proc-imp-cmf-lang-v8 p) -> (Imp-cmf-lang-v8 p)
-;; Compiles Proc-imp-cmf-lang v6 to Imp-cmf-lang v6
+;; Compiles Proc-imp-cmf-lang v8 to Imp-cmf-lang v8
 ;; by imposing calling conventions on all calls and procedure definitions.
 ;; The parameter registers are defined by the list current-parameter-registers.
 (define (impose-calling-conventions picl5)
@@ -26,7 +26,7 @@
   ;; EFFECT; resets new-frames to an empty list
   (define (reset-newframes!)
     (set! new-frames '()))
-  ;; let trg-value be an value in imp-cmf-lang-v6
+  ;; let trg-value be an value in imp-cmf-lang-v8
   (define tmp-ra (void))
   ; (listof opand) -> (listof rloc)
   ;  generates 1 rloc for each aloc, following the calling convention
@@ -123,8 +123,6 @@
             ,(impose-tail! tail1)
             ,(impose-tail! tail2))]
       [value
-       ; return value
-       ; value here are definitely not calling
        (make-begin `((set! ,rv ,(impose-non-calling-value value))) `(jump ,return-point ,rbp ,rv))]))
 
   ;; EFFECT: may register new frame variables to new-frames
@@ -157,14 +155,10 @@
 
 (module+ test
   (require rackunit
-           cpsc411/langs/v5
-           cpsc411/langs/v6)
+           cpsc411/langs/v8)
   (define (peek x)
     ; (pretty-display x)
     x)
-  (define-syntax-rule (check-by-interp p)
-    (check-equal? (interp-proc-imp-cmf-lang-v5 (peek p))
-                  (interp-imp-cmf-lang-v5 (peek (impose-calling-conventions p)))))
   (define-syntax-rule (check-by-interp-v6 p)
-    (check-equal? (interp-proc-imp-cmf-lang-v6 (peek p))
-                  (interp-imp-cmf-lang-v6 (peek (impose-calling-conventions p))))))
+    (check-equal? (interp-proc-imp-cmf-lang-v8 (peek p))
+                  (interp-imp-cmf-lang-v8 (peek (impose-calling-conventions p))))))

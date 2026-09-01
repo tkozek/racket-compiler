@@ -8,14 +8,14 @@
 ;; let trg represent exprs-lang-v9
 
 ;; make an if expr using the given parameter
-;; src-value src-value src-value -> src-value
+;; (src-value src-value src-value) -> src-value
 (define (make-if pred truecase falsecase)
   `(if ,pred ,truecase ,falsecase))
 
-;; make an if expr representing and logic using the given predicates
+;; make an if expr representing 'AND' logic using the given predicates
 ;;     skips over #t to save on number of if generated
 ;;     shortcircuits and produce #f immediately on encoutering a #f in the chain
-;; src-value ... -> src-value
+;; (src-value ...) -> src-value
 (define (make-and . pred)
   (cond
     [(empty? pred) #t]
@@ -25,10 +25,10 @@
     ; although we can use open-recursion to expand on this, it saves some recursion to expand it out here
     [else (make-if (first pred) (apply make-and (rest pred)) #f)]))
 
-;; make an if expr representing or logic using the given predicates
+;; make an if expr representing 'OR' logic using the given predicates
 ;;     skips over #f to save on number of if generated
 ;;     shortcircuits and produce #t immediately on encoutering a #t in the chain
-;; src-value ... -> src-value
+;; (src-value ...) -> src-value
 (define (make-or . pred)
   (cond
     [(empty? pred) #f]
@@ -40,7 +40,7 @@
      (define sym (fresh 'pred/or))
      `(let ([,sym ,(first pred)]) ,(make-if sym sym (apply make-or (rest pred))))]))
 
-;; src-value ... -> src-value
+;; (src-value ...) -> src-value
 (define (make-begin/macro . es)
   (cond
     [(empty? es) '(void)]
@@ -51,7 +51,7 @@
      `(let ([,sym ,(first es)]) ,(make-if `(error? ,sym) sym (apply make-begin/macro (rest es))))]))
 
 ;; zero is allowed for make-vector in racket
-;; src-value ... -> src-value
+;; (src-value ...) -> src-value
 (define (make-vector/macro . item*)
   (let ([size (length item*)])
     `(let ([vec (make-vector ,size)])
@@ -73,7 +73,7 @@
 
 (define (macro-id? mid)
   ((compose not false?) (memq mid (map car MACRO-ID-MAP))))
-;; src-macro-id -> (src-value ... -> src-value)
+;; src-macro-id -> ((src-value ...) -> src-value)
 (define (macro-id->fun mid)
   (dict-ref MACRO-ID-MAP mid (thunk (error (format "Invalid macro-id ~v" mid)))))
 
@@ -110,7 +110,6 @@
                 [letpair*/updated (map list x* val*/updated)])
            `(let ,letpair*/updated ,(loop val0)))]
         [`(,(? macro-id? mid) ,val* ...) (loop (apply (macro-id->fun mid) val*))]
-        ; i am lazy
         [(vector item* ...) (loop `(vector ,@item*))]
         [(? (or/c name? prim-f? fixnum? #t #f 'empty ascii-char-literal?)) val]
         [`(lambda ,param* ,val) `(lambda ,param* ,(expand-value val))]

@@ -9,7 +9,6 @@
 ;; Compiles Asm-pred-lang-v8/spilled to Asm-pred-lang-v8/assignments
 ;; by allocating all abstract locations in the locals set to free frame variables.
 (define (assign-frame-variables p)
-  ; (pretty-display p)
   (define (update-info info)
     (let ([assignment (assign-variables/info info)])
       (info-set (info-remove (info-remove info 'locals) 'conflicts)

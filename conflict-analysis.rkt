@@ -31,7 +31,7 @@
         (set-remove ust triv)
         ust))
 
-  ;; Undead-search-tree (Asm-lang-v2/undead tail) -> graph
+  ;; Undead-search-tree (Asm-pred-lang-v8/undead tail) -> graph
   (define (analyze-tree-effect ust effect graph-init)
     (match* (effect ust)
       [(`(begin
@@ -68,7 +68,7 @@
       [(`(,relop ,loc ,opand) _) (update-graph graph-init loc (set-remove-triv ust opand))]
       [(pred ust) graph-init]))
 
-  ;; Undead-search-tree (Asm-lang-v2/undead tail) -> graph
+  ;; Undead-search-tree (Asm-pred-lang-v8/undead tail) -> graph
   (define (analyze-tree-tail ust tail graph-init)
     (match* (tail ust)
       [(`(begin
@@ -83,7 +83,6 @@
                             (analyze-tree-effect ust effect graph)))]
       [(`(halt ,triv) ust) graph-init]
       [(`(jump ,trg ,loc ...) ust)
-       ;(update-graph graph-init trg ust)
        (if (not (label? trg))
            (update-graph graph-init trg ust)
            graph-init)]

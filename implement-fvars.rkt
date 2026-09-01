@@ -87,7 +87,6 @@
              (error (format "Unsupported offset ~a, we support int64 offset only as of v6" trg-opand))
              (set! curr-offset-nbytes ((binop->fun binop) curr-offset-nbytes trg-opand))))
        `(set! ,trg-loc (,binop ,trg-loc ,(implement-opand opand)))]
-      ; hacky but should work
       [`(begin
           ,fx+ ...)
        #:when (not (empty? fx+))
@@ -129,9 +128,6 @@
 (module+ test
   (require rackunit
            cpsc411/langs/v6)
-  (define (peek x)
-    ; (pretty-display x)
-    x)
   (define-syntax-rule (check-by-interp p)
     (check-equal? (interp-nested-asm-lang-fvars-v6 p)
                   (interp-nested-asm-lang-v6 (implement-fvars p)))))

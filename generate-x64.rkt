@@ -39,12 +39,6 @@
       [(? register?) (~a trg)]
       [(? label?) (~a (sanitize-label trg))]))
 
-  ;; I think the use of this function is redundant (was used in the compare case of statement->x64)
-  ;   (define (opand->ins opand)
-  ;     (match opand
-  ;       [(? int64?) opand]
-  ;       [_ (~a opand)]))
-
   ;; paren-x64-v8-s -> x64-instruction-sequence
   ;; Compiles a Paren-x64 v4 set!-expression into a x64 instruction sequence represented as a string.
   (define (statement->x64 s)

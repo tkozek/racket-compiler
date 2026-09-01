@@ -41,7 +41,7 @@
   (define (patch-s s)
     (match s
       [`(mset! ,loc1 ,index ,triv) 
-      ; could optimize this if index is not int64 or triv is not int64
+      ; could optimize this if index is not int64 or triv is not int64, but this reduces cases
         `((set! ,first-reg ,loc1)
           (set! ,second-reg ,index)
           (set! ,first-reg (+ ,first-reg ,second-reg))

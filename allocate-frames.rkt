@@ -11,7 +11,6 @@
 ;;  non-tail call, and assigning all new-frame variables to frame variables in the new frame.
 (define (allocate-frames p)
 
-  ;; could've use a function, oh well
   (define-syntax-rule (mymap proc lst n)
     (map (lambda (x) (proc x n)) lst))
 

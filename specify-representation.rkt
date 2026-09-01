@@ -147,7 +147,6 @@
        `(begin
           ,@(map specify-effect effects))]
       [`(,primop ,values^ ...)
-       ;; update this
        #:when (primop? primop)
        (specify-primop primop values^)]))
 
@@ -158,7 +157,7 @@
             ,(specify-value v2)
             ,(specify-value v3))]
       [`(let ([,alocs ,values^] ...) ,body-value)
-       ;; don't want to unquote splice the map result, or we lose outer brackets ([]
+       ;; don't want to unquote splice the map result, else we lose outer brackets ([]
        ;;                                                                        []
        ;;                                                                        [])
        `(let ,(map (lambda (aloc value) `[,aloc ,(specify-value value)]) alocs values^)
@@ -223,5 +222,4 @@
                                 (begin
                                   (mset! ,tmp -3 32)
                                   ,tmp))
-                              ;   ,(- (current-vector-length-displacement) (current-vector-tag))
                               -3))))

@@ -5,6 +5,7 @@
 
 (provide optimize-predicates
          nested-asm-lang-progs)
+; Not supported past M6
 
 ;; (nested-asm-lang-fvars-v6 p) -> (nested-asm-lang-fvars-v6 p)
 ;; Optimizes Nested-asm-lang-v4 programs by analyzing and simplifying predicates

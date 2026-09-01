@@ -96,6 +96,7 @@
 ;; alias for int61?
 (define (fixnum? n)
   (int61? n))
+  
 (define (fixnum/tagged? fn)
   (and (int64? fn) (eq? (bitwise-and (current-fixnum-mask) fn) (current-fixnum-tag))))
 

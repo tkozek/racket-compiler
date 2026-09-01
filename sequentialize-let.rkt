@@ -72,7 +72,6 @@
           ,fx* ...
           ,tail)
        (make-begin (map seq-let-effect fx*) (seq-let-tail tail))]
-      ;; (call triv opand ...) exists for both langs despite showing on the diff
       [_ tail]))
   (define (seq-let-p p)
     (match p

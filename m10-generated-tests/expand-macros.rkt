@@ -70,17 +70,6 @@
  '(module
     (define fun/void8531 (lambda () (if #f (void) (void))))
     (call fun/void8531)))
-; (check-by-interp
-;  '(module
-;     (define fun/error8534 (lambda () (error 82)))
-;     (define fun/error8535 (lambda () (error 60)))
-;     (and (or (error 39) (error 193) (error 124) (error 73) (error 75))
-;          (if #f (error 124) (error 124))
-;          (call fun/error8534)
-;          (call fun/error8535)
-;          (if #f (error 148) (error 136))
-;          (let ((procedure0 (lambda () (error 109)))) (error 64))
-;          (begin (error 54) (error 109) (error 200)))))
 (check-by-interp
  '(module
     (define fun/void8538 (lambda () (void)))

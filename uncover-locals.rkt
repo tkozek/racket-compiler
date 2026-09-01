@@ -8,7 +8,7 @@
 ;; Compiles Asm-pred-lang v8 to Asm-pred-lang v8/locals,
 ;; analysing which abstract locations are used in each block,
 ;; and updating each block and the module with the set of variables
-;; in an info? fields.
+;; in an info?'s fields.
 (define (uncover-locals p)
 
   (define (uncover-definitions def)

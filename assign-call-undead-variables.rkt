@@ -63,7 +63,6 @@
      `(module ,(update-info info) ,@(map assign-call-undead-variables/def defs)
         ,tail)]))
 
-;; works
 
 (module+ test
   (require rackunit

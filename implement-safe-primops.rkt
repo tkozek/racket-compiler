@@ -10,7 +10,7 @@
 (define ERROR-NEGATIVE-FIXNUM '(error 12))
 (define ERROR-VECTOR-REF-OOB '(error 11))
 
-; represents dependcies of a label and its underlying function labels
+; represents dependencies of a label and its underlying function labels
 
 (define fill0-lab (fresh 'fill0))
 (define fill0-def
@@ -130,7 +130,7 @@
 ;; (Exprs-unique-lang v9 p) -> (Exprs-unsafe-data-lang v9 p)
 ;; Implement safe primitive operations by inserting procedure
 ;; definitions for each primitive operation which perform dynamic tag checking,
-;;to ensure type and memory safety.
+;; to ensure type and memory safety.
 (define (implement-safe-primops p)
 
   ; usage is a a set of all prim-f referenced in this program p
