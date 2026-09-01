@@ -19,7 +19,7 @@
  (check-by-interp p)
  (check-equal?
   (interp-exprs-unsafe-lang-v9 p)
-  (interp-just-exprs-lang-v9 (fail-if-invalid (define->letrec p)))))
+  (interp-just-exprs-lang-v9 (fail-if-invalid (define-letrec p)))))
 
 (check-by-interp '(module empty))
 (check-by-interp '(module (error 240)))
